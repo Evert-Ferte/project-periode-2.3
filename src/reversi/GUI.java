@@ -1,4 +1,5 @@
-import com.sun.javafx.geom.Vec2d;
+package reversi;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,9 +18,9 @@ public class GUI extends Application {
     private int mapSize = 8;
     private ArrayList<ArrayList<Button>> map = new ArrayList<>();
 
-    private Image tileEmpty = new Image(getClass().getResourceAsStream("tile_empty.png"));
-    private Image tileWhite = new Image(getClass().getResourceAsStream("tile_white.png"));
-    private Image tileBlack = new Image(getClass().getResourceAsStream("tile_black.png"));
+    private Image tileEmpty = new Image(getClass().getResourceAsStream("images/tile_empty.png"));
+    private Image tileWhite = new Image(getClass().getResourceAsStream("images/tile_white.png"));
+    private Image tileBlack = new Image(getClass().getResourceAsStream("images/tile_black.png"));
 
     private boolean turn = true;
 
@@ -122,7 +123,7 @@ public class GUI extends Application {
 
         // check directions (top, bot, left, right, diagonal) for black or white tile
             // skip if the direction is of the same color as the current color
-        ArrayList<Vec2d> directions = new ArrayList<>();
+        ArrayList<Vector2> directions = new ArrayList<>();
         for (int y = -1; y <= 1; y++) {
             for (int x = -1; x <= 1; x++) {
                 // Skip the (0,0) because self + 0 does nothing
@@ -135,7 +136,7 @@ public class GUI extends Application {
                     continue;
 
                 if (map.get(yPos + y).get(xPos + x).getId() == tileId)
-                    directions.add(new Vec2d(x, y));
+                    directions.add(new Vector2(x, y));
             }
         }
 
@@ -144,7 +145,7 @@ public class GUI extends Application {
         System.out.println("directions.size(): " + directions.size());
         for (int i = 0; i < directions.size(); i++) {
             boolean hasNext = true;
-            Vec2d pos = new Vec2d(xPos + directions.get(i).x, yPos + directions.get(i).y);
+            Vector2 pos = new Vector2(xPos + directions.get(i).x, yPos + directions.get(i).y);
             do {
                 ImageView img2 = new ImageView(turn ? tileWhite : tileBlack);
                 img2.setFitWidth((float)width / (float)mapSize);
@@ -153,7 +154,7 @@ public class GUI extends Application {
                 map.get((int)pos.y).get((int)pos.x).setGraphic(img2);
 
                 // set hasNext
-                pos = new Vec2d(pos.x + directions.get(i).x, pos.y + directions.get(i).y);
+                pos = new Vector2(pos.x + directions.get(i).x, pos.y + directions.get(i).y);
 
                 // Check if the position is in the map
                 if (pos.y < 0 || pos.y >= mapSize)
