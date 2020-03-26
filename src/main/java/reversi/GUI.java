@@ -18,9 +18,9 @@ public class GUI extends Application {
     private int mapSize = 8;
     private ArrayList<ArrayList<Button>> map = new ArrayList<>();
 
-    private Image tileEmpty = new Image(getClass().getResourceAsStream("images/tile_empty.png"));
-    private Image tileWhite = new Image(getClass().getResourceAsStream("images/tile_white.png"));
-    private Image tileBlack = new Image(getClass().getResourceAsStream("images/tile_black.png"));
+    private Image tileEmpty = new Image(getClass().getResourceAsStream("/images/tile_empty.png"));
+    private Image tileWhite = new Image(getClass().getResourceAsStream("/images/tile_white.png"));
+    private Image tileBlack = new Image(getClass().getResourceAsStream("/images/tile_black.png"));
 
     private boolean turn = true;
 
