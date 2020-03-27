@@ -3,11 +3,16 @@ package reversi;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -18,8 +23,7 @@ public class GUI extends Application {
     private static final String whiteId = "w";
     private static final int mapSize = 8;
     
-    private int width = 800;
-    private int height = 800;
+    private Vector2 fieldSize = new Vector2(640, 640);
     private ArrayList<ArrayList<Button>> map = new ArrayList<>();
 
     private Image tileEmpty = new Image(getClass().getResourceAsStream("/images/reversi/tile_empty_fade.png"));
@@ -27,14 +31,57 @@ public class GUI extends Application {
     private Image tileBlack = new Image(getClass().getResourceAsStream("/images/reversi/tile_black_0.png"));
 
     private boolean turn = false;
-
-    public GUI() {
-        // ...
-    }
+    private Label turnLabel;
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
+        VBox vBox = new VBox();
+        vBox.setBackground(new Background(new BackgroundFill(Color.web("#005a00"), null, null)));
+        vBox.setPadding(new Insets(20));
+        vBox.setSpacing(20);
+        
+        float extraWidth = (float)(vBox.getPadding().getLeft() + vBox.getPadding().getRight());
+        float extraHeight = (float)(vBox.getPadding().getTop() + vBox.getPadding().getBottom());// + vBox.getSpacing());
+        
+//        Button backButton = new Button("Exit");
+//        backButton.setMinSize(120, 40);
+//        vBox.getChildren().add(backButton);
+        
+        turnLabel = new Label((turn ? "White" : "Black") + "'s turn");
+        turnLabel.setAlignment(Pos.CENTER);
+        turnLabel.setMinSize(fieldSize.x * 0.8f, 60);
+        turnLabel.setFont(new Font(30));
+        turnLabel.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
+        turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().add(turnLabel);
+        
+        HBox hBox = new HBox();
+        Label labelWhite = new Label("White");
+        Label labelBlack = new Label("Black");
+        Label colon = new Label(":");
+        Label labelScoreWhite = new Label("99");
+        Label labelScoreBlack = new Label("99");
+        labelScoreWhite.setMinSize(40, 20);
+        labelScoreWhite.setAlignment(Pos.CENTER);
+        labelScoreWhite.setTextFill(Color.web("#ffffff"));
+        labelWhite.setTextFill(Color.web("#ffffff"));
+        labelScoreWhite.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
+        labelScoreBlack.setMinSize(40, 20);
+        labelScoreBlack.setAlignment(Pos.CENTER);
+        labelScoreBlack.setTextFill(Color.web("#000000"));
+        labelBlack.setTextFill(Color.web("#000000"));
+        labelScoreBlack.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
+        
+        hBox.getChildren().addAll(labelWhite, labelScoreWhite, colon, labelScoreBlack, labelBlack);
+        hBox.setSpacing(10);
+        hBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().add(hBox);
+        
+        extraHeight += /*backButton.getMinHeight() +*/ turnLabel.getMinHeight() + vBox.getSpacing() /* * 2*/;
+        
         GridPane grid = new GridPane();
+        vBox.getChildren().add(grid);
 
         for (int y = 0; y < mapSize; y++) {
             map.add(new ArrayList<>());
@@ -43,11 +90,11 @@ public class GUI extends Application {
                 map.get(y).add(btn);
                 map.get(y).get(x).setId(emptyId);
 
-                btn.setMinSize((float)width / (float)mapSize, (float)height / (float)mapSize);
+                btn.setMinSize(fieldSize.x / (float)mapSize, fieldSize.y / (float)mapSize);
 
                 ImageView img = new ImageView(tileEmpty);
-                img.setFitWidth((float)width / (float)mapSize);
-                img.setFitHeight((float)height / (float)mapSize);
+                img.setFitWidth(fieldSize.x / (float)mapSize);
+                img.setFitHeight(fieldSize.y / (float)mapSize);
                 btn.setGraphic(img);
 
                 btn.setOnAction(new ButtonHandler(x, y, this));
@@ -63,7 +110,8 @@ public class GUI extends Application {
     
         System.out.println(turn ? "white's turn" : "black's turn");
         
-//        //TEMP
+        //TEMP
+        //TODO fix bug here - upper right tile can never be clicked
 //        clickPosition(5, 0, true);
 //        clickPosition(6, 0, true);
 //
@@ -74,10 +122,11 @@ public class GUI extends Application {
 //        turn = !turn;
         //TEMP
 
-        Scene scene = new Scene(grid, width, height);
+        Scene scene = new Scene(vBox, fieldSize.x + extraWidth, fieldSize.y + extraHeight);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Reversi");
+//        primaryStage.setResizable(false);
         primaryStage.show();
     }
 
@@ -86,8 +135,6 @@ public class GUI extends Application {
     }
 
     private void clickPosition(int xPos, int yPos, boolean forceClick) {
-//        if (!forceClick) System.out.println("click("+xPos+", "+yPos+")");
-        
         // Check if we place the new tile to an existing tile
         Button current = map.get(yPos).get(xPos);
         String currentId = current.getId();
@@ -99,17 +146,8 @@ public class GUI extends Application {
         // ...
         boolean valid = false;
         
-        if (forceClick) {
-            // Place the new tile
-            ImageView img = new ImageView(turn ? tileWhite : tileBlack);
-            img.setFitWidth((float)width / (float)mapSize);
-            img.setFitHeight((float)height / (float)mapSize);
-    
-            current.setGraphic(img);
-            current.setId(turn ? whiteId : blackId);
-            
+        if (forceClick)
             valid = true;
-        }
         else {
             valid = checkDirection(xPos, yPos,  0, -1);              // Up
             valid = checkDirection(xPos, yPos,  0,  1) || valid;     // Down
@@ -120,22 +158,20 @@ public class GUI extends Application {
             valid = checkDirection(xPos, yPos,  1, -1) || valid;     // Up right
             valid = checkDirection(xPos, yPos, -1,  1) || valid;     // Down left
             valid = checkDirection(xPos, yPos,  1,  1) || valid;     // Down right
-            
-            if (valid) {
-                // Place the new tile
-                ImageView img = new ImageView(turn ? tileWhite : tileBlack);
-                img.setFitWidth((float)width / (float)mapSize);
-                img.setFitHeight((float)height / (float)mapSize);
+        }
         
-                current.setGraphic(img);
-                current.setId(turn ? whiteId : blackId);
-            }
+        if (valid) {
+            // Place the new tile
+            ImageView img = new ImageView(turn ? tileWhite : tileBlack);
+            img.setFitWidth(fieldSize.x / (float)mapSize);
+            img.setFitHeight(fieldSize.y / (float)mapSize);
+            current.setGraphic(img);
+            current.setId(turn ? whiteId : blackId);
         }
         
         // Swap the turn, only if this turn was valid
         turn = valid != turn;
-    
-        if (!forceClick) System.out.println(turn ? "white's turn" : "black's turn");
+        swapTurn();
     }
     
     private boolean checkDirection(int xPos, int yPos, int xDir, int yDir) {
@@ -151,7 +187,6 @@ public class GUI extends Application {
         // Loop while the new position is still a valid position in the map
         int i = 0;
         while (newX > 0 && newX < mapSize - 1 && newY > 0 && newY < mapSize - 1) {
-//        while (newX >= 0 && newX < mapSize && newY >= 0 && newY < mapSize) {
             i++;
             
             newX = xPos + xDir * i;
@@ -160,8 +195,6 @@ public class GUI extends Application {
             // Get the ID of the current tile
             String id = map.get(newY).get(newX).getId();
             
-//            System.out.println("checking pos (" + newX + ", " + newY + ")");
-    
             // If empty, stop
             if (id.equals(emptyId)) break;
     
@@ -179,22 +212,18 @@ public class GUI extends Application {
             }
         }
     
-//        System.out.println(valid ? "valid" : "not valid");
-    
         if (valid) {
-            System.out.println("valid found, replacing adjacent tiles ("+i+" tile(s) )");
             for (int j = 1; j < i; j++) {
                 int x = xPos + xDir * j;
                 int y = yPos + yDir * j;
                 
                 String id = map.get(y).get(x).getId();
-                System.out.println("replacing ("+x+", "+y+") (id: "+id+")");
                 
                 if (!id.equals(currentPlayerId)) {
                     // convert tile to the same tile as the current player
                     ImageView img = new ImageView(turn ? tileWhite : tileBlack);
-                    img.setFitWidth((float)width / (float)mapSize);
-                    img.setFitHeight((float)height / (float)mapSize);
+                    img.setFitWidth(fieldSize.x / (float)mapSize);
+                    img.setFitHeight(fieldSize.y / (float)mapSize);
                     map.get(y).get(x).setGraphic(img);
                     map.get(y).get(x).setId(currentPlayerId);
                 }
@@ -205,57 +234,14 @@ public class GUI extends Application {
         
         return valid;
     }
-
-    private void checkMove(int xPos, int yPos) {
-        String tileId = !turn ? whiteId : blackId;
-
-        // check directions (top, bot, left, right, diagonal) for black or white tile
-            // skip if the direction is of the same color as the current color
-        ArrayList<Vector2> directions = new ArrayList<>();
-        for (int y = -1; y <= 1; y++) {
-            for (int x = -1; x <= 1; x++) {
-                // Skip the (0,0) because self + 0 does nothing
-                if (x == 0 && y == 0) continue;
-
-                // Check if the position is in the map
-                if (yPos + y < 0 || yPos + y >= mapSize)
-                    continue;
-                if (xPos + x < 0 || xPos + x >= mapSize)
-                    continue;
-
-                if (map.get(yPos + y).get(xPos + x).getId().equals(tileId))
-                    directions.add(new Vector2(x, y));
-            }
-        }
-
-        // for each direction
-            // loop till end of map
-        System.out.println("directions.size(): " + directions.size());
-        for (int i = 0; i < directions.size(); i++) {
-            boolean hasNext = true;
-            Vector2 pos = new Vector2(xPos + directions.get(i).x, yPos + directions.get(i).y);
-            do {
-                ImageView img2 = new ImageView(turn ? tileWhite : tileBlack);
-                img2.setFitWidth((float)width / (float)mapSize);
-                img2.setFitHeight((float)height / (float)mapSize);
-
-                map.get((int)pos.y).get((int)pos.x).setGraphic(img2);
-
-                // set hasNext
-                pos = new Vector2(pos.x + directions.get(i).x, pos.y + directions.get(i).y);
-
-                // Check if the position is in the map
-                if (pos.y < 0 || pos.y >= mapSize)
-                    hasNext = false;
-                if (pos.x < 0 || pos.x >= mapSize)
-                    hasNext = false;
-            }
-            while (hasNext);
-
-            // Go to that direction and loop until it cant go further
-        }
+    
+    private void swapTurn () {
+        // TODO - also switch turn boolean value here...
+        
+        turnLabel.setText((turn ? "White" : "Black") + "'s turn");
+        turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
     }
-
+    
     class ButtonHandler implements EventHandler<ActionEvent> {
         private int xPos;
         private int yPos;
