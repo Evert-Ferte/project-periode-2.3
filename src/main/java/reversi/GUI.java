@@ -22,7 +22,7 @@ public class GUI extends Application {
     private static final String blackId = "b";
     private static final String whiteId = "w";
     private static final int mapSize = 8;
-    
+
     private Vector2 fieldSize = new Vector2(640, 640);
     private ArrayList<ArrayList<Button>> map = new ArrayList<>();
 
@@ -39,14 +39,14 @@ public class GUI extends Application {
         vBox.setBackground(new Background(new BackgroundFill(Color.web("#005a00"), null, null)));
         vBox.setPadding(new Insets(20));
         vBox.setSpacing(20);
-        
+
         float extraWidth = (float)(vBox.getPadding().getLeft() + vBox.getPadding().getRight());
         float extraHeight = (float)(vBox.getPadding().getTop() + vBox.getPadding().getBottom());// + vBox.getSpacing());
-        
+
 //        Button backButton = new Button("Exit");
 //        backButton.setMinSize(120, 40);
 //        vBox.getChildren().add(backButton);
-        
+
         turnLabel = new Label((turn ? "White" : "Black") + "'s turn");
         turnLabel.setAlignment(Pos.CENTER);
         turnLabel.setMinSize(fieldSize.x * 0.8f, 60);
@@ -55,7 +55,7 @@ public class GUI extends Application {
         turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
         vBox.setAlignment(Pos.CENTER);
         vBox.getChildren().add(turnLabel);
-        
+
         HBox hBox = new HBox();
         Label labelWhite = new Label("White");
         Label labelBlack = new Label("Black");
@@ -72,14 +72,14 @@ public class GUI extends Application {
         labelScoreBlack.setTextFill(Color.web("#000000"));
         labelBlack.setTextFill(Color.web("#000000"));
         labelScoreBlack.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
-        
+
         hBox.getChildren().addAll(labelWhite, labelScoreWhite, colon, labelScoreBlack, labelBlack);
         hBox.setSpacing(10);
         hBox.setAlignment(Pos.CENTER);
         vBox.getChildren().add(hBox);
-        
+
         extraHeight += /*backButton.getMinHeight() +*/ turnLabel.getMinHeight() + vBox.getSpacing() /* * 2*/;
-        
+
         GridPane grid = new GridPane();
         vBox.getChildren().add(grid);
 
@@ -102,14 +102,14 @@ public class GUI extends Application {
                 grid.add(btn, x, y);
             }
         }
-        
+
         clickPosition(3, 3, true);
         clickPosition(3, 4, true);
         clickPosition(4, 4, true);
         clickPosition(4, 3, true);
-    
+
         System.out.println(turn ? "white's turn" : "black's turn");
-        
+
         //TEMP
         //TODO fix bug here - upper right tile can never be clicked
 //        clickPosition(5, 0, true);
@@ -145,7 +145,7 @@ public class GUI extends Application {
 
         // ...
         boolean valid = false;
-        
+
         if (forceClick)
             valid = true;
         else {
@@ -153,13 +153,13 @@ public class GUI extends Application {
             valid = checkDirection(xPos, yPos,  0,  1) || valid;     // Down
             valid = checkDirection(xPos, yPos, -1,  0) || valid;     // Left
             valid = checkDirection(xPos, yPos,  1,  0) || valid;     // Right
-            
+
             valid = checkDirection(xPos, yPos, -1, -1) || valid;     // Up left
             valid = checkDirection(xPos, yPos,  1, -1) || valid;     // Up right
             valid = checkDirection(xPos, yPos, -1,  1) || valid;     // Down left
             valid = checkDirection(xPos, yPos,  1,  1) || valid;     // Down right
         }
-        
+
         if (valid) {
             // Place the new tile
             ImageView img = new ImageView(turn ? tileWhite : tileBlack);
@@ -168,42 +168,42 @@ public class GUI extends Application {
             current.setGraphic(img);
             current.setId(turn ? whiteId : blackId);
         }
-        
+
         // Swap the turn, only if this turn was valid
         turn = valid != turn;
         swapTurn();
     }
-    
+
     private boolean checkDirection(int xPos, int yPos, int xDir, int yDir) {
         if (xDir == 0 && yDir == 0) return false;
-        
+
         boolean valid = false, oppositeFound = false;
         String currentPlayerId  = turn ? whiteId : blackId;
         String oppositePlayerId = turn ? blackId : whiteId;
-        
+
         int newX = xPos + xDir;
         int newY = yPos + yDir;
-        
+
         // Loop while the new position is still a valid position in the map
         int i = 0;
         while (newX > 0 && newX < mapSize - 1 && newY > 0 && newY < mapSize - 1) {
             i++;
-            
+
             newX = xPos + xDir * i;
             newY = yPos + yDir * i;
-            
+
             // Get the ID of the current tile
             String id = map.get(newY).get(newX).getId();
-            
+
             // If empty, stop
             if (id.equals(emptyId)) break;
-    
+
             // If opposite player, continue
             if (id.equals(oppositePlayerId)) {
                 oppositeFound = true;
                 continue;
             }
-    
+
             // If current player, break and make valid only if an opposite tile was found
             if (id.equals(currentPlayerId)) {
                 if (oppositeFound)
@@ -211,14 +211,14 @@ public class GUI extends Application {
                 break;
             }
         }
-    
+
         if (valid) {
             for (int j = 1; j < i; j++) {
                 int x = xPos + xDir * j;
                 int y = yPos + yDir * j;
-                
+
                 String id = map.get(y).get(x).getId();
-                
+
                 if (!id.equals(currentPlayerId)) {
                     // convert tile to the same tile as the current player
                     ImageView img = new ImageView(turn ? tileWhite : tileBlack);
@@ -231,17 +231,17 @@ public class GUI extends Application {
                     break;
             }
         }
-        
+
         return valid;
     }
-    
+
     private void swapTurn () {
         // TODO - also switch turn boolean value here...
-        
+
         turnLabel.setText((turn ? "White" : "Black") + "'s turn");
         turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
     }
-    
+
     class ButtonHandler implements EventHandler<ActionEvent> {
         private int xPos;
         private int yPos;

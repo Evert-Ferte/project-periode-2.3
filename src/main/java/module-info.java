@@ -3,4 +3,5 @@ module project.periode {
     requires javafx.controls;
     
     opens reversi;
+    opens TicTacToe;
 }
