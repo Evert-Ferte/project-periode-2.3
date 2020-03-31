@@ -1,5 +1,6 @@
 package reversi;
 
+import games.Game;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,22 +18,46 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
-public class GUI extends Application {
+public class GUI extends Game {
     private static final String emptyId = "e";
     private static final String blackId = "b";
     private static final String whiteId = "w";
     private static final int mapSize = 8;
     
+    // Game variables
     private Vector2 fieldSize = new Vector2(640, 640);
     private ArrayList<ArrayList<Button>> map = new ArrayList<>();
-
+    
+    private boolean turn = false;
+    private Label turnLabel;
+    
+    private int scoreWhite = 0;
+    private int scoreBlack = 0;
+    
+    // UI variables
     private Image tileEmpty = new Image(getClass().getResourceAsStream("/images/reversi/tile_empty_fade.png"));
     private Image tileWhite = new Image(getClass().getResourceAsStream("/images/reversi/tile_white_0.png"));
     private Image tileBlack = new Image(getClass().getResourceAsStream("/images/reversi/tile_black_0.png"));
-
-    private boolean turn = false;
-    private Label turnLabel;
-
+    
+    private Label scoreWhiteLabel;
+    private Label scoreBlackLabel;
+    
+    @Override
+    public void startGame() {
+        super.startGame();
+        start(stage);
+    }
+    
+    @Override
+    public void resetGame() {
+        super.resetGame();
+    
+        scoreWhite = 0;
+        scoreBlack = 0;
+        turn = false;
+        map = new ArrayList<>();
+    }
+    
     @Override
     public void start(Stage primaryStage) {
         VBox vBox = new VBox();
@@ -60,25 +85,26 @@ public class GUI extends Application {
         Label labelWhite = new Label("White");
         Label labelBlack = new Label("Black");
         Label colon = new Label(":");
-        Label labelScoreWhite = new Label("99");
-        Label labelScoreBlack = new Label("99");
-        labelScoreWhite.setMinSize(40, 20);
-        labelScoreWhite.setAlignment(Pos.CENTER);
-        labelScoreWhite.setTextFill(Color.web("#ffffff"));
+        colon.setTextFill(Color.web("#000000"));
+        scoreWhiteLabel = new Label("0");
+        scoreBlackLabel = new Label("0");
+        scoreWhiteLabel.setMinSize(40, 20);
+        scoreWhiteLabel.setAlignment(Pos.CENTER);
+        scoreWhiteLabel.setTextFill(Color.web("#ffffff"));
         labelWhite.setTextFill(Color.web("#ffffff"));
-        labelScoreWhite.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
-        labelScoreBlack.setMinSize(40, 20);
-        labelScoreBlack.setAlignment(Pos.CENTER);
-        labelScoreBlack.setTextFill(Color.web("#000000"));
+        scoreWhiteLabel.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
+        scoreBlackLabel.setMinSize(40, 20);
+        scoreBlackLabel.setAlignment(Pos.CENTER);
+        scoreBlackLabel.setTextFill(Color.web("#000000"));
         labelBlack.setTextFill(Color.web("#000000"));
-        labelScoreBlack.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
+        scoreBlackLabel.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
         
-        hBox.getChildren().addAll(labelWhite, labelScoreWhite, colon, labelScoreBlack, labelBlack);
+        hBox.getChildren().addAll(labelWhite, scoreWhiteLabel, colon, scoreBlackLabel, labelBlack);
         hBox.setSpacing(10);
         hBox.setAlignment(Pos.CENTER);
         vBox.getChildren().add(hBox);
         
-        extraHeight += /*backButton.getMinHeight() +*/ turnLabel.getMinHeight() + vBox.getSpacing() /* * 2*/;
+        extraHeight += /*backButton.getMinHeight() +*/ turnLabel.getMinHeight() + hBox.getHeight() + vBox.getSpacing() * 2;
         
         GridPane grid = new GridPane();
         vBox.getChildren().add(grid);
@@ -108,7 +134,7 @@ public class GUI extends Application {
         clickPosition(4, 4, true);
         clickPosition(4, 3, true);
     
-        System.out.println(turn ? "white's turn" : "black's turn");
+//        System.out.println(turn ? "white's turn" : "black's turn");
         
         //TEMP
         //TODO fix bug here - upper right tile can never be clicked
@@ -126,7 +152,7 @@ public class GUI extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Reversi");
-//        primaryStage.setResizable(false);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 
@@ -161,6 +187,12 @@ public class GUI extends Application {
         }
         
         if (valid) {
+            // Add score to the correct player
+            if (turn)
+                addToScoreWhite();
+            else
+                addToScoreBlack();
+            
             // Place the new tile
             ImageView img = new ImageView(turn ? tileWhite : tileBlack);
             img.setFitWidth(fieldSize.x / (float)mapSize);
@@ -226,6 +258,16 @@ public class GUI extends Application {
                     img.setFitHeight(fieldSize.y / (float)mapSize);
                     map.get(y).get(x).setGraphic(img);
                     map.get(y).get(x).setId(currentPlayerId);
+                    
+                    // Add score to the correct player
+                    if (turn) {
+                        addToScoreWhite();
+                        subtractFromScoreBlack();
+                    }
+                    else {
+                        addToScoreBlack();
+                        subtractFromScoreWhite();
+                    }
                 }
                 else
                     break;
@@ -241,6 +283,31 @@ public class GUI extends Application {
         turnLabel.setText((turn ? "White" : "Black") + "'s turn");
         turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
     }
+    
+    private void addToScoreWhite() { addToScoreWhite(1); }
+    private void addToScoreWhite(int amount) {
+        scoreWhite += amount;
+        scoreWhiteLabel.setText(String.valueOf(scoreWhite));
+    }
+    
+    private void subtractFromScoreWhite() { subtractFromScoreWhite(1); }
+    private void subtractFromScoreWhite(int amount) {
+        scoreWhite -= amount;
+        scoreWhiteLabel.setText(String.valueOf(scoreWhite));
+    }
+    
+    private void addToScoreBlack() { addToScoreBlack(1); }
+    private void addToScoreBlack(int amount) {
+        scoreBlack += amount;
+        scoreBlackLabel.setText(String.valueOf(scoreBlack));
+    }
+    
+    private void subtractFromScoreBlack() { subtractFromScoreBlack(1); }
+    private void subtractFromScoreBlack(int amount) {
+        scoreBlack -= amount;
+        scoreBlackLabel.setText(String.valueOf(scoreBlack));
+    }
+    
     
     class ButtonHandler implements EventHandler<ActionEvent> {
         private int xPos;
