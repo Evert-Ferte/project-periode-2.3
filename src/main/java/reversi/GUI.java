@@ -122,9 +122,9 @@ public class GUI extends Application {
 //        turn = !turn;
         //TEMP
 
-        Scene scene = new Scene(vBox, fieldSize.x + extraWidth, fieldSize.y + extraHeight);
+        Scene gameScene = new Scene(vBox, fieldSize.x + extraWidth, fieldSize.y + extraHeight);
 
-        primaryStage.setScene(scene);
+        primaryStage.setScene(gameScene);
         primaryStage.setTitle("Reversi");
 //        primaryStage.setResizable(false);
         primaryStage.show();

@@ -16,8 +16,11 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class Main extends Application {
+    private Stage window;
+    private Scene homeScene, gameScene, settingsScene;
 
     private static final String emptyId = "e";
     private static final String xId = "x";
@@ -42,25 +45,59 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage){
         //primary stage
-        primaryStage.setTitle("Tic Tac Toe");
-        VBox vbox = new VBox();
-        vbox.setAlignment(Pos.CENTER);
-        primaryStage.setResizable(false);
-        vbox.setBackground(new Background((new BackgroundFill(Color.web("cfcfcf"), null, null))));
-        vbox.setPadding(new Insets(100));
-        float extraWidth = (float)(vbox.getPadding().getLeft() + vbox.getPadding().getRight());
-        float extraHeight = (float)(vbox.getPadding().getTop() + vbox.getPadding().getBottom());
+        window = primaryStage;
+        window.setTitle("Tic Tac Toe");
 
-        //in-game title
-        Label title = new Label("Tic Tac Toe");
-        title.setFont(new Font(40));
-        vbox.getChildren().add(title);
+        HBox topbar = new HBox(65);
+        Button homeScreenButton = new Button("Home");
+        homeScreenButton.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
+        homeScreenButton.setOnAction(e -> window.setScene(homeScene));
+
+        Label gameTitle = new Label("Tic Tac Toe");
+        gameTitle.setStyle("-fx-font-weight: 500;" + "-fx-font-size: 30;");
+//        gameTitle.setFont(new Font(30));
+
+        //Settings button
+        Button settingsScreenButton = new Button("Settings");
+        settingsScreenButton.setOnAction(e -> window.setScene(settingsScene));
+        settingsScreenButton.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
+        topbar.getChildren().addAll(homeScreenButton, gameTitle, settingsScreenButton);
+        topbar.setAlignment(Pos.CENTER);
+
+        // Home Scene
+        VBox homeLayout = new VBox(20);
+
+        Label homeTitle = new Label("Tic Tac Toe");
+        homeTitle.setStyle("-fx-font-weight: bold");
+        homeTitle.setFont(new Font(50));
+        Button continueGame = new Button("Continue");
+        continueGame.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
+        continueGame.setOnAction(e -> window.setScene(gameScene));
+        Button newGame = new Button("New game");
+        newGame.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
+        Button settings = new Button("Settings");
+        settings.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
+        settings.setOnAction(e -> window.setScene(settingsScene));
+
+        homeLayout.getChildren().addAll(homeTitle, continueGame, newGame, settings);
+        homeLayout.setAlignment(Pos.CENTER);
+        homeScene = new Scene(homeLayout, 600, 600);
+
+        // End of Home Scene
+
+        // GameScene
+        VBox gameLayout = new VBox();
+//        gameLayout.getChildren().add(test);
+
+        gameLayout.setAlignment(Pos.CENTER);
+        window.setResizable(false);
+        gameLayout.setPadding(new Insets(70));
+        float extraWidth = (float)(gameLayout.getPadding().getLeft() + gameLayout.getPadding().getRight());
+        float extraHeight = (float)(gameLayout.getPadding().getTop() + gameLayout.getPadding().getBottom());
 
         //Turn label
         labelTurn = new Label(isTurn ? "O" : "X" + "'s turn");
         labelTurn.setFont(new Font(30));
-        vbox.getChildren().add(labelTurn);
-
 
         //Score labels
         HBox hbox = new HBox();
@@ -71,11 +108,9 @@ public class Main extends Application {
         xScoreLabel.setPadding(new Insets(0 ,100, 0, 0));
         hbox.getChildren().addAll(xLabel, xScoreLabel, oLabel, oScoreLabel);
         hbox.setAlignment(Pos.CENTER);
-        vbox.getChildren().add(hbox);
 
         //creating grid
         GridPane grid = new GridPane();
-        vbox.getChildren().add(grid);
 
         //sets gap between buttons
         grid.setHgap(5);
@@ -92,11 +127,11 @@ public class Main extends Application {
                 btn.setStyle("-fx-background-radius:0;" + "-fx-focus-color: #cfcfcf;");
                 board.get(y).get(x).setId(emptyId);
 
-                btn.setMinSize(playField.x / (float)boardSize, playField.y / (float)boardSize);
+                btn.setMinSize(150, 150);
 
                 ImageView img = new ImageView(eBox);
-                img.setFitWidth(playField.x / (float)boardSize);
-                img.setFitHeight(playField.y / (float)boardSize);
+                img.setFitWidth(150);
+                img.setFitHeight(150);
                 btn.setGraphic(img);
 
                 btn.setOnAction(new ButtonHandler(x, y, this));
@@ -104,9 +139,41 @@ public class Main extends Application {
                 grid.add(btn, x, y);
             }
         }
+        gameLayout.getChildren().addAll(topbar, labelTurn, hbox, grid);
+        gameScene = new Scene(gameLayout, playField.x, playField.y);
+        // End of GameScene
 
-        primaryStage.setScene(new Scene(vbox, playField.x + extraWidth, playField.y + extraHeight));
-        primaryStage.show();
+        // SettingsScene
+        VBox settingsLayout = new VBox();
+
+        // Title bar
+        HBox settingsBar = new HBox();
+        settingsBar.setPadding(new Insets(10, 12, 15, 12));
+        settingsBar.setSpacing(10);
+        settingsBar.setStyle("-fx-border-style: none none none none; -fx-border-width: 1; -fx-border-color: #cfcfcf;");
+        Label settingsLabel = new Label("Settings");
+        settingsLabel.setFont(new Font(25));
+        settingsLabel.setAlignment(Pos.CENTER);
+        final Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        spacer.setMinSize(10, 1);
+
+        StackPane backButtonStack = new StackPane();
+        Button backButton = new Button("Done");
+        backButton.setStyle("-fx-background-color: transparent;" + "-fx-font-weight: bold;" + "-fx-font-size: 20;" + "-fx-padding: 0;");
+//        backButton.getOnMouseDragOver(backButton.setStyle("-fx-cursor: hand;"));
+        backButton.setOnAction(e -> window.setScene(gameScene));
+        backButtonStack.setAlignment(Pos.CENTER_RIGHT);
+        backButtonStack.getChildren().add(backButton);
+        settingsBar.getChildren().addAll(settingsLabel, spacer, backButtonStack);
+
+        settingsLayout.getChildren().addAll(settingsBar);
+
+        settingsScene = new Scene(settingsLayout, 600, 600);
+        // End of settingsScene
+
+        window.setScene(homeScene);
+        window.show();
 
     }
 
@@ -118,8 +185,8 @@ public class Main extends Application {
             return;
         else {
             ImageView img = new ImageView(isTurn ? oBox : xBox);
-            img.setFitWidth(playField.x / (float)boardSize);
-            img.setFitHeight(playField.y / (float)boardSize);
+            img.setFitWidth(150);
+            img.setFitHeight(150);
             current.setGraphic(img);
             current.setId(isTurn ? oId : xId);
         }
