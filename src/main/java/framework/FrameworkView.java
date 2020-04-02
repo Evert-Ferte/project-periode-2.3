@@ -124,25 +124,23 @@ public class FrameworkView extends Application {
             
             // Now we setup a few mouse event handlers...
             
-            // MOUSE_ENTERED        : Show the selection box
-            tileImage.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
-                selectionBox.setVisible(true);
-                gameLabel.setText(tile.gameName);
-            });
-            // MOUSE_EXITED         : Hide the selection box
-            tileImage.addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-                selectionBox.setVisible(false);
-                gameLabel.setText("");
-            });
-            // MOUSE_RELEASED       : On click, hide the framework and start the selected game
-            tileImage.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
-                // ...
-                tile.game.stage.setOnCloseRequest(gEvent -> stage.show());
-                tile.game.resetGame();
-                tile.game.startGame();
+            tileImage.addEventHandler(MouseEvent.MOUSE_ENTERED, FrameworkController.MOUSE_ENTERED(selectionBox, gameLabel, tile));
+            tileImage.addEventHandler(MouseEvent.MOUSE_EXITED, FrameworkController.MOUSE_EXITED(selectionBox, gameLabel));
+            tileImage.addEventHandler(MouseEvent.MOUSE_RELEASED, FrameworkController.MOUSE_RELEASED(tile, stage));
             
-                stage.hide();
-            });
+//            // MOUSE_ENTERED        : Show the selection box 
+//            tileImage.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
+//
+//            });
+//            // MOUSE_EXITED         : Hide the selection box
+//            tileImage.addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
+//
+//            });
+//            // MOUSE_RELEASED       : On click, hide the framework and start the selected game
+//            tileImage.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
+//                // ...
+//
+//            });
             
             // Create a StackPane, where we stack the tile image on top of the selection box
             StackPane sp = new StackPane(selectionBox, tileImage);
