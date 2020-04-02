@@ -1,11 +1,11 @@
-package reversi;
+package games.reversi;
 
 import games.Game;
-import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,8 +15,9 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-
 import java.util.ArrayList;
+
+// TODO - Getters for AI
 
 public class GUI extends Game {
     private static final String emptyId = "e";
@@ -44,14 +45,11 @@ public class GUI extends Game {
     
     @Override
     public void startGame() {
-        super.startGame();
         start(stage);
     }
     
     @Override
     public void resetGame() {
-        super.resetGame();
-    
         scoreWhite = 0;
         scoreBlack = 0;
         turn = false;
@@ -70,7 +68,6 @@ public class GUI extends Game {
         
 //        Button backButton = new Button("Exit");
 //        backButton.setMinSize(120, 40);
-//        vBox.getChildren().add(backButton);
         
         turnLabel = new Label((turn ? "White" : "Black") + "'s turn");
         turnLabel.setAlignment(Pos.CENTER);

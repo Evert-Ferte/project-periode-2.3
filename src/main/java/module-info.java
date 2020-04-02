@@ -2,6 +2,7 @@ module project.periode {
     requires javafx.fxml;
     requires javafx.controls;
     
-    opens reversi;
     opens framework;
+    opens games.reversi;
+    opens games.ABC;
 }

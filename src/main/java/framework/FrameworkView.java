@@ -1,7 +1,9 @@
 package framework;
 
-import games.AbcView;
+import games.ABC.AbcView;
 import games.Game;
+import games.reversi.ReversiView;
+import games.reversi.Vector2;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -19,8 +21,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import reversi.GUI;
-import reversi.Vector2;
 
 public class FrameworkView extends Application {
     private static final Vector2 windowSize = new Vector2(1000, 600);
@@ -86,7 +86,10 @@ public class FrameworkView extends Application {
      */
     private ScrollPane createGameTiles(Stage stage) {
         // Create a list with games and some empty tiles
-        GameTile[] gameTiles = new GameTile[] {new GameTile("Reversi", gameImages[0], new GUI()), new GameTile("Tic Tac Toe", gameImages[1], new AbcView()), new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(),
+        GameTile[] gameTiles = new GameTile[] {
+                new GameTile("Reversi", gameImages[0], new ReversiView()),
+                new GameTile("Tic Tac Toe", gameImages[1], new AbcView()),
+                new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(),
         };
         
         // Create the horizontal box which will contain the (game)tiles
@@ -148,6 +151,7 @@ public class FrameworkView extends Application {
         
         // Create a scroll pane containing all (game)tiles
         // TODO - https://gist.github.com/Col-E/7d31b6b8684669cf1997831454681b85 (smooth scrolling)
+        // TODO - disable vertical scrolling (dragging)
         ScrollPane scrollPane = new ScrollPane(tiles);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setPannable(true);
