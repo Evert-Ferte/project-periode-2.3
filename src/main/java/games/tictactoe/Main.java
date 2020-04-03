@@ -26,8 +26,9 @@ public class Main extends Game {
     private static final String emptyId = "e";
     private static final String xId = "x";
     private static final String oId = "o";
-    //board size x * x
-    private static final int boardSize = 3;
+
+    private Label xScoreLabel = new Label("0");
+    private Label oScoreLabel = new Label("0");
 
     private Controller playField = new Controller(600, 600);
     private ArrayList<ArrayList<Button>> board = new ArrayList<>();
@@ -39,10 +40,6 @@ public class Main extends Game {
     private  boolean isTurn = false; //if false -> X's turn, if true -> O's turn
     private Label labelTurn;
 
-    String[][] boardArjan = {{"x", "x", "o"},
-            {"o", "x", "x"},
-            {"o", "o", "o"}};
-    
     /**
      * Start the game.
      */
@@ -50,7 +47,7 @@ public class Main extends Game {
     public void startGame() {
         start(stage);
     }
-    
+
     /**
      * Reset the game and it's values.
      */
@@ -58,7 +55,7 @@ public class Main extends Game {
     public void resetGame() {
         //TODO implementeer deze methode (reset de nodige variabelen hier)
     }
-    
+
     /**
      * This function is called once on the start of the application.
      *
@@ -125,8 +122,8 @@ public class Main extends Game {
         HBox hbox = new HBox();
         Label xLabel = new Label("X:");
         Label oLabel = new Label("O:");
-        Label xScoreLabel = new Label("5");
-        Label oScoreLabel = new Label("3");
+        //Label xScoreLabel = new Label("0");
+        //Label oScoreLabel = new Label("0");
         xScoreLabel.setPadding(new Insets(0 ,100, 0, 0));
         hbox.getChildren().addAll(xLabel, xScoreLabel, oLabel, oScoreLabel);
         hbox.setAlignment(Pos.CENTER);
@@ -141,9 +138,9 @@ public class Main extends Game {
         grid.setStyle("-fx-background-color: #2a2a2a;");
 
         //creating buttons
-        for (int y = 0; y < boardSize; y++) {
+        for (int y = 0; y < 3; y++) {
             board.add(new ArrayList<>());
-            for (int x = 0; x < boardSize; x++) {
+            for (int x = 0; x < 3; x++) {
                 Button btn = new Button();
                 board.get(y).add(btn);
                 btn.setStyle("-fx-background-radius:0;" + "-fx-focus-color: #cfcfcf;");
@@ -198,6 +195,51 @@ public class Main extends Game {
         window.show();
     }
 
+    private boolean checkEmptySpaces(){
+        int emptySpaces = 0;
+        for (int j=0; j<3; j++){
+            for (int i=0; i<3; i++){
+                if(board.get(i).get(j).getId().equals(emptyId)){
+                    emptySpaces++;
+                }
+            }
+        }
+        return emptySpaces == 0;
+    }
+
+    private boolean isGameOver(){
+        return checkWinner(xId) || checkWinner(oId) || checkEmptySpaces();
+    }
+
+    boolean checkWinner(String player) {
+        //Diagonal wins.
+        if ((board.get(0).get(0).getId().equals(board.get(1).get(1).getId()) && board.get(0).get(0).getId().equals(board.get(2).get(2).getId()) && board.get(0).get(0).getId().equals(player)) ||
+                (board.get(2).get(0).getId().equals(board.get(1).get(1).getId()) && board.get(2).get(0).getId().equals(board.get(0).get(2).getId()) && board.get(2).get(0).getId().equals(player))) {
+            return true;
+        }
+        //Vertical and horizontal wins.
+        for (int i = 0; i < 3; ++i) {
+            if (((board.get(i).get(0).getId().equals(board.get(i).get(1).getId()) && board.get(i).get(0).getId().equals(board.get(i).get(2).getId()) && board.get(i).get(0).getId().equals(player))
+                    || (board.get(0).get(i).getId().equals(board.get(1).get(i).getId()) && board.get(0).get(i).getId().equals(board.get(2).get(i).getId()) && board.get(0).get(i).getId().equals(player)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void resetBoard(){
+        for(int j=0; j<3; j++){
+            for(int i=0; i<3; i++){
+                ImageView img = new ImageView(eBox);
+                img.setFitWidth(150);
+                img.setFitHeight(150);
+                board.get(i).get(j).setGraphic(img);
+                board.get(i).get(j).setId(emptyId);
+
+            }
+        }
+    }
+
     private void onTileClick(int xPos, int yPos){
         Button current = board.get(yPos).get(xPos);
         String currentId = current.getId();
@@ -211,7 +253,19 @@ public class Main extends Game {
             current.setGraphic(img);
             current.setId(isTurn ? oId : xId);
         }
+        if(isGameOver()){
+            if(checkWinner(xId)){
+                //TODO print /label x has won the game
+                xScoreLabel.setText(""+(Integer.valueOf(xScoreLabel.getText())+1));
+            }else if(checkWinner(oId)){
+                //TODO print /label o has won the game
+                oScoreLabel.setText(""+(Integer.valueOf(oScoreLabel.getText())+1));
 
+            }
+            resetBoard();
+            //TODO if score == 5 print x has won the game and reset the game
+            return;
+        }
         swapTurn();
     }
 
@@ -239,31 +293,6 @@ public class Main extends Game {
 
         labelTurn.setText((isTurn ? "O" : "X") + "'s turn");
     }
-
-
-
-
-
-//    private static final String[] players = {"x", "o"};
-//
-//    private static void checkGameOver(String[][] boardArjan) {
-//        for(String player: players){
-//            if (((boardArjan[0][0].equals(player))&&(boardArjan[0][1].equals(player))&&(boardArjan[0][2].equals(player)))||
-//                    ((boardArjan[1][0].equals(player))&&(boardArjan[1][1].equals(player))&&(boardArjan[1][2].equals(player)))||
-//                    ((boardArjan[2][0].equals(player))&&(boardArjan[2][1].equals(player))&&(boardArjan[0][2].equals(player)))||
-//
-//                    ((boardArjan[0][0].equals(player))&&(boardArjan[1][0].equals(player))&&(boardArjan[2][0].equals(player))) ||
-//                    ((boardArjan[0][1].equals(player))&&(boardArjan[1][1].equals(player))&&(boardArjan[2][1].equals(player)))||
-//                    ((boardArjan[0][2].equals(player))&&(boardArjan[1][2].equals(player))&&(boardArjan[2][2].equals(player)))||
-//
-//                    ((boardArjan[0][0].equals(player))&&(boardArjan[1][1].equals(player))&&(boardArjan[2][2].equals(player)))||
-//                    ((boardArjan[0][2].equals(player))&&(boardArjan[1][1].equals(player))&&(boardArjan[2][0].equals(player)))){
-//                running = false;
-//                System.out.println(player + " wins!");
-//            }
-//        }
-//
-//    }
 
 
     public static void main(String[] args) {
