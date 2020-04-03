@@ -3,6 +3,7 @@ package framework;
 import games.Game;
 import games.reversi.ReversiView;
 import games.reversi.Vector2;
+import games.tictactoe.Main;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -87,7 +88,7 @@ public class FrameworkView extends Application {
         // Create a list with games and some empty tiles
         GameTile[] gameTiles = new GameTile[] {
                 new GameTile("Reversi", gameImages[0], new ReversiView()),
-//                new GameTile("Tic Tac Toe", gameImages[1], null),
+                new GameTile("Tic Tac Toe", gameImages[1], new Main()),
                 new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(),
         };
         
