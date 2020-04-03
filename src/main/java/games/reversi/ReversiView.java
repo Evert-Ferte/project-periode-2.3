@@ -176,10 +176,10 @@ public class ReversiView extends Game {
         
         Scene scene = new Scene(vBox, fieldSize.x + extraWidth, fieldSize.y + extraHeight);
         
-        stage.setScene(scene);
-        stage.setTitle("Reversi");
-        stage.setResizable(false);
-        stage.show();
+        this.stage.setScene(scene);
+        this.stage.setTitle("Reversi");
+        this.stage.setResizable(false);
+        this.stage.show();
     }
     
     /**
