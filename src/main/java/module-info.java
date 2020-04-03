@@ -4,5 +4,4 @@ module project.periode {
     
     opens framework;
     opens games.reversi;
-    opens games.ABC;
 }

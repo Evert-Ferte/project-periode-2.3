@@ -1,6 +1,5 @@
 package framework;
 
-import games.ABC.AbcView;
 import games.Game;
 import games.reversi.ReversiView;
 import games.reversi.Vector2;
@@ -88,7 +87,7 @@ public class FrameworkView extends Application {
         // Create a list with games and some empty tiles
         GameTile[] gameTiles = new GameTile[] {
                 new GameTile("Reversi", gameImages[0], new ReversiView()),
-                new GameTile("Tic Tac Toe", gameImages[1], new AbcView()),
+//                new GameTile("Tic Tac Toe", gameImages[1], null),
                 new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(),
         };
         
