@@ -1,9 +1,12 @@
 package games.reversi;
 
 import games.Game;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -36,6 +39,8 @@ public class ReversiView extends Game {
     private Button multiplayerButton;
     private Button settingsButton;
     
+    VBox entryHolders;
+    
     // Game Variables
     private Image tileEmpty = new Image(getClass().getResourceAsStream("/images/reversi/tile_empty_fade.png"));
     private Image tileWhite = new Image(getClass().getResourceAsStream("/images/reversi/tile_white_0.png"));
@@ -54,6 +59,12 @@ public class ReversiView extends Game {
      */
     public ReversiView() {
         this.model = new ReversiModel(this);
+    }
+    
+    //TEMP
+    public ReversiView(String name) {
+        this();
+        model.setName(name);
     }
     
     /**
@@ -141,13 +152,13 @@ public class ReversiView extends Game {
         line.setScaleY(4);
         
         // Create a box that holds all the player entries
-        VBox entryHolders = new VBox();
+        entryHolders = new VBox();
         entryHolders.setMinSize(100, 560);
         entryHolders.setPadding(new Insets(60, 20, 20, 20));
         entryHolders.setSpacing(20);
         
         // Get a list of all online players
-        ArrayList<String> playerList = model.getPlayerList();
+        String[] playerList = model.getPlayerList();
         
         // Loop through all online players
         for (String player : playerList) {
@@ -159,6 +170,7 @@ public class ReversiView extends Game {
             Button actionButton = new Button("Challenge");
             actionButton.setOnAction(ReversiController.challengePlayer(model, actionButton));
             actionButton.setMinSize(100, 40);
+            actionButton.setId(player);
             
             // Create a border pane so we can align all components to the borders
             BorderPane entry = new BorderPane();
@@ -414,4 +426,36 @@ public class ReversiView extends Game {
     public String getTileId(int x, int y) { return map.get(y).get(x).getId(); }
     public String getPlayerId(boolean turn) { return turn ? whiteId : blackId; }
     public String getEmptyId() { return emptyId; }
+    
+    
+    
+    public void challengeReceived(String challenger, String nr) {
+        for (Node entry : entryHolders.getChildren()) {
+            for (Node node : ((BorderPane) entry).getChildren()) {
+                VBox b = (VBox) node;
+                Node n = b.getChildren().get(0);
+                String entryId = n.getId();
+                
+                if (entryId != null) {
+                    if (entryId.equals(challenger)) {
+                        System.out.println(entryId);
+                        Button btn = ((Button) n);
+                        System.out.println(btn.toString());
+                        
+//                        btn.setText("Accept");
+                        btn.setBackground(new Background(new BackgroundFill(Color.web("#10d12d"), null, null)));
+                        n.setId(nr);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    public void startMatch() {
+        System.out.println("opening game menu...");
+//        Platform.runLater(new Runnable(){
+//            stage.setScene(gameMenu);
+//        });
+    }
 }

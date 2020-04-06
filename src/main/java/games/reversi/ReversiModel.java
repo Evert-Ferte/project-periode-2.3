@@ -1,6 +1,12 @@
 package games.reversi;
 
 import javafx.scene.control.Button;
+import network.Connection;
+import network.Handler;
+import network.Receiver;
+import network.Sender;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ReversiModel {
@@ -16,6 +22,17 @@ public class ReversiModel {
     
     private boolean isGameFinished = false;
     
+    // Networking
+    private Connection connection;
+    private static final String ip = "localhost";
+    private static final int port = 7789;
+    
+    private Sender sender;
+    private String name = "test-user";
+    private Receiver receiver;
+    
+    private Handler handler;
+    
     /**
      * The constructor. Sets the view reference.
      *
@@ -23,6 +40,22 @@ public class ReversiModel {
      */
     public ReversiModel(ReversiView view) {
         this.view = view;
+        
+        connection = new Connection(ip, port);
+    
+        try {
+            receiver = new Receiver(connection.getSocket());
+            receiver.start();
+            try {
+                Thread.sleep(16);
+            } catch (InterruptedException ignored) { }
+        } catch (IOException ignored) { }
+    
+        sender = new Sender(connection.getSocket());
+        sender.login(name);
+        sender.getPlayerlist();
+
+        handler = new Handler(this);
     }
     
     /**
@@ -266,33 +299,58 @@ public class ReversiModel {
         return pos.toArray(new Vector2[0]);
     }
     
-    public ArrayList<String> getPlayerList() {
-        System.out.println("method not implemented...");
-        
-        // TODO - implement method ...
-        ArrayList<String> l = new ArrayList<>();
-        l.add("Evert");
-        l.add("Zein");
-        l.add("Arjan");
-        l.add("Maric");
-        
-        return l;
+    public String[] getPlayerList() {
+        return Handler.playerlist == null ? new String[0] : Handler.playerlist;
     }
     
     public void challengePlayer(Button btn) {
-        // TODO - implement method ...
-        System.out.println("method not implemented...");
+        boolean challenged = true;
+        String id = null;
         
-        if (btn.getText().toLowerCase().equals("challenge")) {
-            System.out.println("Challenge player");
+        try {
+            int i = Integer.parseInt(btn.getId());
+            id = btn.getId();
+            challenged = false;
         }
-        else if (btn.getText().toLowerCase().equals("accept")) {
-            System.out.println("Challenge accepted");
+        catch (NumberFormatException ignored) { }
+        
+//        if (btn.getText().toLowerCase().equals("challenge")) {
+        if (challenged) {
+            System.out.println("challenging player:");
+            System.out.println("player: " + btn.getId());
+            sender.challenge(btn.getId(), "Reversi");
+        }
+//        else if (btn.getText().toLowerCase().equals("accept")) {
+        else {
+            System.out.println("accept challenge");
+            sender.acceptAChallenge(id);
         }
     }
     
     public void refreshPlayerList() {
-        // TODO - implement method ...
+        // TODO - implement method (call this method when receiving a game challenge)
         System.out.println("method not implemented...");
+    }
+    
+    /**
+     * Accept a challenge from someon else.
+     * @param nr Challenge number.
+     */
+    public void acceptChallenge(String nr) {
+        System.out.println("challenge " + nr + " accepted");
+        sender.acceptAChallenge(nr);
+        
+        // TODO - call method start new game
+    }
+    
+    //TEMP
+    public void setName(String name) { this.name = name; }
+    
+    public void challengeReceived(String challenger, String nr) {
+        view.challengeReceived(challenger, nr);
+    }
+    
+    public void startMatch() {
+        view.startMatch();
     }
 }

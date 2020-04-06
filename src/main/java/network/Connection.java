@@ -8,7 +8,7 @@ public class Connection {
     String ip;
     int port;
     Socket socket;
-    static Connection connection;
+//    static Connection connection;
 
     public Connection (String ip, int port) {
         this.ip = ip;
@@ -18,7 +18,7 @@ public class Connection {
         }
         catch (IOException ex) { System.err.println(ex.getMessage());}
 
-        connection = new Connection(ip,port);
+//        connection = new Connection(ip,port);
     }
 
     public String getIp() {
@@ -39,11 +39,11 @@ public class Connection {
 
     public Socket getSocket() {return socket;}
 
-    public static Connection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
+//    public static Connection getConnection() {
+//        return connection;
+//    }
+//
+//    public void setConnection(Connection connection) {
+//        this.connection = connection;
+//    }
 }

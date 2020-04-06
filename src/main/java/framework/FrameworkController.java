@@ -1,5 +1,7 @@
 package framework;
 
+import games.Game;
+import games.reversi.ReversiView;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -51,6 +53,10 @@ public class FrameworkController {
             tile.game.stage.setOnCloseRequest(gEvent -> stage.show());
             tile.game.resetGame();
             tile.game.startGame();
+    
+//            Game view = new ReversiView("evert");
+//            view.resetGame();
+//            view.startGame();
     
             stage.hide();
         };
