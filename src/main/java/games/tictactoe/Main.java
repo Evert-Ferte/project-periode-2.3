@@ -14,7 +14,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -53,7 +56,10 @@ public class Main extends Game {
      */
     @Override
     public void resetGame() {
-        //TODO implementeer deze methode (reset de nodige variabelen hier)
+        xScoreLabel.setText("0");
+        oScoreLabel.setText("0");
+        isTurn = false;
+        board = new ArrayList<>();
     }
 
     /**
@@ -64,7 +70,7 @@ public class Main extends Game {
     @Override
     public void start(Stage stage){
         //primary stage
-        window = this.stage;    //TODO - kan weg als je wil. deze class wordt nu ge-overerfd van de class game.java, deze heeft een eigen stage variabel. kan je bij door this.stage te doen.
+        window = this.stage;
         window.setTitle("Tic Tac Toe");
 
         HBox topbar = new HBox(65);
@@ -89,10 +95,16 @@ public class Main extends Game {
         Label homeTitle = new Label("Tic Tac Toe");
         homeTitle.setStyle("-fx-font-weight: bold");
         homeTitle.setFont(new Font(50));
-        Button continueGame = new Button("Continue");
+        Button continueGame = new Button("Continue game");
         continueGame.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
         continueGame.setOnAction(e -> window.setScene(gameScene));
         Button newGame = new Button("New game");
+        newGame.setOnAction((event) -> {    // lambda expression
+            oScoreLabel.setText("0");
+            xScoreLabel.setText("0");
+            resetBoard();
+            window.setScene(gameScene);
+        });
         newGame.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
         Button settings = new Button("Settings");
         settings.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
@@ -240,13 +252,40 @@ public class Main extends Game {
         }
     }
 
+    private void hasWon(String player){
+        Popup popup = new Popup();
+        Label fooHasWon = new Label("eww");
+        Button okButton = new Button("confirm");
+        okButton.setOnAction(e -> popup.hide());
+        okButton.setAlignment(Pos.CENTER);
+        fooHasWon.setMinWidth(250);
+        fooHasWon.setMinHeight(250);
+        fooHasWon.setAlignment(Pos.CENTER);
+        fooHasWon.setStyle("-fx-background-color: #fff");
+        popup.getContent().addAll(fooHasWon, okButton);
+        if (player.equals(oId)){
+            fooHasWon.setText("O has Won");
+        } if(player.equals(xId)) {
+            fooHasWon.setText("X has Won");
+        } else {
+            fooHasWon.setText("It's a draw!");
+        }
+        System.out.println(fooHasWon);
+        if (!popup.isShowing())
+            popup.show(stage);
+        else
+            popup.hide();
+
+    }
+
     private void onTileClick(int xPos, int yPos){
         Button current = board.get(yPos).get(xPos);
         String currentId = current.getId();
 
-        if (!currentId.equals(emptyId))
+        if (!currentId.equals(emptyId)) {
+            System.out.println("eee");
             return;
-        else {
+        }else {
             ImageView img = new ImageView(isTurn ? oBox : xBox);
             img.setFitWidth(150);
             img.setFitHeight(150);
@@ -256,11 +295,16 @@ public class Main extends Game {
         if(isGameOver()){
             if(checkWinner(xId)){
                 //TODO print /label x has won the game
+                hasWon(xId);
                 xScoreLabel.setText(""+(Integer.valueOf(xScoreLabel.getText())+1));
             }else if(checkWinner(oId)){
                 //TODO print /label o has won the game
+//                Label oWon = new Label("O has won the game");
+                hasWon(oId);
                 oScoreLabel.setText(""+(Integer.valueOf(oScoreLabel.getText())+1));
 
+            } else {
+                hasWon("");
             }
             resetBoard();
             //TODO if score == 5 print x has won the game and reset the game
@@ -293,6 +337,14 @@ public class Main extends Game {
 
         labelTurn.setText((isTurn ? "O" : "X") + "'s turn");
     }
+
+//    public String getPosId(int x, int y) { return board.get(y).get(x).getId(); }
+//    public String getPlayerId(boolean turn) { return isTurn ? oId : xId; }
+//    public String getEmptyId() { return emptyId; }
+//    public boolean getTurn() { return isTurn; }
+//    public Controller getPlayField() { return playField; }
+//    public Label getScoreO() { return oScoreLabel; }
+//    public Label getScoreX() { return xScoreLabel; }
 
 
     public static void main(String[] args) {
