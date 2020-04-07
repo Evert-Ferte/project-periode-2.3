@@ -36,6 +36,7 @@ public class Receiver extends Thread  {
             else if (response.startsWith("SVR PLAYERLIST")) {Handler.playerlistHalndler (response);}
             else if (response.startsWith("SVR GAME CHALLENGE")) {Handler.gameChallengeHalndler (response);}
             else if (response.startsWith("SVR GAME DRAW")) {Handler.gameDrawHalndler (response);}
+            else if (response.startsWith("SVR GAME MOVE")) {Handler.gameMoveHalndler (response);}
 
         }
     }
