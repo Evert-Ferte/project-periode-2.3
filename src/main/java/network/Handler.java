@@ -31,7 +31,7 @@ public class Handler {
         return "For help information checkout Protocol.txt on Blackboard";
     }
 
-    public static String gameMatchHalndler (String response) {
+    public static String gameMatchHandler(String response) {
         inMatch = true;
     
         System.out.println("start a new game");
@@ -40,29 +40,29 @@ public class Handler {
         return "newGame";
     }
 
-    public static void gameMoveHalndler(String response) {
+    public static void gameMoveHandler(String response) {
         HashMap<String, String> map = responseToMap(response);
         String player = map.get("PLAYER");
         String move = map.get("MOVE");
         //TODO Send the details move to the game board
     }
 
-    public static void turnHalndler(String response) {
+    public static void turnHandler(String response) {
         System.out.println("your turn...");
         //TODO ask AI to make a move
     }
 
-    public static void winHalndler(String response) {
+    public static void winHandler(String response) {
         System.out.println("game won");
         //TODO send win sginal to reversi
     }
 
-    public static void lossHalndler(String response) {
+    public static void lossHandler(String response) {
         System.out.println("game lost");
         //TODO send loss signal to reversi
     }
 
-    public static void playerlistHalndler(String response) {
+    public static void playerlistHandler(String response) {
         response = stringCleaner(response);
         String[] responseArray = toArray(response);
         playerlist = responseArray;
@@ -72,7 +72,7 @@ public class Handler {
      * When receiving a challenge, this handler is called.
      * @param response the response message.
      */
-    public static void gameChallengeHalndler(String response) {
+    public static void gameChallengeHandler(String response) {
         if (inMatch) return;
         
         Map<String, String> result = responseToMap(response);
@@ -85,7 +85,7 @@ public class Handler {
         game.challengeReceived(challenger, challengeNr);
     }
 
-    public static void gameDrawHalndler(String response) { }
+    public static void gameDrawHandler(String response) { }
 
     private static String stringCleaner(String dirty) {
         dirty = dirty.substring(dirty.indexOf("[") + 1,dirty.indexOf("]"));

@@ -1,6 +1,10 @@
 package games.reversi;
 
+import javafx.application.Platform;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.paint.Color;
 import network.Connection;
 import network.Handler;
 import network.Receiver;
@@ -9,6 +13,8 @@ import network.Sender;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ReversiModel {
     private static final int mapSize = 8;
@@ -58,6 +64,16 @@ public class ReversiModel {
         sender.getPlayerlist();
 
         handler = new Handler(this);
+    
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    refreshPlayerList();
+                });
+            }
+        }, 0, 2000);
     }
     
     /**
@@ -121,6 +137,9 @@ public class ReversiModel {
             
             // Place the new tile
             view.updateTileGraphic(turn, xPos, yPos);
+            
+            // Send the move to the server
+//            sender.sendMove();
         }
         
         // Swap the turn, only if this turn was valid

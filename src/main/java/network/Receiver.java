@@ -29,14 +29,14 @@ public class Receiver extends Thread  {
             response = receiver.readLine();
             if (response.startsWith("ERR")) {Handler.errHandler (response);}
             else if (response.startsWith("SVR HELP")) {Handler.helpHandler (response);}
-            else if (response.startsWith("SVR GAME MATCH")) {Handler.gameMatchHalndler (response);}
-            else if (response.startsWith("SVR GAME YOURTURN")) {Handler.turnHalndler (response);}
-            else if (response.startsWith("SVR GAME WIN")) {Handler.winHalndler (response);}
-            else if (response.startsWith("SVR GAME LOSS")) {Handler.lossHalndler (response);}
-            else if (response.startsWith("SVR PLAYERLIST")) {Handler.playerlistHalndler (response);}
-            else if (response.startsWith("SVR GAME CHALLENGE")) {Handler.gameChallengeHalndler (response);}
-            else if (response.startsWith("SVR GAME DRAW")) {Handler.gameDrawHalndler (response);}
-            else if (response.startsWith("SVR GAME MOVE")) {Handler.gameMoveHalndler (response);}
+            else if (response.startsWith("SVR GAME MATCH")) {Handler.gameMatchHandler(response);}
+            else if (response.startsWith("SVR GAME YOURTURN")) {Handler.turnHandler(response);}
+            else if (response.startsWith("SVR GAME WIN")) {Handler.winHandler(response);}
+            else if (response.startsWith("SVR GAME LOSS")) {Handler.lossHandler(response);}
+            else if (response.startsWith("SVR PLAYERLIST")) {Handler.playerlistHandler(response);}
+            else if (response.startsWith("SVR GAME CHALLENGE")) {Handler.gameChallengeHandler(response);}
+            else if (response.startsWith("SVR GAME DRAW")) {Handler.gameDrawHandler(response);}
+            else if (response.startsWith("SVR GAME MOVE")) {Handler.gameMoveHandler(response);}
 
         }
     }
