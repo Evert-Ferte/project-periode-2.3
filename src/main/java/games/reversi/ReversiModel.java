@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class ReversiModel implements Cloneable{
     private static final int mapSize = 8;
-    private String ai = "minimax";
+    private String ai = "random";
     
     private Vector2 fieldSize = new Vector2(640, 640);
     
@@ -263,7 +263,7 @@ public class ReversiModel implements Cloneable{
         if (ai.equals("random")) Ai.aiRandom(this);
         if (ai.equals("minimax")){
             try {
-                Ai.aiMiniMax(this,"White", -1);
+                Ai.aiMiniMax(this,"White", 10);
             }catch (Exception e){
                 System.out.println("Ai could't clone model: " + e);
             }

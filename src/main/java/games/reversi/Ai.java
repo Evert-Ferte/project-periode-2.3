@@ -19,9 +19,7 @@ class Ai {
         Vector2 bestMove = null;
         for (Vector2 position : originalGame.getAvailablePositions()) {
             ReversiModel cloneGame = (ReversiModel) originalGame.clone();
-            ReversiView cloneView = (ReversiView) originalGame.getView().clone();
             System.out.println("cloned");
-            cloneGame.setView(cloneView);
             cloneGame.clickPosition((int)position.x, (int)position.y);
             int score = miniMax(cloneGame, player, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, false);
             if (score > optimumScore) {
@@ -65,7 +63,7 @@ class Ai {
                     break;
                 }
             }
-            System.out.println(optimumScore);
+            System.out.println("maxi: "+ optimumScore);
             return optimumScore;
         }
         else{
@@ -81,7 +79,7 @@ class Ai {
                     break;
                 }
             }
-            System.out.println(optimumScore);
+            System.out.println("mini: " + optimumScore);
             return optimumScore;
         }
     }
