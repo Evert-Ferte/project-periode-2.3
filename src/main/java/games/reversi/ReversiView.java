@@ -17,7 +17,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import network.Sender;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 
 // TODO - cannot make a match on the edge
 // TODO - use static final variables for colors
@@ -33,11 +36,14 @@ public class ReversiView extends Game {
     private Scene mainMenu;
     private Scene multiplayerMenu;
     private Scene settingsMenu;
+    private Scene choseModeMenu;
     private Scene gameMenu;
     
     private Button startButton;
     private Button multiplayerButton;
     private Button settingsButton;
+    private Button vsPlayerButton;
+    private Button vsAiButton;
     
     VBox entryHolders;
     
@@ -94,6 +100,7 @@ public class ReversiView extends Game {
         mainMenu = createMainMenu();
         multiplayerMenu = createMultiplayerMenu();
         settingsMenu = createSettingsMenu();
+        choseModeMenu = createChooseModeMenu();
         gameMenu = createGameMenu();
     
         setActionListeners();
@@ -118,17 +125,14 @@ public class ReversiView extends Game {
         startButton = new Button("Play");
         multiplayerButton = new Button("Multiplayer");
         settingsButton = new Button("Settings");
-//        Button exitButton = new Button("Exit");
-//        exitButton.setOnAction(ReversiController.closeReversi(stage));
         
         // Set the size for all buttons
         startButton.setMinSize(200, 40);
         multiplayerButton.setMinSize(200, 40);
         settingsButton.setMinSize(200, 40);
-//        exitButton.setMinSize(200, 40);
         
         // Create a box that holds all the buttons from above
-        VBox buttonHolder = new VBox(startButton, multiplayerButton, settingsButton/*, exitButton*/);
+        VBox buttonHolder = new VBox(startButton, multiplayerButton, settingsButton);
         buttonHolder.setPadding(new Insets(100, 0, 100, 0));
         buttonHolder.setSpacing(50);
         buttonHolder.setAlignment(Pos.TOP_CENTER);
@@ -158,42 +162,7 @@ public class ReversiView extends Game {
         entryHolders.setSpacing(20);
         
         // Get a list of all online players
-        String[] playerList = model.getPlayerList();
-        
-        // Loop through all online players
-        for (String player : playerList) {
-            // Create a label that shows the player name
-            Label playerLabel = new Label(player);
-            playerLabel.setFont(new Font(24));
-            
-            // Create the button where you can challenge and accept challenges
-            Button actionButton = new Button("Challenge");
-            actionButton.setOnAction(ReversiController.challengePlayer(model, actionButton));
-            actionButton.setMinSize(100, 40);
-            actionButton.setId(player);
-            
-            // Create a border pane so we can align all components to the borders
-            BorderPane entry = new BorderPane();
-            entry.setBackground(new Background(new BackgroundFill(Color.web("#dddddd"), null, null)));
-            entry.setMinSize(100, 80);
-            
-            // Create a box for the left side. We do this the vertically center the label
-            VBox leftBorder = new VBox(playerLabel);
-            leftBorder.setAlignment(Pos.CENTER);
-            leftBorder.setPadding(new Insets(0, 0, 0, 40));
-            
-            // Create a box for the right side. We do this the vertically center the button
-            VBox rightBorder = new VBox(actionButton);
-            rightBorder.setAlignment(Pos.CENTER);
-            rightBorder.setPadding(new Insets(0, 20, 0, 0));
-            
-            // Add the 2 borders
-            entry.setLeft(leftBorder);
-            entry.setRight(rightBorder);
-            
-            // Add the new player entry
-            entryHolders.getChildren().add(entry);
-        }
+        refreshPlayerList(model.getPlayerList());
         
         // Create the back button, which leads to the main menu
         Button backButton = new Button("<");
@@ -203,7 +172,7 @@ public class ReversiView extends Game {
         // Create the refresh button, which refreshes the player list
         Button refreshButton = new Button("Refresh");
         refreshButton.setMinSize(100, 40);
-        refreshButton.setOnAction(event -> refreshPlayerList());
+        refreshButton.setOnAction(event -> model.refreshPlayerList());
         
         HBox buttons = new HBox(backButton, refreshButton);
         buttons.setAlignment(Pos.CENTER);
@@ -228,15 +197,52 @@ public class ReversiView extends Game {
         line.setScaleY(4);
         
         // ...
+    
+        VBox emptyBox = new VBox();
+        emptyBox.setPadding(new Insets(250, 0, 100, 0));
+        
+        // ...
         
         Button backButton = new Button("<");
         backButton.setMinSize(100, 40);
         backButton.setOnAction(ReversiController.setSceneInStage(stage, mainMenu));
         
         // Create a vertical box that hold all UI components created above
-        VBox vBox = new VBox(title, line, backButton);
+        VBox vBox = new VBox(title, line, emptyBox, backButton);
         vBox.setAlignment(Pos.TOP_CENTER);
         
+        // Set the above vertical box to the scene with a given width and height and return it
+        return new Scene(vBox, windowSize.x, windowSize.y);
+    }
+    
+    private Scene createChooseModeMenu() {
+        // Create the main title for this screen
+        Label title = new Label("Choose game mode");
+        title.setFont(new Font(32));
+        title.setPadding(new Insets(100, 0, 0, 0));
+    
+        // Create a line that divides the title and the buttons
+        Line line = new Line(-200, 0, 200, 0);
+        line.setScaleY(4);
+    
+        vsPlayerButton = new Button("Player vs Player");
+        vsPlayerButton.setMinSize(200, 40);
+        vsAiButton = new Button("Player vs Computer");
+        vsAiButton.setMinSize(200, 40);
+        
+        VBox modeButtons = new VBox(vsPlayerButton, vsAiButton);
+        modeButtons.setPadding(new Insets(150, 0, 100, 0));
+        modeButtons.setSpacing(40);
+        modeButtons.setAlignment(Pos.TOP_CENTER);
+    
+        Button backButton = new Button("<");
+        backButton.setMinSize(100, 40);
+        backButton.setOnAction(ReversiController.setSceneInStage(stage, mainMenu));
+    
+        // Create a vertical box that hold all UI components created above
+        VBox vBox = new VBox(title, line, modeButtons, backButton);
+        vBox.setAlignment(Pos.TOP_CENTER);
+    
         // Set the above vertical box to the scene with a given width and height and return it
         return new Scene(vBox, windowSize.x, windowSize.y);
     }
@@ -351,21 +357,24 @@ public class ReversiView extends Game {
     
     private void setActionListeners() {
 //        startButton.setOnAction(ReversiController.setSceneInStage(stage, gameMenu));
-        startButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
+        startButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, choseModeMenu));
+        multiplayerButton.setOnAction(ReversiController.setSceneInStage(stage, multiplayerMenu));
+        settingsButton.setOnAction(ReversiController.setSceneInStage(stage, settingsMenu));
+    
         //TODO IMPROVE, MAKE SEPARATE FUNCTION
-        startButton.addEventHandler(ActionEvent.ACTION, event -> {
+        EventHandler<ActionEvent> startEvent = event -> {
             model.reset();
             for (ArrayList<Button> btns : map) {
                 for (Button btn : btns) {
                     Vector2 fieldSize = model.getFieldSize();
                     int mapSize = model.getMapSize();
-                    
+                
                     // Create an image that we will put over the button
                     ImageView img = new ImageView(tileEmpty);
                     img.setFitWidth(fieldSize.x / (float)mapSize);
                     img.setFitHeight(fieldSize.y / (float)mapSize);
                     btn.setGraphic(img);
-                    
+                
                     btn.setId(emptyId);
                 }
             }
@@ -374,15 +383,55 @@ public class ReversiView extends Game {
             model.clickPosition(3, 4, true);
             model.clickPosition(4, 4, true);
             model.clickPosition(4, 3, true);
-        });
+        };
         
-        multiplayerButton.setOnAction(ReversiController.setSceneInStage(stage, multiplayerMenu));
-        settingsButton.setOnAction(ReversiController.setSceneInStage(stage, settingsMenu));
+        vsPlayerButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(true));
+        vsPlayerButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
+        vsPlayerButton.addEventHandler(ActionEvent.ACTION, startEvent);
+        
+        vsAiButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(false));
+        vsAiButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
+        vsAiButton.addEventHandler(ActionEvent.ACTION, startEvent);
     }
     
-    private void refreshPlayerList() {
-        // TODO - implement method ...
-        model.refreshPlayerList();
+    public void refreshPlayerList(String[] players) {
+        // Remove all current nodes
+        entryHolders.getChildren().clear();
+        
+        // Loop through all online players
+        for (String player : players) {
+            // Create a label that shows the player name
+            Label playerLabel = new Label(player);
+            playerLabel.setFont(new Font(24));
+            
+            // Create the button where you can challenge and accept challenges
+            Button actionButton = new Button("Challenge");
+            actionButton.setOnAction(ReversiController.challengePlayer(model, actionButton));
+            actionButton.setMinSize(100, 40);
+            actionButton.setId(player);
+        
+            // Create a border pane so we can align all components to the borders
+            BorderPane entry = new BorderPane();
+            entry.setBackground(new Background(new BackgroundFill(Color.web("#dddddd"), null, null)));
+            entry.setMinSize(100, 80);
+        
+            // Create a box for the left side. We do this the vertically center the label
+            VBox leftBorder = new VBox(playerLabel);
+            leftBorder.setAlignment(Pos.CENTER);
+            leftBorder.setPadding(new Insets(0, 0, 0, 40));
+        
+            // Create a box for the right side. We do this the vertically center the button
+            VBox rightBorder = new VBox(actionButton);
+            rightBorder.setAlignment(Pos.CENTER);
+            rightBorder.setPadding(new Insets(0, 20, 0, 0));
+        
+            // Add the 2 borders
+            entry.setLeft(leftBorder);
+            entry.setRight(rightBorder);
+        
+            // Add the new player entry
+            entryHolders.getChildren().add(entry);
+        }
     }
     
     /**
@@ -441,9 +490,11 @@ public class ReversiView extends Game {
                         System.out.println(entryId);
                         Button btn = ((Button) n);
                         System.out.println(btn.toString());
-                        
-//                        btn.setText("Accept");
-                        btn.setBackground(new Background(new BackgroundFill(Color.web("#10d12d"), null, null)));
+    
+                        Platform.runLater(() -> {
+                            btn.setText("Accept");
+                            btn.setBackground(new Background(new BackgroundFill(Color.web("#10d12d"), null, null)));
+                        });
                         n.setId(nr);
                         break;
                     }
@@ -453,9 +504,8 @@ public class ReversiView extends Game {
     }
     
     public void startMatch() {
-        System.out.println("opening game menu...");
-//        Platform.runLater(new Runnable(){
-//            stage.setScene(gameMenu);
-//        });
+        Platform.runLater(() -> {
+            stage.setScene(gameMenu);
+        });
     }
 }

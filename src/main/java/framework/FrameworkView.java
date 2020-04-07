@@ -56,6 +56,7 @@ public class FrameworkView extends Application {
         Scene scene = new Scene(vBox, windowSize.x, windowSize.y);
         
         // Configure and show the stage
+//        stage.setOnCloseRequest(windowEvent -> );
         stage.setScene(scene);
         stage.setTitle("Game Hub");
         stage.setResizable(false);
@@ -123,24 +124,9 @@ public class FrameworkView extends Application {
             selectionBox.setVisible(false);
             
             // Now we setup a few mouse event handlers...
-            
             tileImage.addEventHandler(MouseEvent.MOUSE_ENTERED, FrameworkController.MOUSE_ENTERED(selectionBox, gameLabel, tile));
             tileImage.addEventHandler(MouseEvent.MOUSE_EXITED, FrameworkController.MOUSE_EXITED(selectionBox, gameLabel));
             tileImage.addEventHandler(MouseEvent.MOUSE_RELEASED, FrameworkController.MOUSE_RELEASED(tile, stage));
-            
-//            // MOUSE_ENTERED        : Show the selection box 
-//            tileImage.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
-//
-//            });
-//            // MOUSE_EXITED         : Hide the selection box
-//            tileImage.addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-//
-//            });
-//            // MOUSE_RELEASED       : On click, hide the framework and start the selected game
-//            tileImage.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
-//                // ...
-//
-//            });
             
             // Create a StackPane, where we stack the tile image on top of the selection box
             StackPane sp = new StackPane(selectionBox, tileImage);

@@ -7,6 +7,7 @@ import network.Receiver;
 import network.Sender;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class ReversiModel {
@@ -21,6 +22,7 @@ public class ReversiModel {
     private ReversiView view;
     
     private boolean isGameFinished = false;
+    private boolean againstPlayer = true;
     
     // Networking
     private Connection connection;
@@ -300,7 +302,17 @@ public class ReversiModel {
     }
     
     public String[] getPlayerList() {
-        return Handler.playerlist == null ? new String[0] : Handler.playerlist;
+        sender.getPlayerlist();
+        //TODO improve -> sender.getPlayerList is not instant (takes a few ms)
+        String[] allPlayers = Handler.playerlist == null ? new String[0] : Handler.playerlist;
+        ArrayList<String> players = new ArrayList<>();
+        
+        for (String p : allPlayers) {
+            if (!p.equals(name))
+                players.add(p);
+        }
+        
+        return players.toArray(new String[0]);
     }
     
     public void challengePlayer(Button btn) {
@@ -314,13 +326,11 @@ public class ReversiModel {
         }
         catch (NumberFormatException ignored) { }
         
-//        if (btn.getText().toLowerCase().equals("challenge")) {
         if (challenged) {
             System.out.println("challenging player:");
             System.out.println("player: " + btn.getId());
             sender.challenge(btn.getId(), "Reversi");
         }
-//        else if (btn.getText().toLowerCase().equals("accept")) {
         else {
             System.out.println("accept challenge");
             sender.acceptAChallenge(id);
@@ -328,8 +338,7 @@ public class ReversiModel {
     }
     
     public void refreshPlayerList() {
-        // TODO - implement method (call this method when receiving a game challenge)
-        System.out.println("method not implemented...");
+        view.refreshPlayerList(getPlayerList());
     }
     
     /**
@@ -353,4 +362,7 @@ public class ReversiModel {
     public void startMatch() {
         view.startMatch();
     }
+    
+    public void setAgainstPlayer(boolean againstPlayer) { this.againstPlayer = againstPlayer; }
+    public boolean isAgainstPlayer() { return againstPlayer; }
 }
