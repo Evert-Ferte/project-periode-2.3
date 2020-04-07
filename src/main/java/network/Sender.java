@@ -33,6 +33,6 @@ public class Sender {
 
     public void subscribeGame(String game) { sender.println("subscribe " + game); }
 
-    public void setMove(int move){ sender.println("move " + move); }
+    public void sendMove(int move){ sender.println("move " + move); }
 
 }

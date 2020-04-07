@@ -40,6 +40,13 @@ public class Handler {
         return "newGame";
     }
 
+    public static void gameMoveHalndler(String response) {
+        HashMap<String, String> map = responseToMap(response);
+        String player = map.get("PLAYER");
+        String move = map.get("MOVE");
+        //TODO Send the details move to the game board
+    }
+
     public static void turnHalndler(String response) {
         System.out.println("your turn...");
         //TODO ask AI to make a move
@@ -68,7 +75,7 @@ public class Handler {
     public static void gameChallengeHalndler(String response) {
         if (inMatch) return;
         
-        Map<String, String> result = MessageToMap(response);
+        Map<String, String> result = responseToMap(response);
         
         String challenger = result.get("CHALLENGER");
         String challengeNr = result.get("CHALLENGENUMBER");
@@ -91,7 +98,7 @@ public class Handler {
         return anArray;
     }
 
-    private static HashMap<String, String> MessageToMap(String response) {
+    private static HashMap<String, String> responseToMap(String response) {
         String server_msg = response.substring(response.indexOf('{') + 1, response.indexOf('}'));
         HashMap<String, String> map = new HashMap<String, String>();
         String[] list = server_msg.split(",");
@@ -102,5 +109,6 @@ public class Handler {
         }
         return map;
     }
+
 
 }
