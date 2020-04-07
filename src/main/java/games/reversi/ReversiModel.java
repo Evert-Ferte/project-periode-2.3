@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import network.Connection;
 import network.Handler;
@@ -384,4 +385,11 @@ public class ReversiModel {
     
     public void setAgainstPlayer(boolean againstPlayer) { this.againstPlayer = againstPlayer; }
     public boolean isAgainstPlayer() { return againstPlayer; }
+    
+    public int convertPositionToIndex(int x, int y) {
+        return mapSize * y + x;
+    }
+    public Vector2 convertIndexToPosition(int i) {
+        return new Vector2(i / (float)mapSize, i % mapSize);
+    }
 }
