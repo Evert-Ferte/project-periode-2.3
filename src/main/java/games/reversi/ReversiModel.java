@@ -17,8 +17,9 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ReversiModel {
+public class ReversiModel implements Cloneable{
     private static final int mapSize = 8;
+    private String ai = "minimax";
     
     private Vector2 fieldSize = new Vector2(640, 640);
     
@@ -85,7 +86,11 @@ public class ReversiModel {
         scoreBlack = 0;
         turn = false;
     }
-    
+
+    public Object clone() throws CloneNotSupportedException{
+        return super.clone();
+    }
+
     /**
      * Place a black or white tile on the given position on the board.
      *
@@ -300,7 +305,26 @@ public class ReversiModel {
     public Vector2 getFieldSize() { return fieldSize; }
     public int getScoreWhite() { return scoreWhite; }
     public int getScoreBlack() { return scoreBlack; }
-    
+
+    public ReversiView getView() {
+        return view;
+    }
+
+    void setView(ReversiView view){
+        this.view = view;
+    }
+
+    public void AiMove(){
+        if (ai.equals("random")) Ai.aiRandom(this);
+        if (ai.equals("minimax")){
+            try {
+                Ai.aiMiniMax(this,"White", -1);
+            }catch (Exception e){
+                System.out.println("Ai could't clone model: " + e);
+            }
+        }
+    }
+
     public Vector2[] getAvailablePositions() {
         ArrayList<Vector2> pos = new ArrayList<>();
         String emptyId = view.getEmptyId();

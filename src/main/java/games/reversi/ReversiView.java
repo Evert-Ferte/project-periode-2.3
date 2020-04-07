@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 // TODO - cannot make a match on the edge
 // TODO - use static final variables for colors
-public class ReversiView extends Game {
+public class ReversiView extends Game{
     private static final Vector2 windowSize = new Vector2(680, 860);
     private static final String emptyId = "e";
     private static final String blackId = "b";
@@ -109,6 +109,10 @@ public class ReversiView extends Game {
         this.stage.setTitle("Reversi");
         this.stage.setResizable(false);
         this.stage.show();
+    }
+
+    public Object clone() throws CloneNotSupportedException{
+        return super.clone();
     }
     
     private Scene createMainMenu() {
