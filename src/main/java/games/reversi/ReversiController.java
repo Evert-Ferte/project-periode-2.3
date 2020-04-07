@@ -1,10 +1,14 @@
 package games.reversi;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ReversiController {
     static class ButtonHandler implements EventHandler<ActionEvent> {
@@ -20,8 +24,19 @@ public class ReversiController {
         
         @Override
         public void handle(ActionEvent event) {
-            model.AiMove();
             model.clickPosition(xPos, yPos);
+    
+            //TODO - add delay for AI move.
+//            Timer timer = new Timer();
+//            timer.scheduleAtFixedRate(new TimerTask() {
+//                @Override
+//                public void run() {
+//                    Platform.runLater(() -> {
+//                        // delay
+//                    });
+//                }
+//            }, 0, 3000);
+            model.AiMove();
         }
     }
     

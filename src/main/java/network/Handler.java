@@ -2,7 +2,13 @@ package network;
 
 import games.Game;
 import games.reversi.ReversiModel;
+import games.reversi.Vector2;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +41,8 @@ public class Handler {
         inMatch = true;
     
         System.out.println("start a new game");
+        
+        game.softReset();
         game.startMatch();
         
         return "newGame";
@@ -44,6 +52,12 @@ public class Handler {
         HashMap<String, String> map = responseToMap(response);
         String player = map.get("PLAYER");
         String move = map.get("MOVE");
+        System.out.println("opponent("+player+") moved("+move+")");
+        
+        if (!player.equals(game.getName())) {
+            Vector2 pos = game.convertIndexToPosition(Integer.parseInt(move));
+            game.clickPosition((int)pos.x, (int)pos.y);
+        }
         //TODO Send the details move to the game board
     }
 

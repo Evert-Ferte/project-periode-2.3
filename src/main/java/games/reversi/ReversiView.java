@@ -339,10 +339,10 @@ public class ReversiView extends Game{
         vBox.getChildren().add(backButton);
     
         // Create the standard 4 tiles that make up the default board layout
-        model.clickPosition(3, 3, true);
-        model.clickPosition(3, 4, true);
-        model.clickPosition(4, 4, true);
-        model.clickPosition(4, 3, true);
+//        model.clickPosition(3, 4, true);
+//        model.clickPosition(3, 3, true);
+//        model.clickPosition(4, 3, true);
+//        model.clickPosition(4, 4, true);
     
         //TEMP
         //TODO fix bug here - upper right tile can never be clicked (probably same bug as not being able to click on the edges)
@@ -447,8 +447,10 @@ public class ReversiView extends Game{
      * @param scoreBlack The new score of black that will be shown.
      */
     public void updateScoreLabel(int scoreWhite, int scoreBlack) {
-        scoreBlackLabel.setText(String.valueOf(scoreBlack));
-        scoreWhiteLabel.setText(String.valueOf(scoreWhite));
+        Platform.runLater(() -> {
+            scoreBlackLabel.setText(String.valueOf(scoreBlack));
+            scoreWhiteLabel.setText(String.valueOf(scoreWhite));
+        });
     }
     
     /**
@@ -457,8 +459,10 @@ public class ReversiView extends Game{
      * @param turn Boolean value that represents whether it is black of white's turn.
      */
     public void updateTurnLabel(boolean turn) {
-        turnLabel.setText((turn ? "White" : "Black") + "'s turn");
-        turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
+        Platform.runLater(() -> {
+            turnLabel.setText((turn ? "White" : "Black") + "'s turn");
+            turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
+        });
     }
     
     /**
@@ -469,13 +473,15 @@ public class ReversiView extends Game{
      * @param yPos The Y position on the board.
      */
     public void updateTileGraphic(boolean turn, int xPos, int yPos) {
-        ImageView img = new ImageView(turn ? tileWhite : tileBlack);
-        img.setFitWidth(imgSize.x);
-        img.setFitHeight(imgSize.y);
-        
-        Button current = map.get(yPos).get(xPos);
-        current.setGraphic(img);
-        current.setId(turn ? whiteId : blackId);
+        Platform.runLater(() -> {
+            ImageView img = new ImageView(turn ? tileWhite : tileBlack);
+            img.setFitWidth(imgSize.x);
+            img.setFitHeight(imgSize.y);
+            
+            Button current = map.get(yPos).get(xPos);
+            current.setGraphic(img);
+            current.setId(turn ? whiteId : blackId);
+        });
     }
     
     public String getTileId(int x, int y) { return map.get(y).get(x).getId(); }
@@ -513,5 +519,30 @@ public class ReversiView extends Game{
         Platform.runLater(() -> {
             stage.setScene(gameMenu);
         });
+    }
+    
+    public void softReset() {
+        model.reset();
+        for (ArrayList<Button> btns : map) {
+            for (Button btn : btns) {
+                Vector2 fieldSize = model.getFieldSize();
+                int mapSize = model.getMapSize();
+            
+                // Create an image that we will put over the button
+                ImageView img = new ImageView(tileEmpty);
+                img.setFitWidth(fieldSize.x / (float)mapSize);
+                img.setFitHeight(fieldSize.y / (float)mapSize);
+                btn.setGraphic(img);
+            
+                btn.setId(emptyId);
+            }
+        }
+        
+        // Create the standard 4 tiles that make up the default board layout
+        model.clickPosition(4, 3, true);
+        model.clickPosition(3, 3, true);
+        model.clickPosition(3, 4, true);
+        model.clickPosition(4, 4, true);
+        System.out.println("updated");
     }
 }

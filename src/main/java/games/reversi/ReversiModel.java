@@ -1,7 +1,10 @@
 package games.reversi;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
@@ -67,15 +70,15 @@ public class ReversiModel implements Cloneable{
 
         handler = new Handler(this);
     
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    refreshPlayerList();
-                });
-            }
-        }, 0, 2000);
+//        Timer timer = new Timer();
+//        timer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                Platform.runLater(() -> {
+//                    refreshPlayerList();
+//                });
+//            }
+//        }, 0, 2000);
     }
     
     /**
@@ -132,6 +135,8 @@ public class ReversiModel implements Cloneable{
             valid = setTilesInDirection(xPos, yPos, -1,  1) || valid;     // Down left
             valid = setTilesInDirection(xPos, yPos,  1,  1) || valid;     // Down right
         }
+    
+        System.out.println(valid ? "valid move" : "not a valid move");
         
         // If the position is valid, add score and update the interface
         if (valid) {
@@ -145,7 +150,8 @@ public class ReversiModel implements Cloneable{
             view.updateTileGraphic(turn, xPos, yPos);
             
             // Send the move to the server
-//            sender.sendMove();
+            if (!forceClick)
+                sender.sendMove(convertPositionToIndex(xPos, yPos));
         }
         
         // Swap the turn, only if this turn was valid
@@ -414,6 +420,12 @@ public class ReversiModel implements Cloneable{
         return mapSize * y + x;
     }
     public Vector2 convertIndexToPosition(int i) {
-        return new Vector2(i / (float)mapSize, i % mapSize);
+        return new Vector2(i % mapSize, (int)Math.floor(i / (float)mapSize));
     }
+    
+    public void softReset() {
+        view.softReset();
+    }
+    
+    public String getName() { return name; }
 }
