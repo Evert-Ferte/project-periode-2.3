@@ -335,7 +335,8 @@ public class ReversiView extends Game{
     
         Button backButton = new Button("Exit");
         backButton.setMinSize(120, 40);
-        backButton.setOnAction(ReversiController.setSceneInStage(stage, mainMenu));
+        backButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, mainMenu));
+        backButton.addEventHandler(ActionEvent.ACTION, ReversiController.exitGame(model));
         vBox.getChildren().add(backButton);
     
         // Create the standard 4 tiles that make up the default board layout

@@ -1,14 +1,10 @@
 package games.reversi;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ReversiController {
     static class ButtonHandler implements EventHandler<ActionEvent> {
@@ -24,19 +20,14 @@ public class ReversiController {
         
         @Override
         public void handle(ActionEvent event) {
-            model.clickPosition(xPos, yPos);
-    
-            //TODO - add delay for AI move.
-//            Timer timer = new Timer();
-//            timer.scheduleAtFixedRate(new TimerTask() {
-//                @Override
-//                public void run() {
-//                    Platform.runLater(() -> {
-//                        // delay
-//                    });
-//                }
-//            }, 0, 3000);
-            model.AiMove();
+//            if (model.isAgainstPlayer() || model.isPlayerTurn())
+//                model.clickPosition(xPos, yPos);
+//            else
+//                model.AiMove();
+            
+            // Only let the player click a tile if it's the players turn, or if we are playing against ourselves
+            if (model.isAgainstPlayer() || model.isPlayerTurn())
+                model.clickPosition(xPos, yPos);
         }
     }
     
@@ -51,6 +42,12 @@ public class ReversiController {
     public static EventHandler<ActionEvent> challengePlayer(ReversiModel model, Button btn) {
         return event -> {
             model.challengePlayer(btn);
+        };
+    }
+    
+    public static EventHandler<ActionEvent> exitGame(ReversiModel model) {
+        return event -> {
+            model.exitGame();
         };
     }
 }

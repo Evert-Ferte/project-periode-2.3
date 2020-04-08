@@ -14,7 +14,6 @@ public class Sender {
             sender = new PrintWriter(socket.getOutputStream(), true);
         }
         catch (IOException e) {System.err.println(e.getMessage());}
-
     }
 
     public void login (String playerName) { sender.println("login "+playerName); }

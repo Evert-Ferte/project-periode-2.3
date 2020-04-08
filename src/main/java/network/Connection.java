@@ -38,6 +38,11 @@ public class Connection {
     }
 
     public Socket getSocket() {return socket;}
+    
+    public boolean isConnected() {
+        if (socket == null) return false;
+        return socket.isConnected();
+    }
 
 //    public static Connection getConnection() {
 //        return connection;

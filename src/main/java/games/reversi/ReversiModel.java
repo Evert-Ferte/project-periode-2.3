@@ -1,34 +1,31 @@
 package games.reversi;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import network.Connection;
 import network.Handler;
 import network.Receiver;
 import network.Sender;
-
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class ReversiModel implements Cloneable{
     private static final int mapSize = 8;
-    private String ai = "random";
+    
+    private static final String ai = "random";
+    private static final int minDelay = 180;
+    private static final int maxDelay = 800;
     
     private Vector2 fieldSize = new Vector2(640, 640);
     
     private int scoreWhite = 0;
     private int scoreBlack = 0;
     private boolean turn = false;
+    private boolean playerTurn = true;
+    private boolean isOnlineMatch = false;
     
     private ReversiView view;
     
@@ -42,9 +39,6 @@ public class ReversiModel implements Cloneable{
     
     private Sender sender;
     private String name = "test-user";
-    private Receiver receiver;
-    
-    private Handler handler;
     
     /**
      * The constructor. Sets the view reference.
@@ -54,31 +48,31 @@ public class ReversiModel implements Cloneable{
     public ReversiModel(ReversiView view) {
         this.view = view;
         
+        createConnection();
+    }
+    
+//    private void startApplication() {
+//        createConnection();
+//    }
+    
+    private void createConnection() {
         connection = new Connection(ip, port);
     
-        try {
-            receiver = new Receiver(connection.getSocket());
-            receiver.start();
+        if (connection.isConnected()) {
             try {
-                Thread.sleep(16);
-            } catch (InterruptedException ignored) { }
-        } catch (IOException ignored) { }
-    
-        sender = new Sender(connection.getSocket());
-        sender.login(name);
-        sender.getPlayerlist();
-
-        handler = new Handler(this);
-    
-//        Timer timer = new Timer();
-//        timer.scheduleAtFixedRate(new TimerTask() {
-//            @Override
-//            public void run() {
-//                Platform.runLater(() -> {
-//                    refreshPlayerList();
-//                });
-//            }
-//        }, 0, 2000);
+                Receiver receiver = new Receiver(connection.getSocket());
+                receiver.start();
+                try {
+                    Thread.sleep(16);
+                } catch (InterruptedException ignored) { }
+            } catch (IOException ignored) { }
+        
+            sender = new Sender(connection.getSocket());
+            sender.login(name);
+            sender.getPlayerlist();
+        
+            Handler handler = new Handler(this);
+        }
     }
     
     /**
@@ -88,6 +82,8 @@ public class ReversiModel implements Cloneable{
         scoreWhite = 0;
         scoreBlack = 0;
         turn = false;
+        playerTurn = true;
+        setOnlineMatch(false);
     }
 
     public Object clone() throws CloneNotSupportedException{
@@ -135,8 +131,9 @@ public class ReversiModel implements Cloneable{
             valid = setTilesInDirection(xPos, yPos, -1,  1) || valid;     // Down left
             valid = setTilesInDirection(xPos, yPos,  1,  1) || valid;     // Down right
         }
-    
-        System.out.println(valid ? "valid move" : "not a valid move");
+        
+        if (connection.isConnected())
+            System.out.println(valid ? "valid move" : "not a valid move");
         
         // If the position is valid, add score and update the interface
         if (valid) {
@@ -151,12 +148,28 @@ public class ReversiModel implements Cloneable{
             
             // Send the move to the server
             if (!forceClick)
-                sender.sendMove(convertPositionToIndex(xPos, yPos));
+                if (connection.isConnected())
+                    sender.sendMove(convertPositionToIndex(xPos, yPos));
         }
         
         // Swap the turn, only if this turn was valid
         turn = valid != turn;
+        
+        playerTurn = valid != playerTurn;
         view.updateTurnLabel(turn);
+        
+        if (!isOnlineMatch) {
+            if (!isAgainstPlayer() && !isPlayerTurn() && !forceClick) {
+                System.out.println("\t\t\t\tai moving");
+                int delay = minDelay + new Random().nextInt(maxDelay - minDelay);
+                
+                // Call AiMove after a few milliseconds
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override public void run() { Platform.runLater(() -> { AiMove(); }); }
+                }, delay);
+            }
+        }
     }
     
     /**
@@ -320,13 +333,17 @@ public class ReversiModel implements Cloneable{
         this.view = view;
     }
 
-    public void AiMove(){
+    public void AiMove() {
+        if (againstPlayer) return;
+    
+        System.out.println("\t\tAI MOVEINGajsdfhkaljsdfklhasdklfaklsdhfklajsdflkjhasdf");
+        
         if (ai.equals("random")) Ai.aiRandom(this);
         if (ai.equals("minimax")){
             try {
                 Ai.aiMiniMax(this,"White", 10);
             }catch (Exception e){
-                System.out.println("Ai could't clone model: " + e);
+                System.out.println("Ai couldn't clone model: " + e);
             }
         }
     }
@@ -352,9 +369,16 @@ public class ReversiModel implements Cloneable{
     }
     
     public String[] getPlayerList() {
-        sender.getPlayerlist();
-        //TODO improve -> sender.getPlayerList is not instant (takes a few ms)
-        String[] allPlayers = Handler.playerlist == null ? new String[0] : Handler.playerlist;
+        if (connection.isConnected()) sender.getPlayerlist();
+        
+        try { Thread.sleep(16); }
+        catch (InterruptedException ignored) { }
+    
+        String[] allPlayers;
+        if (connection.isConnected())
+            allPlayers = Handler.playerlist == null ? new String[0] : Handler.playerlist;
+        else allPlayers = new String[0];
+        
         ArrayList<String> players = new ArrayList<>();
         
         for (String p : allPlayers) {
@@ -366,6 +390,8 @@ public class ReversiModel implements Cloneable{
     }
     
     public void challengePlayer(Button btn) {
+        if (!connection.isConnected()) return;
+        
         boolean challenged = true;
         String id = null;
         
@@ -388,6 +414,7 @@ public class ReversiModel implements Cloneable{
     }
     
     public void refreshPlayerList() {
+        if (!connection.isConnected()) return;
         view.refreshPlayerList(getPlayerList());
     }
     
@@ -396,6 +423,7 @@ public class ReversiModel implements Cloneable{
      * @param nr Challenge number.
      */
     public void acceptChallenge(String nr) {
+        if (!connection.isConnected()) return;
         System.out.println("challenge " + nr + " accepted");
         sender.acceptAChallenge(nr);
         
@@ -406,6 +434,7 @@ public class ReversiModel implements Cloneable{
     public void setName(String name) { this.name = name; }
     
     public void challengeReceived(String challenger, String nr) {
+        if (!connection.isConnected()) return;
         view.challengeReceived(challenger, nr);
     }
     
@@ -428,4 +457,19 @@ public class ReversiModel implements Cloneable{
     }
     
     public String getName() { return name; }
+    
+    public boolean isPlayerTurn() { return playerTurn; }
+    public void setPlayerTurn(boolean playerTurn) { this.playerTurn = playerTurn; }
+    
+    public void exitGame() {
+        sender.forfeitAGame();
+        setOnlineMatch(false);
+    }
+    
+    public void gameWon(boolean playerWon) {
+        System.out.println("implement close game here (ReversiModel.java gameWon() method");
+    }
+    
+    public boolean isOnlineMatch() { return isOnlineMatch; }
+    public void setOnlineMatch(boolean isOnlineMatch) { this.isOnlineMatch = isOnlineMatch; }
 }

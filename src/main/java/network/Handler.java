@@ -43,6 +43,7 @@ public class Handler {
         System.out.println("start a new game");
         
         game.softReset();
+        game.setOnlineMatch(true);
         game.startMatch();
         
         return "newGame";
@@ -55,6 +56,7 @@ public class Handler {
         System.out.println("opponent("+player+") moved("+move+")");
         
         if (!player.equals(game.getName())) {
+            
             Vector2 pos = game.convertIndexToPosition(Integer.parseInt(move));
             game.clickPosition((int)pos.x, (int)pos.y);
         }
@@ -68,11 +70,13 @@ public class Handler {
 
     public static void winHandler(String response) {
         System.out.println("game won");
+        game.gameWon(true);
         //TODO send win sginal to reversi
     }
 
     public static void lossHandler(String response) {
         System.out.println("game lost");
+        game.gameWon(false);
         //TODO send loss signal to reversi
     }
 
