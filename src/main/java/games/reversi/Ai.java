@@ -10,7 +10,7 @@ class Ai {
         }
     }
 
-    static void aiMiniMax(ReversiModel originalGame, String player, int depth) throws CloneNotSupportedException{
+    static void aiMiniMax(ReversiModel originalGame, int depth) throws CloneNotSupportedException{
         if(!originalGame.getTurn()){
             return;
         }
@@ -21,7 +21,7 @@ class Ai {
             ReversiModel cloneGame = (ReversiModel) originalGame.clone();
             System.out.println("cloned");
             cloneGame.clickPosition((int)position.x, (int)position.y);
-            int score = miniMax(cloneGame, player, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+            int score = miniMax(cloneGame, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, false);
             if (score > optimumScore) {
                 optimumScore = score;
                 bestMove = position;
@@ -31,23 +31,21 @@ class Ai {
         originalGame.clickPosition((int)bestMove.x, (int)bestMove.y);
     }
 
-    private static int miniMax(ReversiModel game, String player, int depth, int alpha, int beta, boolean isMaximizing)throws CloneNotSupportedException{
+    private static int miniMax(ReversiModel game, int depth, int alpha, int beta, boolean isMaximizing)throws CloneNotSupportedException{
         if(depth == 0 || game.isGameFinished()) {
-            if (player.equals("White")) {
+            if (game.getTurn()) {
                 if(game.getScoreWhite() > game.getScoreBlack()){
                     return 1;
                 }else{
                     return -1;
                 }
             }
-            else if (player.equals("Black")) {
+            else{
                 if(game.getScoreBlack() > game.getScoreWhite()) {
                     return 1;
                 }else{
                     return -1;
                 }
-            }else{
-                return 0;
             }
         }
         if (isMaximizing){
@@ -56,7 +54,7 @@ class Ai {
                 ReversiModel cloneGame = (ReversiModel) game.clone();
                 System.out.println("cloned");
                 cloneGame.clickPosition((int)position.x, (int)position.y);
-                int score = miniMax(cloneGame, player, depth-1, alpha, beta, false);
+                int score = miniMax(cloneGame, depth-1, alpha, beta, false);
                 optimumScore = Integer.max(score, optimumScore);
                 alpha = Integer.max(alpha, optimumScore);
                 if(beta <= alpha){
@@ -72,7 +70,7 @@ class Ai {
                 ReversiModel cloneGame = (ReversiModel) game.clone();
                 System.out.println("cloned");
                 cloneGame.clickPosition((int)position.x, (int)position.y);
-                int score = miniMax(cloneGame, player,depth-1, alpha, beta,true);
+                int score = miniMax(cloneGame, depth-1, alpha, beta,true);
                 optimumScore = Integer.min(score, optimumScore);
                 beta = Integer.min(beta, optimumScore);
                 if(beta <= alpha){

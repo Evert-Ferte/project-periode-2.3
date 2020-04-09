@@ -20,8 +20,8 @@ public class ReversiController {
         
         @Override
         public void handle(ActionEvent event) {
-            model.AiMove();
-            model.clickPosition(xPos, yPos);
+            model.playerMove(xPos,yPos);
+            model.aiMove();
         }
     }
     

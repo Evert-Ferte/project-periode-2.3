@@ -17,18 +17,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import network.Sender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 // TODO - cannot make a match on the edge
 // TODO - use static final variables for colors
 public class ReversiView extends Game{
     private static final Vector2 windowSize = new Vector2(680, 860);
-    private static final String emptyId = "e";
-    private static final String blackId = "b";
-    private static final String whiteId = "w";
     
     private ReversiModel model;
     
@@ -52,7 +47,7 @@ public class ReversiView extends Game{
     private Image tileWhite = new Image(getClass().getResourceAsStream("/images/reversi/tile_white_0.png"));
     private Image tileBlack = new Image(getClass().getResourceAsStream("/images/reversi/tile_black_0.png"));
     
-    private ArrayList<ArrayList<Button>> map = new ArrayList<>();
+    private ArrayList<ArrayList<Button>> viewMap = new ArrayList<>();
     
     private Label turnLabel;
     private Label scoreWhiteLabel;
@@ -86,7 +81,7 @@ public class ReversiView extends Game{
      */
     @Override
     public void resetGame() {
-        map = new ArrayList<>();
+        viewMap = new ArrayList<>();
         model.reset();
     }
     
@@ -109,10 +104,6 @@ public class ReversiView extends Game{
         this.stage.setTitle("Reversi");
         this.stage.setResizable(false);
         this.stage.show();
-    }
-
-    public Object clone() throws CloneNotSupportedException{
-        return super.clone();
     }
     
     private Scene createMainMenu() {
@@ -312,13 +303,13 @@ public class ReversiView extends Game{
     
         // Loop through the board
         for (int y = 0; y < mapSize; y++) {
-            map.add(new ArrayList<>());
+            viewMap.add(new ArrayList<>());
             for (int x = 0; x < mapSize; x++) {
                 // Create a new button for this spot on the board
                 Button btn = new Button();
                 btn.setMinSize(fieldSize.x / (float)mapSize, fieldSize.y / (float)mapSize);
-                map.get(y).add(btn);
-                map.get(y).get(x).setId(emptyId);
+                viewMap.get(y).add(btn);
+                viewMap.get(y).get(x).setId(model.getEmptyId());
             
                 // Create an image that we will put over the button
                 ImageView img = new ImageView(tileEmpty);
@@ -343,6 +334,8 @@ public class ReversiView extends Game{
         model.clickPosition(3, 4, true);
         model.clickPosition(4, 4, true);
         model.clickPosition(4, 3, true);
+
+        update();
     
         //TEMP
         //TODO fix bug here - upper right tile can never be clicked (probably same bug as not being able to click on the edges)
@@ -368,7 +361,7 @@ public class ReversiView extends Game{
         //TODO IMPROVE, MAKE SEPARATE FUNCTION
         EventHandler<ActionEvent> startEvent = event -> {
             model.reset();
-            for (ArrayList<Button> btns : map) {
+            for (ArrayList<Button> btns : viewMap) {
                 for (Button btn : btns) {
                     Vector2 fieldSize = model.getFieldSize();
                     int mapSize = model.getMapSize();
@@ -379,7 +372,7 @@ public class ReversiView extends Game{
                     img.setFitHeight(fieldSize.y / (float)mapSize);
                     btn.setGraphic(img);
                 
-                    btn.setId(emptyId);
+                    btn.setId(model.getEmptyId());
                 }
             }
             // Create the standard 4 tiles that make up the default board layout
@@ -387,6 +380,7 @@ public class ReversiView extends Game{
             model.clickPosition(3, 4, true);
             model.clickPosition(4, 4, true);
             model.clickPosition(4, 3, true);
+            update();
         };
         
         vsPlayerButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(true));
@@ -442,13 +436,10 @@ public class ReversiView extends Game{
     
     /**
      * Update the black and white score labels.
-     *
-     * @param scoreWhite The new score of white that will be shown.
-     * @param scoreBlack The new score of black that will be shown.
      */
-    public void updateScoreLabel(int scoreWhite, int scoreBlack) {
-        scoreBlackLabel.setText(String.valueOf(scoreBlack));
-        scoreWhiteLabel.setText(String.valueOf(scoreWhite));
+    public void updateScoreLabel() {
+        scoreBlackLabel.setText(String.valueOf(model.getScoreBlack()));
+        scoreWhiteLabel.setText(String.valueOf(model.getScoreWhite()));
     }
     
     /**
@@ -464,25 +455,41 @@ public class ReversiView extends Game{
     /**
      * Update the graphics (image) for a specific tile.
      *
-     * @param turn Boolean value that represents whether it is black of white's turn.
+     * @param player Boolean value that represents whether it is black of white's turn.
      * @param xPos The X position on the board.
      * @param yPos The Y position on the board.
      */
-    public void updateTileGraphic(boolean turn, int xPos, int yPos) {
-        ImageView img = new ImageView(turn ? tileWhite : tileBlack);
+    public void updateTileGraphic(boolean player, int xPos, int yPos) {
+        ImageView img = new ImageView(player ? tileWhite : tileBlack);
         img.setFitWidth(imgSize.x);
         img.setFitHeight(imgSize.y);
-        
-        Button current = map.get(yPos).get(xPos);
+
+        Button current = viewMap.get(yPos).get(xPos);
         current.setGraphic(img);
-        current.setId(turn ? whiteId : blackId);
+        current.setId(model.getPlayerId(player));
     }
-    
-    public String getTileId(int x, int y) { return map.get(y).get(x).getId(); }
-    public String getPlayerId(boolean turn) { return turn ? whiteId : blackId; }
-    public String getEmptyId() { return emptyId; }
-    
-    
+
+    public void updateMapGraphic(){
+        ArrayList<ArrayList<String>> modelMap = model.getModelMap();
+        int mapSize = model.getMapSize();
+        for (int y=0; y<mapSize; y++) {
+            for(int x=0; x<mapSize; x++ ){
+                String id = modelMap.get(y).get(x);
+                if(id.equals(model.getWhiteId())){
+                    updateTileGraphic(true, x, y);
+                }else if (id.equals(model.getBlackId())){
+                    updateTileGraphic(false, x, y);
+                }
+
+            }
+        }
+    }
+
+    public void update(){
+        updateMapGraphic();
+        updateTurnLabel(model.getTurn());
+        updateScoreLabel();
+    }
     
     public void challengeReceived(String challenger, String nr) {
         for (Node entry : entryHolders.getChildren()) {
