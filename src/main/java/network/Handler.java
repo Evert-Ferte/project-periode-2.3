@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +62,13 @@ public class Handler {
 
     public static void turnHandler(String response) {
         System.out.println("your turn...");
+        
+        if (game.getGameMode() != ReversiModel.GameMode.ONLINE) return;
+        
+        game.AiMove();
         //TODO ask AI to make a move
+//        game.
+        // TODO - start turn for player
     }
 
     public static void winHandler(String response) { game.gameEnd(true); }
@@ -95,11 +102,12 @@ public class Handler {
     private static String stringCleaner(String dirty) {
         dirty = dirty.substring(dirty.indexOf("[") + 1,dirty.indexOf("]"));
         dirty = dirty.replace("\"","");
-        dirty = dirty.replace(",","");
+//        dirty = dirty.replace(",","");
         return dirty;
     }
     public static String[] toArray (String string) {
-        String[] anArray = string.split(" ");
+//        String[] anArray = string.split(" ");
+        String[] anArray = string.split(",");
         return anArray;
     }
 

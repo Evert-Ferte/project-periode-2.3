@@ -55,7 +55,6 @@ public class FrameworkController {
             tile.game.startGame();
     
 //            Game view = new ReversiView("evert");
-//            view.resetGame();
 //            view.startGame();
             
             stage.hide();

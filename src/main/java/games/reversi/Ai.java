@@ -3,17 +3,25 @@ package games.reversi;
 class Ai {
 
     static void aiRandom(ReversiModel game){
-        if(game.isWhiteTurn()){ // TODO - Check if this if statement is needed. AI can be either black or white
-            Vector2[] avPos = game.getAvailablePositions();
+        // TODO - Check if this if statement is needed. AI can be either black or white
+//        if(game.isWhiteTurn()){
+//        }
+        
+        Vector2[] avPos = game.getAvailablePositions();
+        
+        if (avPos.length > 0) {
             Vector2 randomPosition = avPos[(int)(Math.random() * avPos.length)];
             game.clickPosition((int)randomPosition.x, (int)randomPosition.y);
+        }
+        else {
+            System.out.println("WARNING! No available positions for AI to choose from!");
         }
     }
 
     static void aiMiniMax(ReversiModel originalGame, String player, int depth) throws CloneNotSupportedException{
-        if(!originalGame.isWhiteTurn()){
-            return;
-        }
+//        if(!originalGame.isWhiteTurn()){
+//            return;
+//        }
 
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;

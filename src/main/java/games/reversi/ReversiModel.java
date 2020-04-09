@@ -1,6 +1,8 @@
 package games.reversi;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import network.Connection;
 import network.Handler;
@@ -36,11 +38,11 @@ public class ReversiModel implements Cloneable{
     
     // Networking
     private Connection connection;
-    private static final String ip = "localhost";
+    private static final String ip = "145.33.225.170"; //"localhost";
     private static final int port = 7789;
     
     private Sender sender;
-    private String name = "test-user";
+    private String name = /*"challenge me pls";*/ "groep2d5";
     
     /**
      * The constructor. Sets the view reference.
@@ -93,6 +95,12 @@ public class ReversiModel implements Cloneable{
         placeStartingTiles();
         view.startMatch();
         
+        // If not online, assign the player to the black tiles
+        if (mode != GameMode.ONLINE)
+            setPlayerToWhite(false);
+        else
+            setPlayerTurn(false);
+        
         // TODO - turn should always be false at start, but set isPlayerTurn is player can go first
         //  (online=variable, ai=alwaysStart, pvp=?)
     }
@@ -133,18 +141,12 @@ public class ReversiModel implements Cloneable{
     private void turnHandler() {
         turnEnd();
         
-        if (gameMode == GameMode.PLAYER_VS_AI) {
-            if (!isPlayerTurn()) {
-                System.out.println("\t\t\t\tai moving");
-                int delay = minAiMoveDelay + new Random().nextInt(maxAiMoveDelay - minAiMoveDelay);
+        if (gameMode == GameMode.PLAYER_VS_AI)
+            if (!isPlayerTurn())
+                AiMove();
     
-                // Call AiMove after a few milliseconds
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override public void run() { Platform.runLater(() -> { AiMove(); }); }
-                }, delay);
-            }
-        }
+        System.out.println("next turn");
+        System.out.println("isPlayerTurn: " + isPlayerTurn());
     }
     private void turnStart() {
     
@@ -160,6 +162,7 @@ public class ReversiModel implements Cloneable{
     
     private void switchTurn() {
         setWhiteTurn(!isWhiteTurn());
+        setPlayerTurn(!isPlayerTurn());
     }
     private void setWhiteTurn(boolean whiteTurn) {
         this.whiteTurn = whiteTurn;
@@ -185,6 +188,8 @@ public class ReversiModel implements Cloneable{
      * @param y Y position where the tile will be placed.
      */
     public void clickPositionNew(int x, int y) {
+//        if (isGameFinished()) return;
+        
         // Get and check for possible tiles that can be flipped at the clicked position
         ArrayList<Vector2> tilesToFlip = getTilesToFlip(x, y);
         boolean validClick = tilesToFlip.size() > 0;
@@ -202,6 +207,10 @@ public class ReversiModel implements Cloneable{
         if (isWhiteTurn())  addScoreToWhite();
         else                addScoreToBlack();
         
+        // Send the move to the server (only if this command came from our client (it is our turn) )
+        if (isPlayerTurn())
+            sender.sendMove(convertPositionToIndex(x, y));
+        
         turnHandler();
     }
     
@@ -216,16 +225,16 @@ public class ReversiModel implements Cloneable{
 //        setTurn(false); //TODO for if we want a standard layout for the starting tiles, otherwise remove this.
         
         // Place the first 2 white/black tiles
-        tilesToFlip.add(new Vector2(3, 3));
-        tilesToFlip.add(new Vector2(4, 4));
+        tilesToFlip.add(new Vector2(3, 4));
+        tilesToFlip.add(new Vector2(4, 3));
         flipTiles(tilesToFlip, false);
         
         // Switch turns so we can place the other color
         switchTurn();
     
         // Place the second 2 black/white tiles
-        tilesToFlip.set(0, new Vector2(3, 4));
-        tilesToFlip.set(1, new Vector2(4, 3));
+        tilesToFlip.set(0, new Vector2(3, 3));
+        tilesToFlip.set(1, new Vector2(4, 4));
         flipTiles(tilesToFlip, false);
         
         // Switch turns again so we end up where we were
@@ -367,6 +376,32 @@ public class ReversiModel implements Cloneable{
         gameMode = mode;
     }
     
+    public Vector2[] getAvailablePositions() {
+        ArrayList<Vector2> pos = new ArrayList<>();
+        String emptyId = view.getEmptyId();
+        
+        // Loop through the map/board
+        for (int y = 0; y < mapSize; y++) {
+            for (int x = 0; x < mapSize; x++) {
+                // Get the current tile id
+                String tileId = view.getTileId(x, y);
+                
+                // If the tile is empty, check if the current player can place a valid tile here
+                if (tileId.equals(emptyId)) {
+//                    if (isValidTile(x, y))
+//                        pos.add(new Vector2(x, y));
+                    // TODO - sometimes it cannot find tiles on the first move of the game (fix this)
+                    ArrayList<Vector2> p = getTilesToFlip(x, y);
+                    
+                    if (p.size() > 0)
+                        pos.add(new Vector2(x, y));
+                }
+            }
+        }
+        
+        return pos.toArray(new Vector2[0]);
+    }
+    
     // GETTERS AND SETTERS BELOW
     
     //region Getters and setters for the score (both black and white score)
@@ -407,6 +442,8 @@ public class ReversiModel implements Cloneable{
         setWhiteTurn(false);
     }
     
+    public GameMode getGameMode() { return gameMode; }
+    
     public Vector2 getFieldSize() { return fieldSize; }
     
     //TODO - not always true, sometimes there are no available moves left to do,
@@ -425,10 +462,25 @@ public class ReversiModel implements Cloneable{
     
     public void AiMove() {
         // Return if we are not playing against AI
-        if (gameMode != GameMode.PLAYER_VS_AI) return;
+        if (gameMode == GameMode.PLAYER_VS_PLAYER) return;
         
-        System.out.println("\t\tAI MOVEINGajsdfhkaljsdfklhasdklfaklsdhfklajsdflkjhasdf");
+        int delay = minAiMoveDelay + new Random().nextInt(maxAiMoveDelay - minAiMoveDelay);
+//        System.out.println("ai scheduled to move after " + delay + " milliseconds");
         
+        // Call AiMove after a few milliseconds
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override public void run() {
+                Platform.runLater(() -> {
+                    move();
+                });
+            }
+        }, delay);
+    }
+    
+    //TODO this is temporary, find a fix for this (should not be separate function
+    private void move() {
+        System.out.println("ai moving");
         if (ai.equals("random")) Ai.aiRandom(this);
         if (ai.equals("minimax")){
             try {
@@ -658,26 +710,6 @@ public class ReversiModel implements Cloneable{
 
     void setView(ReversiView view){
         this.view = view;
-    }
-
-    public Vector2[] getAvailablePositions() {
-        ArrayList<Vector2> pos = new ArrayList<>();
-        String emptyId = view.getEmptyId();
-        
-        // Loop through the map/board
-        for (int y = 0; y < mapSize; y++) {
-            for (int x = 0; x < mapSize; x++) {
-                // Get the current tile id
-                String tileId = view.getTileId(x, y);
-                
-                // If the tile is empty, check if the current player can place a valid tile here
-                if (tileId.equals(emptyId))
-                    if (isValidTile(x, y))
-                        pos.add(new Vector2(x, y));
-            }
-        }
-        
-        return pos.toArray(new Vector2[0]);
     }
     
     public String[] getPlayerList() {

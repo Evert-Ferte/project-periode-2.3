@@ -8,7 +8,14 @@ import javafx.stage.Stage;
 
 public class ReversiController {
     public static EventHandler<ActionEvent> ButtonHandler(int x, int y, ReversiModel model) {
-        return event -> model.clickPositionNew(x, y);
+        return event -> {
+            // When the game mode is player vs player, always let the player click a tile
+            if (model.getGameMode() == ReversiModel.GameMode.PLAYER_VS_PLAYER)
+                model.clickPositionNew(x, y);
+            // When not playing player vs player, but player vs ai or online, only let the player click on his turn
+            else if (model.isPlayerTurn())
+                model.clickPositionNew(x, y);
+        };
     }
     
     public static EventHandler<ActionEvent> setSceneInStage(Stage stage, Scene scene) {

@@ -9,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -176,12 +177,18 @@ public class ReversiView extends Game{
         
         // Create a box that holds all the player entries
         entryHolders = new VBox();
-        entryHolders.setMinSize(100, 560);
+        entryHolders.setMinSize(100, 0);
         entryHolders.setPadding(new Insets(60, 20, 20, 20));
         entryHolders.setSpacing(20);
         
         // Get a list of all online players
         refreshPlayerList(model.getPlayerList());
+    
+        ScrollPane scrollPane = new ScrollPane(entryHolders);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setMinSize(500, 560);
         
         // Create the back button, which leads to the main menu
         Button backButton = new Button("<");
@@ -198,7 +205,7 @@ public class ReversiView extends Game{
         buttons.setSpacing(20);
         
         // Create a vertical box that hold all UI components created above
-        VBox vBox = new VBox(title, line, entryHolders, buttons);
+        VBox vBox = new VBox(title, line, /*entryHolders, */ scrollPane, buttons);
         vBox.setAlignment(Pos.TOP_CENTER);
         
         // Set the above vertical box to the scene with a given width and height and return it
@@ -412,6 +419,8 @@ public class ReversiView extends Game{
             // Add the new player entry
             entryHolders.getChildren().add(entry);
         }
+    
+        entryHolders.setMinSize(560, (80 + 20) * players.length + 60);
     }
     
     /**
