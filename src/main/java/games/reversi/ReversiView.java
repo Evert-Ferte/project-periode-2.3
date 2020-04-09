@@ -67,7 +67,7 @@ public class ReversiView extends Game{
     //TEMP
     public ReversiView(String name) {
         this();
-        model.setName(name);
+        model.setClientName(name);
     }
     
     /**
@@ -482,9 +482,9 @@ public class ReversiView extends Game{
                 
                 if (entryId != null) {
                     if (entryId.equals(challenger)) {
-                        System.out.println(entryId);
+                        model.log(entryId);
                         Button btn = ((Button) n);
-                        System.out.println(btn.toString());
+                        model.log(btn.toString());
     
                         Platform.runLater(() -> {
                             btn.setText("Accept");
@@ -507,7 +507,7 @@ public class ReversiView extends Game{
 //    public void softReset() {
 //        resetTiles();
 //        model.gameStart();
-//        System.out.println("restarting game...");
+//        model.log("restarting game...");
 //    }
     
     public void resetTiles() {

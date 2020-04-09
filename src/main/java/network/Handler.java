@@ -1,80 +1,66 @@
 package network;
 
-import games.Game;
 import games.reversi.ReversiModel;
 import games.reversi.Vector2;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.control.Button;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Handler {
-
-    //private static MultiPlayerGUI gui;
-
-    public static String[] playerlist;
-    static String opponent;
-    static String gameName;
+    public String[] playerlist;
+    private String opponent;
+    private String gameName;
     
-    private static boolean inMatch = false;
+    private boolean inMatch = false;
 
-//    static Sender sender = new Sender(Connection.getConnection().getSocket());
-    private static ReversiModel game;
+//    Sender sender = new Sender(Connection.getConnection().getSocket());
+    private ReversiModel game;
 
     public Handler(ReversiModel game) {
         this.game = game;
     }
 
-    public static String errHandler (String toHandle) {
+    public String errHandler (String toHandle) {
         return toHandle;
     }
 
-    public static String helpHandler (String toHandle) {
+    public String helpHandler (String toHandle) {
         return "For help information checkout Protocol.txt on Blackboard";
     }
 
-    public static String gameMatchHandler(String response) {
+    public String gameMatchHandler(String response) {
         inMatch = true;
         
+        game.log("starting...");
         game.gameStart(ReversiModel.GameMode.ONLINE);
         
         return "newGame";
     }
 
-    public static void gameMoveHandler(String response) {
+    public void gameMoveHandler(String response) {
         HashMap<String, String> map = responseToMap(response);
         String player = map.get("PLAYER");
         String move = map.get("MOVE");
-        System.out.println("opponent("+player+") moved("+move+")");
+        game.log("opponent("+player+") moved("+move+")");
         
-        if (!player.equals(game.getName())) {
-            
+        if (!player.equals(game.getClientName())) {
             Vector2 pos = game.convertIndexToPosition(Integer.parseInt(move));
-            game.clickPositionNew((int)pos.x, (int)pos.y);
+            game.clickPosition((int)pos.x, (int)pos.y);
         }
-        //TODO Send the details move to the game board
     }
 
-    public static void turnHandler(String response) {
-        System.out.println("your turn...");
+    public void turnHandler(String response) {
+        game.log("your turn...");
         
         if (game.getGameMode() != ReversiModel.GameMode.ONLINE) return;
         
+        game.turnStart();
         game.AiMove();
-        //TODO ask AI to make a move
-//        game.
-        // TODO - start turn for player
     }
 
-    public static void winHandler(String response) { game.gameEnd(true); }
-    public static void lossHandler(String response) { game.gameEnd(false); }
+    public void winHandler(String response) { game.gameEnd(true); }
+    public void lossHandler(String response) { game.gameEnd(false); }
 
-    public static void playerlistHandler(String response) {
+    public void playerlistHandler(String response) {
         response = stringCleaner(response);
         String[] responseArray = toArray(response);
         playerlist = responseArray;
@@ -84,7 +70,7 @@ public class Handler {
      * When receiving a challenge, this handler is called.
      * @param response the response message.
      */
-    public static void gameChallengeHandler(String response) {
+    public void gameChallengeHandler(String response) {
         if (inMatch) return;
         
         Map<String, String> result = responseToMap(response);
@@ -92,25 +78,27 @@ public class Handler {
         String challenger = result.get("CHALLENGER");
         String challengeNr = result.get("CHALLENGENUMBER");
         
-        System.out.println("challenge received("+challengeNr+"), from "+challenger+"");
+        game.log("challenge received("+challengeNr+"), from "+challenger+"");
+        
+        game.acceptChallenge(challengeNr);
         
         game.challengeReceived(challenger, challengeNr);
     }
 
-    public static void gameDrawHandler(String response) { }
+    public void gameDrawHandler(String response) { }
 
-    private static String stringCleaner(String dirty) {
+    private String stringCleaner(String dirty) {
         dirty = dirty.substring(dirty.indexOf("[") + 1,dirty.indexOf("]"));
         dirty = dirty.replace("\"","");
 //        dirty = dirty.replace(",","");
         return dirty;
     }
-    public static String[] toArray (String string) {
+    public String[] toArray (String string) {
         String[] anArray = string.split(",");
         return anArray;
     }
 
-    private static HashMap<String, String> responseToMap(String response) {
+    private HashMap<String, String> responseToMap(String response) {
         String server_msg = response.substring(response.indexOf('{') + 1, response.indexOf('}'));
         HashMap<String, String> map = new HashMap<String, String>();
         String[] list = server_msg.split(",");

@@ -4,12 +4,10 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Connection {
-
-    String ip;
-    int port;
-    Socket socket;
-//    static Connection connection;
-
+    private String ip;
+    private int port;
+    private Socket socket;
+    
     public Connection (String ip, int port) {
         this.ip = ip;
         this.port = port;
@@ -17,8 +15,6 @@ public class Connection {
             this.socket = new Socket(ip,port);
         }
         catch (IOException ex) { System.err.println(ex.getMessage());}
-
-//        connection = new Connection(ip,port);
     }
 
     public String getIp() {
@@ -43,12 +39,4 @@ public class Connection {
         if (socket == null) return false;
         return socket.isConnected();
     }
-
-//    public static Connection getConnection() {
-//        return connection;
-//    }
-//
-//    public void setConnection(Connection connection) {
-//        this.connection = connection;
-//    }
 }

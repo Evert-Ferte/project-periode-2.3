@@ -134,7 +134,6 @@ public class FrameworkView extends Application {
         }
         
         // Create a scroll pane containing all (game)tiles
-        // TODO - https://gist.github.com/Col-E/7d31b6b8684669cf1997831454681b85 (smooth scrolling)
         // TODO - disable vertical scrolling (dragging)
         ScrollPane scrollPane = new ScrollPane(tiles);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);

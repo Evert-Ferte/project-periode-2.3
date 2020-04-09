@@ -1,8 +1,6 @@
 package games.reversi;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import network.Connection;
 import network.Handler;
@@ -22,12 +20,13 @@ public class ReversiModel implements Cloneable{
     private static final int minAiMoveDelay = 180;
     private static final int maxAiMoveDelay = 800;
     
+    // General variables
+    private ReversiView view;
+    
     private int scoreWhite = 0;
     private int scoreBlack = 0;
     private boolean whiteTurn = false;
     private boolean playerTurn = false;
-    
-    private ReversiView view;
     
     private GameMode gameMode = GameMode.PLAYER_VS_PLAYER;
     public enum GameMode {
@@ -36,13 +35,14 @@ public class ReversiModel implements Cloneable{
         ONLINE
     }
     
-    // Networking
-    private Connection connection;
-    private static final String ip = "145.33.225.170"; //"localhost";
+    // Networking variables
+    private static final String ip = /*"145.33.225.170";*/ "localhost";
     private static final int port = 7789;
+    private Connection connection;
     
     private Sender sender;
-    private String name = /*"challenge me pls";*/ "groep2d5";
+    private String clientName = "client_0";
+    private Handler handler;
     
     /**
      * The constructor. Sets the view reference.
@@ -53,43 +53,43 @@ public class ReversiModel implements Cloneable{
         this.view = view;
     }
     
-    //region class initialization functions
+//region Class initialization functions
     
     /**
-     * Called when clicking on a game tile.
+     * Called when clicking on a game tile. Tries to create a connection with the game server.
      */
     public void startApplication() {
         createConnection();
     }
     
     /**
-     * Creates a connection with the game server.
+     * Tries to create a connection with the game server.
      */
     private void createConnection() {
         connection = new Connection(ip, port);
     
         if (connection.isConnected()) {
+            handler = new Handler(this);
+            
             try {
-                Receiver receiver = new Receiver(connection.getSocket());
+                Receiver receiver = new Receiver(connection.getSocket(), handler);
                 receiver.start();
+                
                 try {
                     Thread.sleep(16);
                 } catch (InterruptedException ignored) { }
             } catch (IOException ignored) { }
         
             sender = new Sender(connection.getSocket());
-            sender.login(name);
+            sender.login(clientName);
             sender.getPlayerlist();
-        
-            Handler handler = new Handler(this);
         }
     }
     
-    //endregion
-    
+//endregion
     
     public void gameStart(GameMode mode) {
-        resetVariables();        // TODO - old method, check and renew!
+        resetVariables();
         
         setGameMode(mode);
         placeStartingTiles();
@@ -100,23 +100,24 @@ public class ReversiModel implements Cloneable{
             setPlayerToWhite(false);
         else
             setPlayerTurn(false);
-        
-        // TODO - turn should always be false at start, but set isPlayerTurn is player can go first
-        //  (online=variable, ai=alwaysStart, pvp=?)
     }
     public void gameEnd(boolean won) {
         // TODO - do general game end stuff here, and call onGameWon() or onGameLost()
         
         if (won) onGameWon();
         else     onGameLost();
+        
+        // TODO - close game here
     }
     private void onGameWon() {
-        System.out.println("game won");
         // TODO - specific game won stuff here
+        
+        log("game won");
     }
     private void onGameLost() {
         // TODO - specific game lost stuff here
-        System.out.println("game lost");
+        
+        log("game lost");
     }
     public void forfeitGame() {
         if (gameMode == GameMode.ONLINE)
@@ -131,12 +132,11 @@ public class ReversiModel implements Cloneable{
     public void resetVariables() {
         setScoreWhite(0);
         setScoreBlack(0);
-//        setOnlineMatch(false);
         setWhiteTurn(false);
         setPlayerTurn(true);
     }
     
-    //region Turn handling functions
+//region Turn handling functions
     
     private void turnHandler() {
         turnEnd();
@@ -144,11 +144,11 @@ public class ReversiModel implements Cloneable{
         if (gameMode == GameMode.PLAYER_VS_AI)
             if (!isPlayerTurn())
                 AiMove();
-    
-        System.out.println("next turn");
-        System.out.println("isPlayerTurn: " + isPlayerTurn());
+        
+        log("next turn");
+        log("isPlayerTurn: " + isPlayerTurn());
     }
-    private void turnStart() {
+    public void turnStart() {
     
     }
     private void turnEnd() {
@@ -168,17 +168,14 @@ public class ReversiModel implements Cloneable{
         this.whiteTurn = whiteTurn;
     }
     
-    //endregion
+//endregion
     
     /**
      * Updates all UI components.
      */
     private void updateView() { view.update(); }
     
-    
-    
-    
-    //region Functions for placing and flipping tiles
+//region Functions for placing and flipping tiles
     
     /**
      * Places a tile on the board (if given a valid position), and flips tiles in trapped by the
@@ -187,8 +184,8 @@ public class ReversiModel implements Cloneable{
      * @param x X position where the tile will be placed.
      * @param y Y position where the tile will be placed.
      */
-    public void clickPositionNew(int x, int y) {
-//        if (isGameFinished()) return;
+    public void clickPosition(int x, int y) {
+        if (isGameFinished()) return;
         
         // Get and check for possible tiles that can be flipped at the clicked position
         ArrayList<Vector2> tilesToFlip = getTilesToFlip(x, y);
@@ -208,7 +205,7 @@ public class ReversiModel implements Cloneable{
         else                addScoreToBlack();
         
         // Send the move to the server (only if this command came from our client (it is our turn) )
-        if (isPlayerTurn())
+        if (isPlayerTurn() && gameMode == GameMode.ONLINE)
             sender.sendMove(convertPositionToIndex(x, y));
         
         turnHandler();
@@ -361,7 +358,37 @@ public class ReversiModel implements Cloneable{
         return valid ? tilesInDirection : new ArrayList<>();
     }
     
-    //endregion
+    /**
+     * Desc here...
+     */
+    public void AiMove() {
+        // Return if we are not playing against AI
+        if (gameMode == GameMode.PLAYER_VS_PLAYER) return;
+        
+        int delay = minAiMoveDelay + new Random().nextInt(maxAiMoveDelay - minAiMoveDelay);
+        
+        ReversiModel modelReference = this;
+        
+        // Call AiMove after a few milliseconds
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override public void run() {
+                Platform.runLater(() -> {
+                    log("ai moving");
+                    if (ai.equals("random")) Ai.aiRandom(modelReference);
+                    if (ai.equals("minimax")){
+                        try {
+                            Ai.aiMiniMax(modelReference,"White", 10);
+                        }catch (Exception e){
+                            log("Ai couldn't clone model: " + e);
+                        }
+                    }
+                });
+            }
+        }, delay);
+    }
+    
+//endregion
     
     /**
      * Returns true of the given position is in the board, and false if not.
@@ -402,7 +429,78 @@ public class ReversiModel implements Cloneable{
         return pos.toArray(new Vector2[0]);
     }
     
-    // GETTERS AND SETTERS BELOW
+//region Networking functions
+    
+    public void challengePlayer(Button btn) {
+        if (!connection.isConnected()) return;
+        
+        boolean challenged = true;
+        String id = null;
+        
+        try {
+            int i = Integer.parseInt(btn.getId());
+            id = btn.getId();
+            challenged = false;
+        }
+        catch (NumberFormatException ignored) { }
+        
+        if (challenged) {
+            log("challenging player:");
+            log("player: " + btn.getId());
+            sender.challenge(btn.getId(), "Reversi");
+        }
+        else {
+            log("accept challenge");
+            sender.acceptAChallenge(id);
+        }
+    }
+    
+    /**
+     * Accept a challenge from someon else.
+     * @param nr Challenge number.
+     */
+    public void acceptChallenge(String nr) {
+        if (!connection.isConnected()) return;
+        log("challenge " + nr + " accepted");
+        sender.acceptAChallenge(nr);
+        
+        // TODO - call method start new game
+    }
+    
+    public void challengeReceived(String challenger, String nr) {
+        if (!connection.isConnected()) return;
+        view.challengeReceived(challenger, nr);
+    }
+    
+    public String[] getPlayerList() {
+        if (connection.isConnected()) sender.getPlayerlist();
+        
+        try { Thread.sleep(16); }
+        catch (InterruptedException ignored) { }
+        
+        String[] allPlayers;
+        if (connection.isConnected())
+            allPlayers = handler.playerlist == null ? new String[0] : handler.playerlist;
+        else allPlayers = new String[0];
+        
+        ArrayList<String> players = new ArrayList<>();
+        
+        for (String p : allPlayers) {
+            if (!p.equals(clientName))
+                players.add(p);
+        }
+        
+        return players.toArray(new String[0]);
+    }
+    
+    public void refreshPlayerList() {
+        if (!connection.isConnected()) return;
+        view.refreshPlayerList(getPlayerList());
+    }
+
+//endregion
+
+//region Getters and setters
     
     //region Getters and setters for the score (both black and white score)
     
@@ -424,377 +522,91 @@ public class ReversiModel implements Cloneable{
     
     //endregion
     
-    public int getMapSize() { return mapSize; }
-    
     public boolean isWhiteTurn() { return whiteTurn; }
     
-    public boolean isPlayerWhite() {
-        return isWhiteTurn() == isPlayerTurn();
-    }
-    
+    public boolean isPlayerWhite() { return isWhiteTurn() == isPlayerTurn(); }
     /**
      * Assigns the player to black or white.
      *
-     * @param playerIsWhite Asign player to white?
+     * @param playerIsWhite Assign player to white?
      */
     public void setPlayerToWhite(boolean playerIsWhite) {
         setPlayerTurn(!playerIsWhite);
         setWhiteTurn(false);
     }
     
-    public GameMode getGameMode() { return gameMode; }
+    public boolean isPlayerTurn() { return playerTurn; }
+    public void setPlayerTurn(boolean playerTurn) { this.playerTurn = playerTurn; }
     
-    public Vector2 getFieldSize() { return fieldSize; }
-    
-    //TODO - not always true, sometimes there are no available moves left to do,
-    // but not all tiles are filled, then the game is also finished
-    public boolean isGameFinished() { return scoreWhite + scoreBlack == mapSize * mapSize; }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    public void AiMove() {
-        // Return if we are not playing against AI
-        if (gameMode == GameMode.PLAYER_VS_PLAYER) return;
-        
-        int delay = minAiMoveDelay + new Random().nextInt(maxAiMoveDelay - minAiMoveDelay);
-//        System.out.println("ai scheduled to move after " + delay + " milliseconds");
-        
-        // Call AiMove after a few milliseconds
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override public void run() {
-                Platform.runLater(() -> {
-                    move();
-                });
-            }
-        }, delay);
-    }
-    
-    //TODO this is temporary, find a fix for this (should not be separate function
-    private void move() {
-        System.out.println("ai moving");
-        if (ai.equals("random")) Ai.aiRandom(this);
-        if (ai.equals("minimax")){
-            try {
-                Ai.aiMiniMax(this,"White", 10);
-            }catch (Exception e){
-                System.out.println("Ai couldn't clone model: " + e);
-            }
-        }
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    public Object clone() throws CloneNotSupportedException{
-        return super.clone();
-    }
-
-    /**
-     * Place a black or white tile on the given position on the board.
-     *
-     * @param xPos X position on the board.
-     * @param yPos Y position on the board.
-     */
-    public void clickPosition(int xPos, int yPos) {
-        clickPosition(xPos, yPos, false);
-    }
-    
-    /**
-     *  Place a black or white tile on the given position on the board.
-     *
-     * @param xPos X position on the board.
-     * @param yPos Y position on the board.
-     * @param forceClick If true, place without checking if the spot is valid.
-     */
-    public void clickPosition(int xPos, int yPos, boolean forceClick) {
-        // If we are not force clicking a tile, check if the tile is a valid tile to click
-        if (!forceClick) {
-            String tileId = view.getTileId(xPos, yPos);
-            if (!tileId.equals(view.getEmptyId()))
-                return;
-        }
-        
-        boolean valid;
-        // If we force click a tile, always make it a valid move
-        if (forceClick)
-            valid = true;
-            // Else, check each direction (horizontal, vertical & diagonal) for possible moves
-        else {
-            valid = setTilesInDirection(xPos, yPos,  0, -1);              // Up
-            valid = setTilesInDirection(xPos, yPos,  0,  1) || valid;     // Down
-            valid = setTilesInDirection(xPos, yPos, -1,  0) || valid;     // Left
-            valid = setTilesInDirection(xPos, yPos,  1,  0) || valid;     // Right
-            
-            valid = setTilesInDirection(xPos, yPos, -1, -1) || valid;     // Up left
-            valid = setTilesInDirection(xPos, yPos,  1, -1) || valid;     // Up right
-            valid = setTilesInDirection(xPos, yPos, -1,  1) || valid;     // Down left
-            valid = setTilesInDirection(xPos, yPos,  1,  1) || valid;     // Down right
-        }
-        
-        if (connection.isConnected())
-            System.out.println(valid ? "valid move" : "not a valid move");
-        
-        // If the position is valid, add score and update the interface
-        if (valid) {
-            // Add score to the correct player
-            if (whiteTurn)
-                addScoreToWhite();
-            else
-                addScoreToBlack();
-            
-            // Place the new tile
-            view.updateTileGraphic(whiteTurn, xPos, yPos);
-            
-            // Send the move to the server
-            if (!forceClick)
-                if (connection.isConnected())
-                    sender.sendMove(convertPositionToIndex(xPos, yPos));
-        }
-        
-        // Swap the turn, only if this turn was valid
-        setWhiteTurn(valid != isWhiteTurn());
-        
-        playerTurn = valid != playerTurn;
-        view.updateTurnLabel(whiteTurn);
-        
-        if (gameMode != GameMode.ONLINE) {
-            if (gameMode == GameMode.PLAYER_VS_AI && !isPlayerTurn() && !forceClick) {
-                System.out.println("\t\t\t\tai moving");
-                int delay = minAiMoveDelay + new Random().nextInt(maxAiMoveDelay - minAiMoveDelay);
-                
-                // Call AiMove after a few milliseconds
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override public void run() { Platform.runLater(() -> { AiMove(); }); }
-                }, delay);
-            }
-        }
-    }
-    
-    /**
-     * Check a direction from a given point, for possible valid moves that can be made.
-     *
-     * @param xPos The start X position.
-     * @param yPos The start Y position.
-     * @param xDir The X direction that will be checked.
-     * @param yDir The Y direction that will be checked.
-     * @return Returns if a valid move could be made it the given direction.
-     */
-    private boolean setTilesInDirection(int xPos, int yPos, int xDir, int yDir) {
-        if (xDir == 0 && yDir == 0) return false;       // Return if no direction is given
-        
-        // Check if the direction is a valid direction
-        boolean valid = isValidDirection(xPos, yPos, xDir, yDir);
-        
-        // If the clicked position is valid, switch the tiles around so that they belong to the current player
-        if (valid) {
-            String currentPlayerId  = view.getPlayerId(whiteTurn);
-            
-            int x = xPos + xDir;
-            int y = yPos + yDir;
-            
-            int j = 0;
-            // Loop for the amount of tiles checked if the previous loop (i)
-            while (x > 0 && x < mapSize - 1 && y > 0 && y < mapSize - 1) {
-                j++;
-//            for (int j = 1; j < i; j++) {
-                // Get the current x and y position
-                /*int */x = xPos + xDir * j;
-                /*int */y = yPos + yDir * j;
-                
-                String id = view.getTileId(x, y);
-                
-                // Keep looping while we haven't found the tile of the current player
-                if (!id.equals(currentPlayerId)) {
-                    // convert tile to the same tile as the current player
-                    view.updateTileGraphic(whiteTurn, x, y);
-                    
-                    // Add score to the correct player, and remove score from the other player
-                    if (whiteTurn) {
-                        addScoreToWhite();
-                        subtractScoreFromBlack();
-                    }
-                    else {
-                        addScoreToBlack();
-                        subtractScoreFromWhite();
-                    }
-                }
-                // If a tile from the current player is found, stop looping
-                else
-                    break;
-            }
-        }
-        
-        // Return if a successful move was made in this direction
-        return valid;
-    }
-    
-    private boolean isValidDirection(int xPos, int yPos, int xDir, int yDir) {
-        boolean valid = false, oppositeFound = false;
-        String currentPlayerId  = view.getPlayerId(whiteTurn);
-        String oppositePlayerId = view.getPlayerId(!whiteTurn);
-    
-        int newX = xPos + xDir;
-        int newY = yPos + yDir;
-    
-        // Loop while the new position is still a valid position on the board
-        int i = 0;
-        while (newX > 0 && newX < mapSize - 1 && newY > 0 && newY < mapSize - 1) {
-            i++;
-        
-            // Set the new position to 1 tile further in the given direction
-            newX = xPos + xDir * i;
-            newY = yPos + yDir * i;
-        
-            // Get the ID of the current tile
-            String id = view.getTileId(newX, newY);
-        
-            // If the current tile is empty, stop the loop
-            if (id.equals(view.getEmptyId())) break;
-        
-            // If the current tile is of the opposite player, continue (to the next loop)
-            if (id.equals(oppositePlayerId)) {
-                oppositeFound = true;
-                continue;
-            }
-        
-            // If the current tile is of the player, break and make valid only if an opposite tile was found
-            if (id.equals(currentPlayerId)) {
-                if (oppositeFound)
-                    valid = true;
-                break;
-            }
-        }
-        
-        return valid;
-    }
-    
-    private boolean isValidTile(int xPos, int yPos) {
-        boolean valid;
-        valid = isValidDirection(xPos, yPos,  0, -1);              // Up
-        valid = isValidDirection(xPos, yPos,  0,  1) || valid;     // Down
-        valid = isValidDirection(xPos, yPos, -1,  0) || valid;     // Left
-        valid = isValidDirection(xPos, yPos,  1,  0) || valid;     // Right
-    
-        valid = isValidDirection(xPos, yPos, -1, -1) || valid;     // Up left
-        valid = isValidDirection(xPos, yPos,  1, -1) || valid;     // Up right
-        valid = isValidDirection(xPos, yPos, -1,  1) || valid;     // Down left
-        valid = isValidDirection(xPos, yPos,  1,  1) || valid;     // Down right
-        
-        return valid;
-    }
-    
-//    private void checkWinCondition() {
-//        isGameFinished = scoreWhite + scoreBlack == mapSize * mapSize;
-//    }
-    
-    public ReversiView getView() {
-        return view;
-    }
-
-    void setView(ReversiView view){
-        this.view = view;
-    }
-    
-    public String[] getPlayerList() {
-        if (connection.isConnected()) sender.getPlayerlist();
-        
-        try { Thread.sleep(16); }
-        catch (InterruptedException ignored) { }
-    
-        String[] allPlayers;
-        if (connection.isConnected())
-            allPlayers = Handler.playerlist == null ? new String[0] : Handler.playerlist;
-        else allPlayers = new String[0];
-        
-        ArrayList<String> players = new ArrayList<>();
-        
-        for (String p : allPlayers) {
-            if (!p.equals(name))
-                players.add(p);
-        }
-        
-        return players.toArray(new String[0]);
-    }
-    
-    public void challengePlayer(Button btn) {
-        if (!connection.isConnected()) return;
-        
-        boolean challenged = true;
-        String id = null;
-        
-        try {
-            int i = Integer.parseInt(btn.getId());
-            id = btn.getId();
-            challenged = false;
-        }
-        catch (NumberFormatException ignored) { }
-        
-        if (challenged) {
-            System.out.println("challenging player:");
-            System.out.println("player: " + btn.getId());
-            sender.challenge(btn.getId(), "Reversi");
-        }
-        else {
-            System.out.println("accept challenge");
-            sender.acceptAChallenge(id);
-        }
-    }
-    
-    public void refreshPlayerList() {
-        if (!connection.isConnected()) return;
-        view.refreshPlayerList(getPlayerList());
-    }
-    
-    /**
-     * Accept a challenge from someon else.
-     * @param nr Challenge number.
-     */
-    public void acceptChallenge(String nr) {
-        if (!connection.isConnected()) return;
-        System.out.println("challenge " + nr + " accepted");
-        sender.acceptAChallenge(nr);
-        
-        // TODO - call method start new game
-    }
-    
-    //TEMP
-    public void setName(String name) { this.name = name; }
-    
-    public void challengeReceived(String challenger, String nr) {
-        if (!connection.isConnected()) return;
-        view.challengeReceived(challenger, nr);
-    }
-    
-//    public void setAgainstPlayer(boolean againstPlayer) { this.againstPlayer = againstPlayer; }
-//    public boolean isAgainstPlayer() { return againstPlayer; }
-    
-    public int convertPositionToIndex(int x, int y) {
-        return mapSize * y + x;
-    }
+    public int convertPositionToIndex(int x, int y) { return mapSize * y + x; }
     public Vector2 convertIndexToPosition(int i) {
         return new Vector2(i % mapSize, (int)Math.floor(i / (float)mapSize));
     }
     
-    public String getName() { return name; }
+    public String getClientName() { return clientName; }
+    public void setClientName(String name) { this.clientName = name; }
     
-    public boolean isPlayerTurn() { return playerTurn; }
-    public void setPlayerTurn(boolean playerTurn) { this.playerTurn = playerTurn; }
+    public boolean isGameFinished() {
+        // Loop through the map and find tiles that can still be flipped
+        for (int y = 0; y < mapSize; y++) {
+            for (int x = 0; x < mapSize; x++) {
+                ArrayList<Vector2> tiles = getTilesToFlip(x, y);
+                
+                // The game is finished when no tiles can be flipped, so return false if there are still tiles left
+                if (tiles.size() > 0)
+                    return false;
+            }
+        }
+        
+//        return scoreWhite + scoreBlack == mapSize * mapSize;
+        return true;
+    }
     
+    public GameMode getGameMode() { return gameMode; }
+    
+    public int getMapSize() { return mapSize; }
+    
+    public Vector2 getFieldSize() { return fieldSize; }
+    
+//endregion
+    
+    /**
+     * log a message, like System.out.println(), but add the client's name before the message.
+     *
+     * @param message The message that will be printed.
+     */
+    public void log(String message) {
+        StringBuilder template = new StringBuilder();
+        
+        int length = 20;
+        int curOffLength = length - 4;
+        for (int i = 0; i < length; i++) {
+            String txt = "";
+            
+            if (i < clientName.length() && i < curOffLength)
+                txt = String.valueOf(clientName.charAt(i));
+            else if (i < curOffLength)
+                txt = " ";
+            else if (clientName.length() < curOffLength)
+                txt = " ";
+            else if (i < length - 1)
+                txt = ".";
+            
+            // Always add this on the last node
+            if (i == length - 1)
+                txt = " : ";
+            
+            template.append(txt);
+        }
+    
+        System.out.println(template + message);
+    }
+    
+    /**
+     * Create a copy of this class so we can change information without changing the original class.
+     *
+     * @return Returns the copy.
+     * @throws CloneNotSupportedException Thrown to indicate that the object's class does not implement the Cloneable interface.
+     */
+    public Object clone() throws CloneNotSupportedException{ return super.clone(); }
 }
