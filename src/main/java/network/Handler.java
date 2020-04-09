@@ -106,7 +106,6 @@ public class Handler {
         return dirty;
     }
     public static String[] toArray (String string) {
-//        String[] anArray = string.split(" ");
         String[] anArray = string.split(",");
         return anArray;
     }
