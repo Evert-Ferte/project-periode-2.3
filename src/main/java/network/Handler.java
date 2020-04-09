@@ -39,12 +39,8 @@ public class Handler {
 
     public static String gameMatchHandler(String response) {
         inMatch = true;
-    
-        System.out.println("start a new game");
         
-        game.softReset();
-        game.setOnlineMatch(true);
-        game.startMatch();
+        game.gameStart(ReversiModel.GameMode.ONLINE);
         
         return "newGame";
     }
@@ -58,7 +54,7 @@ public class Handler {
         if (!player.equals(game.getName())) {
             
             Vector2 pos = game.convertIndexToPosition(Integer.parseInt(move));
-            game.clickPosition((int)pos.x, (int)pos.y);
+            game.clickPositionNew((int)pos.x, (int)pos.y);
         }
         //TODO Send the details move to the game board
     }
@@ -68,17 +64,8 @@ public class Handler {
         //TODO ask AI to make a move
     }
 
-    public static void winHandler(String response) {
-        System.out.println("game won");
-        game.gameWon(true);
-        //TODO send win sginal to reversi
-    }
-
-    public static void lossHandler(String response) {
-        System.out.println("game lost");
-        game.gameWon(false);
-        //TODO send loss signal to reversi
-    }
+    public static void winHandler(String response) { game.gameEnd(true); }
+    public static void lossHandler(String response) { game.gameEnd(false); }
 
     public static void playerlistHandler(String response) {
         response = stringCleaner(response);

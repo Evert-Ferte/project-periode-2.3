@@ -7,28 +7,8 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class ReversiController {
-    static class ButtonHandler implements EventHandler<ActionEvent> {
-        private int xPos;
-        private int yPos;
-        private ReversiModel model;
-        
-        public ButtonHandler(int xPos, int yPos, ReversiModel model) {
-            this.xPos = xPos;
-            this.yPos = yPos;
-            this.model = model;
-        }
-        
-        @Override
-        public void handle(ActionEvent event) {
-//            if (model.isAgainstPlayer() || model.isPlayerTurn())
-//                model.clickPosition(xPos, yPos);
-//            else
-//                model.AiMove();
-            
-            // Only let the player click a tile if it's the players turn, or if we are playing against ourselves
-            if (model.isAgainstPlayer() || model.isPlayerTurn())
-                model.clickPosition(xPos, yPos);
-        }
+    public static EventHandler<ActionEvent> ButtonHandler(int x, int y, ReversiModel model) {
+        return event -> model.clickPositionNew(x, y);
     }
     
     public static EventHandler<ActionEvent> setSceneInStage(Stage stage, Scene scene) {
@@ -40,14 +20,12 @@ public class ReversiController {
     }
     
     public static EventHandler<ActionEvent> challengePlayer(ReversiModel model, Button btn) {
-        return event -> {
-            model.challengePlayer(btn);
-        };
+        return event -> model.challengePlayer(btn);
     }
     
     public static EventHandler<ActionEvent> exitGame(ReversiModel model) {
         return event -> {
-            model.exitGame();
+            model.forfeitGame();
         };
     }
 }

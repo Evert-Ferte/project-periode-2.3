@@ -3,7 +3,6 @@ package games.reversi;
 import games.Game;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -17,12 +16,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import network.Sender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-// TODO - cannot make a match on the edge
 // TODO - use static final variables for colors
 public class ReversiView extends Game{
     private static final Vector2 windowSize = new Vector2(680, 860);
@@ -78,6 +74,7 @@ public class ReversiView extends Game{
      */
     @Override
     public void startGame() {
+        model.startApplication();
         start(stage);
     }
     
@@ -85,9 +82,9 @@ public class ReversiView extends Game{
      * Reset the game and it's values.
      */
     @Override
-    public void resetGame() {
+    public void resetGame() {//TODO check if main reset and stuff , and if true reset all
         map = new ArrayList<>();
-        model.reset();
+        model.resetVariables();
     }
     
     /**
@@ -110,7 +107,25 @@ public class ReversiView extends Game{
         this.stage.setResizable(false);
         this.stage.show();
     }
-
+    
+    
+    // NIEUW GEDEELTE VAN HIER ....
+    
+    /**
+     * General method for updating all view components.
+     */
+    public void update() {
+        updateScoreLabel(model.getScoreWhite(), model.getScoreBlack());
+        updateTurnLabel(model.isWhiteTurn());
+    }
+    
+    
+    
+    // NIEUW GEDEELTE TOT HIER ....
+    
+    
+    
+    
     public Object clone() throws CloneNotSupportedException{
         return super.clone();
     }
@@ -253,7 +268,7 @@ public class ReversiView extends Game{
     
     private Scene createGameMenu() {
         // Get a few values from the model
-        boolean turn = model.getTurn();
+        boolean isWhiteTurn = model.isWhiteTurn();
         int mapSize = model.getMapSize();
         Vector2 fieldSize = model.getFieldSize();
     
@@ -267,12 +282,12 @@ public class ReversiView extends Game{
         vBox.setSpacing(20);
     
         // Create the turn label, which shows who's turn it is
-        turnLabel = new Label((turn ? "White" : "Black") + "'s turn");
+        turnLabel = new Label((isWhiteTurn ? "White" : "Black") + "'s turn");
         turnLabel.setAlignment(Pos.CENTER);
         turnLabel.setMinSize(fieldSize.x * 0.8f, 60);
         turnLabel.setFont(new Font(30));
         turnLabel.setBackground(new Background(new BackgroundFill(Color.web("005200"), null, null)));
-        turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
+        turnLabel.setTextFill(Color.web(isWhiteTurn ? "#ffffff" : "000000"));
         vBox.setAlignment(Pos.CENTER);
         vBox.getChildren().add(turnLabel);
     
@@ -327,7 +342,7 @@ public class ReversiView extends Game{
                 btn.setGraphic(img);
             
                 // Set the event handler for the button
-                btn.setOnAction(new ReversiController.ButtonHandler(x, y, model));
+                btn.setOnAction(ReversiController.ButtonHandler(x, y, model));
             
                 grid.add(btn, x, y);
             }
@@ -338,24 +353,6 @@ public class ReversiView extends Game{
         backButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, mainMenu));
         backButton.addEventHandler(ActionEvent.ACTION, ReversiController.exitGame(model));
         vBox.getChildren().add(backButton);
-    
-        // Create the standard 4 tiles that make up the default board layout
-//        model.clickPosition(3, 4, true);
-//        model.clickPosition(3, 3, true);
-//        model.clickPosition(4, 3, true);
-//        model.clickPosition(4, 4, true);
-    
-        //TEMP
-        //TODO fix bug here - upper right tile can never be clicked (probably same bug as not being able to click on the edges)
-//        model.clickPosition(5, 0, true);
-//        model.clickPosition(6, 0, true);
-//
-//        model.clickPosition(6, 1, true);
-//
-//        model.clickPosition(7, 1, true);
-//        model.clickPosition(7, 2, true);
-//        turn = !turn;
-        //TEMP
         
         return new Scene(vBox, windowSize.x, windowSize.y);
     }
@@ -365,38 +362,14 @@ public class ReversiView extends Game{
         startButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, choseModeMenu));
         multiplayerButton.setOnAction(ReversiController.setSceneInStage(stage, multiplayerMenu));
         settingsButton.setOnAction(ReversiController.setSceneInStage(stage, settingsMenu));
-    
-        //TODO IMPROVE, MAKE SEPARATE FUNCTION
-        EventHandler<ActionEvent> startEvent = event -> {
-            model.reset();
-            for (ArrayList<Button> btns : map) {
-                for (Button btn : btns) {
-                    Vector2 fieldSize = model.getFieldSize();
-                    int mapSize = model.getMapSize();
-                
-                    // Create an image that we will put over the button
-                    ImageView img = new ImageView(tileEmpty);
-                    img.setFitWidth(fieldSize.x / (float)mapSize);
-                    img.setFitHeight(fieldSize.y / (float)mapSize);
-                    btn.setGraphic(img);
-                
-                    btn.setId(emptyId);
-                }
-            }
-            // Create the standard 4 tiles that make up the default board layout
-            model.clickPosition(3, 3, true);
-            model.clickPosition(3, 4, true);
-            model.clickPosition(4, 4, true);
-            model.clickPosition(4, 3, true);
-        };
         
-        vsPlayerButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(true));
+//        vsPlayerButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(true));
+        vsPlayerButton.addEventHandler(ActionEvent.ACTION, event -> model.gameStart(ReversiModel.GameMode.PLAYER_VS_PLAYER));
         vsPlayerButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
-        vsPlayerButton.addEventHandler(ActionEvent.ACTION, startEvent);
         
-        vsAiButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(false));
+//        vsAiButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(false));
+        vsAiButton.addEventHandler(ActionEvent.ACTION, event -> model.gameStart(ReversiModel.GameMode.PLAYER_VS_AI));
         vsAiButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
-        vsAiButton.addEventHandler(ActionEvent.ACTION, startEvent);
     }
     
     public void refreshPlayerList(String[] players) {
@@ -522,8 +495,13 @@ public class ReversiView extends Game{
         });
     }
     
-    public void softReset() {
-        model.reset();
+//    public void softReset() {
+//        resetTiles();
+//        model.gameStart();
+//        System.out.println("restarting game...");
+//    }
+    
+    public void resetTiles() {
         for (ArrayList<Button> btns : map) {
             for (Button btn : btns) {
                 Vector2 fieldSize = model.getFieldSize();
@@ -538,12 +516,5 @@ public class ReversiView extends Game{
                 btn.setId(emptyId);
             }
         }
-        
-        // Create the standard 4 tiles that make up the default board layout
-        model.clickPosition(4, 3, true);
-        model.clickPosition(3, 3, true);
-        model.clickPosition(3, 4, true);
-        model.clickPosition(4, 4, true);
-        System.out.println("updated");
     }
 }
