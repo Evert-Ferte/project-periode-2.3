@@ -95,11 +95,11 @@ public class Handler {
     private static String stringCleaner(String dirty) {
         dirty = dirty.substring(dirty.indexOf("[") + 1,dirty.indexOf("]"));
         dirty = dirty.replace("\"","");
-        dirty = dirty.replace(",","");
+//        dirty = dirty.replace(",","");
         return dirty;
     }
     public static String[] toArray (String string) {
-        String[] anArray = string.split(" ");
+        String[] anArray = string.split(",");
         return anArray;
     }
 
