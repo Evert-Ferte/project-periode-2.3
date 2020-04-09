@@ -46,7 +46,9 @@ public class ReversiView extends Game{
     private Image tileEmpty = new Image(getClass().getResourceAsStream("/images/reversi/tile_empty_fade.png"));
     private Image tileWhite = new Image(getClass().getResourceAsStream("/images/reversi/tile_white_0.png"));
     private Image tileBlack = new Image(getClass().getResourceAsStream("/images/reversi/tile_black_0.png"));
-    
+
+
+    private Vector2 fieldSize = new Vector2(640, 640);
     private ArrayList<ArrayList<Button>> viewMap = new ArrayList<>();
     
     private Label turnLabel;
@@ -246,8 +248,7 @@ public class ReversiView extends Game{
         // Get a few values from the model
         boolean turn = model.getTurn();
         int mapSize = model.getMapSize();
-        Vector2 fieldSize = model.getFieldSize();
-    
+
         // Set the image size that all tiles/buttons on the board will use
         imgSize = new Vector2(fieldSize.x / (float)mapSize, fieldSize.y / (float)mapSize);
     
@@ -363,7 +364,6 @@ public class ReversiView extends Game{
             model.reset();
             for (ArrayList<Button> btns : viewMap) {
                 for (Button btn : btns) {
-                    Vector2 fieldSize = model.getFieldSize();
                     int mapSize = model.getMapSize();
                 
                     // Create an image that we will put over the button
