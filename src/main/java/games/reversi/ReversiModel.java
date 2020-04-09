@@ -20,7 +20,6 @@ public class ReversiModel implements Cloneable{
     private final String whiteId = "w";
 
     private String ai = "random";
-    
 
     private ArrayList<ArrayList<String>> modelMap;
     
