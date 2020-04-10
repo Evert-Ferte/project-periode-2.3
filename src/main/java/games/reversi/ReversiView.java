@@ -69,8 +69,9 @@ public class ReversiView extends Game{
     //TEMP
     public ReversiView(String name) {
         this();
-        model.setName(name);
+        model.setClientName(name);
     }
+    //TEMP
     
     /**
      * Start the game.
@@ -88,6 +89,11 @@ public class ReversiView extends Game{
     public void resetGame() {//TODO check if main reset and stuff , and if true reset all
         map = new ArrayList<>();
         model.resetVariables();
+    }
+    
+    public void closeGame() {
+        model.closeConnection();
+        stage.close();
     }
     
     /**
@@ -111,26 +117,12 @@ public class ReversiView extends Game{
         this.stage.show();
     }
     
-    
-    // NIEUW GEDEELTE VAN HIER ....
-    
     /**
      * General method for updating all view components.
      */
     public void update() {
         updateScoreLabel(model.getScoreWhite(), model.getScoreBlack());
         updateTurnLabel(model.isWhiteTurn());
-    }
-    
-    
-    
-    // NIEUW GEDEELTE TOT HIER ....
-    
-    
-    
-    
-    public Object clone() throws CloneNotSupportedException{
-        return super.clone();
     }
     
     private Scene createMainMenu() {
@@ -383,6 +375,7 @@ public class ReversiView extends Game{
     public void refreshPlayerList(String[] players) {
         if (entryHolders == null) return;
         
+        // TODO - Only add new, and remove the ones that are not in the new list
         // Remove all current nodes
         entryHolders.getChildren().clear();
         
@@ -483,9 +476,9 @@ public class ReversiView extends Game{
                 
                 if (entryId != null) {
                     if (entryId.equals(challenger)) {
-                        System.out.println(entryId);
+                        model.log(entryId);
                         Button btn = ((Button) n);
-                        System.out.println(btn.toString());
+                        model.log(btn.toString());
     
                         Platform.runLater(() -> {
                             btn.setText("Accept");
@@ -505,12 +498,6 @@ public class ReversiView extends Game{
         });
     }
     
-//    public void softReset() {
-//        resetTiles();
-//        model.gameStart();
-//        System.out.println("restarting game...");
-//    }
-    
     public void resetTiles() {
         for (ArrayList<Button> btns : map) {
             for (Button btn : btns) {
@@ -525,5 +512,9 @@ public class ReversiView extends Game{
                 btn.setId(emptyId);
             }
         }
+    }
+    
+    public Object clone() throws CloneNotSupportedException{
+        return super.clone();
     }
 }

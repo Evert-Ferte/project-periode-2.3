@@ -50,11 +50,18 @@ public class FrameworkController {
      */
     public static EventHandler<MouseEvent> MOUSE_RELEASED(FrameworkView.GameTile tile, Stage stage) {
         return mouseEvent -> {
-            tile.game.stage.setOnCloseRequest(gEvent -> stage.show());
-//            tile.game.resetGame();
+            tile.game.stage.setOnCloseRequest(e -> {
+                ReversiView view = (ReversiView) tile.game;
+                view.closeGame();
+                stage.show();
+            });
             tile.game.startGame();
     
-//            Game view = new ReversiView("evert");
+            
+//            ReversiView view = new ReversiView("client_1");
+//            view.stage.setOnCloseRequest(e -> {
+//                view.closeGame();
+//            });
 //            view.startGame();
             
             stage.hide();

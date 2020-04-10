@@ -9,9 +9,11 @@ public class Receiver extends Thread  {
 
     BufferedReader receiver;
     String response;
-
-    public Receiver (Socket socket) throws IOException {
+    Handler handler;
+    
+    public Receiver (Socket socket, Handler handler) throws IOException {
         receiver = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.handler = handler;
     }
 
     @Override
@@ -27,16 +29,16 @@ public class Receiver extends Thread  {
         while (true) {
 
             response = receiver.readLine();
-            if (response.startsWith("ERR")) {Handler.errHandler (response);}
-            else if (response.startsWith("SVR HELP")) {Handler.helpHandler (response);}
-            else if (response.startsWith("SVR GAME MATCH")) {Handler.gameMatchHandler(response);}
-            else if (response.startsWith("SVR GAME YOURTURN")) {Handler.turnHandler(response);}
-            else if (response.startsWith("SVR GAME WIN")) {Handler.winHandler(response);}
-            else if (response.startsWith("SVR GAME LOSS")) {Handler.lossHandler(response);}
-            else if (response.startsWith("SVR PLAYERLIST")) {Handler.playerlistHandler(response);}
-            else if (response.startsWith("SVR GAME CHALLENGE")) {Handler.gameChallengeHandler(response);}
-            else if (response.startsWith("SVR GAME DRAW")) {Handler.gameDrawHandler(response);}
-            else if (response.startsWith("SVR GAME MOVE")) {Handler.gameMoveHandler(response);}
+            if (response.startsWith("ERR")) {handler.errHandler (response);}
+            else if (response.startsWith("SVR HELP")) {handler.helpHandler (response);}
+            else if (response.startsWith("SVR GAME MATCH")) {handler.gameMatchHandler(response);}
+            else if (response.startsWith("SVR GAME YOURTURN")) {handler.turnHandler(response);}
+            else if (response.startsWith("SVR GAME WIN")) {handler.winHandler(response);}
+            else if (response.startsWith("SVR GAME LOSS")) {handler.lossHandler(response);}
+            else if (response.startsWith("SVR PLAYERLIST")) {handler.playerlistHandler(response);}
+            else if (response.startsWith("SVR GAME CHALLENGE")) {handler.gameChallengeHandler(response);}
+            else if (response.startsWith("SVR GAME DRAW")) {handler.gameDrawHandler(response);}
+            else if (response.startsWith("SVR GAME MOVE")) {handler.gameMoveHandler(response);}
 
         }
     }

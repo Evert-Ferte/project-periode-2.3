@@ -22,7 +22,7 @@ class Ai {
 //        if(!originalGame.isWhiteTurn()){
 //            return;
 //        }
-
+        
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;
         for (Vector2 position : originalGame.getAvailablePositions()) {
