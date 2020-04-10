@@ -56,7 +56,6 @@ public class FrameworkView extends Application {
         Scene scene = new Scene(vBox, windowSize.x, windowSize.y);
         
         // Configure and show the stage
-//        stage.setOnCloseRequest(windowEvent -> );
         stage.setScene(scene);
         stage.setTitle("Game Hub");
         stage.setResizable(false);

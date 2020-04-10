@@ -69,6 +69,7 @@ public class ReversiView extends Game{
         this();
         model.setClientName(name);
     }
+    //TEMP
     
     /**
      * Start the game.
@@ -86,6 +87,11 @@ public class ReversiView extends Game{
     public void resetGame() {//TODO check if main reset and stuff , and if true reset all
         map = new ArrayList<>();
         model.resetVariables();
+    }
+    
+    public void closeGame() {
+        model.closeConnection();
+        stage.close();
     }
     
     /**
@@ -109,26 +115,12 @@ public class ReversiView extends Game{
         this.stage.show();
     }
     
-    
-    // NIEUW GEDEELTE VAN HIER ....
-    
     /**
      * General method for updating all view components.
      */
     public void update() {
         updateScoreLabel(model.getScoreWhite(), model.getScoreBlack());
         updateTurnLabel(model.isWhiteTurn());
-    }
-    
-    
-    
-    // NIEUW GEDEELTE TOT HIER ....
-    
-    
-    
-    
-    public Object clone() throws CloneNotSupportedException{
-        return super.clone();
     }
     
     private Scene createMainMenu() {
@@ -504,12 +496,6 @@ public class ReversiView extends Game{
         });
     }
     
-//    public void softReset() {
-//        resetTiles();
-//        model.gameStart();
-//        model.log("restarting game...");
-//    }
-    
     public void resetTiles() {
         for (ArrayList<Button> btns : map) {
             for (Button btn : btns) {
@@ -525,5 +511,9 @@ public class ReversiView extends Game{
                 btn.setId(emptyId);
             }
         }
+    }
+    
+    public Object clone() throws CloneNotSupportedException{
+        return super.clone();
     }
 }

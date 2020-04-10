@@ -5,13 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-// TODO - end receiver thread on window close
 public class Receiver extends Thread  {
 
     BufferedReader receiver;
     String response;
     Handler handler;
-
+    
     public Receiver (Socket socket, Handler handler) throws IOException {
         receiver = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.handler = handler;

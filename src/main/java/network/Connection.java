@@ -39,4 +39,14 @@ public class Connection {
         if (socket == null) return false;
         return socket.isConnected();
     }
+    
+    public void terminate() {
+        // Return if not connected
+        if (!isConnected()) return;
+        
+        // Close the socket connection
+        try {
+            socket.close();
+        } catch (IOException ignored) { }
+    }
 }

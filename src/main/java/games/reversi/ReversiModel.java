@@ -40,8 +40,8 @@ public class ReversiModel implements Cloneable{
     private static final int port = 7789;
     private Connection connection;
     
-    private Sender sender;
     private String clientName = "client_0";
+    private Sender sender;
     private Handler handler;
     
     /**
@@ -53,40 +53,12 @@ public class ReversiModel implements Cloneable{
         this.view = view;
     }
     
-//region Class initialization functions
-    
     /**
      * Called when clicking on a game tile. Tries to create a connection with the game server.
      */
     public void startApplication() {
         createConnection();
     }
-    
-    /**
-     * Tries to create a connection with the game server.
-     */
-    private void createConnection() {
-        connection = new Connection(ip, port);
-    
-        if (connection.isConnected()) {
-            handler = new Handler(this);
-            
-            try {
-                Receiver receiver = new Receiver(connection.getSocket(), handler);
-                receiver.start();
-                
-                try {
-                    Thread.sleep(16);
-                } catch (InterruptedException ignored) { }
-            } catch (IOException ignored) { }
-        
-            sender = new Sender(connection.getSocket());
-            sender.login(clientName);
-            sender.getPlayerlist();
-        }
-    }
-    
-//endregion
     
     public void gameStart(GameMode mode) {
         resetVariables();
@@ -430,6 +402,34 @@ public class ReversiModel implements Cloneable{
     }
     
 //region Networking functions
+    
+    /**
+     * Tries to create a connection with the game server.
+     */
+    private void createConnection() {
+        connection = new Connection(ip, port);
+        
+        if (connection.isConnected()) {
+            handler = new Handler(this);
+            
+            try {
+                Receiver receiver = new Receiver(connection.getSocket(), handler);
+                receiver.start();
+                
+                try {
+                    Thread.sleep(16);
+                } catch (InterruptedException ignored) { }
+            } catch (IOException ignored) { }
+            
+            sender = new Sender(connection.getSocket());
+            sender.login(clientName);
+            sender.getPlayerlist();
+        }
+    }
+    
+    public void closeConnection() {
+        connection.terminate();
+    }
     
     public void challengePlayer(Button btn) {
         if (!connection.isConnected()) return;
