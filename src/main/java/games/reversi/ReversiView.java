@@ -374,6 +374,7 @@ public class ReversiView extends Game{
     public void refreshPlayerList(String[] players) {
         if (entryHolders == null) return;
         
+        // TODO - Only add new, and remove the ones that are not in the new list
         // Remove all current nodes
         entryHolders.getChildren().clear();
         

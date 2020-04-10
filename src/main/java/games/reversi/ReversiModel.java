@@ -486,7 +486,8 @@ public class ReversiModel implements Cloneable{
         ArrayList<String> players = new ArrayList<>();
         
         for (String p : allPlayers) {
-            if (!p.equals(clientName))
+            p = p.trim();
+            if (!p.equals(clientName.trim()))
                 players.add(p);
         }
         
