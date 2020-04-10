@@ -568,7 +568,6 @@ public class ReversiModel implements Cloneable{
     
     public int getMapSize() { return mapSize; }
     
-    public Vector2 getFieldSize() { return fieldSize; }
     
 //endregion
     
