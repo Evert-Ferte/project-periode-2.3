@@ -16,19 +16,18 @@ import java.util.TimerTask;
 
 public class ReversiModel implements Cloneable{
     private static final int mapSize = 8;
-    private static final Vector2 fieldSize = new Vector2(640, 640);
-    
+
     private static final String ai = "random";
     private static final int minAiMoveDelay = 180;
     private static final int maxAiMoveDelay = 800;
-    
+
     private int scoreWhite = 0;
     private int scoreBlack = 0;
     private boolean whiteTurn = false;
     private boolean playerTurn = false;
     
     private ReversiView view;
-    
+
     private GameMode gameMode = GameMode.PLAYER_VS_PLAYER;
     public enum GameMode {
         PLAYER_VS_PLAYER,
@@ -90,23 +89,23 @@ public class ReversiModel implements Cloneable{
     
     public void gameStart(GameMode mode) {
         resetVariables();        // TODO - old method, check and renew!
-        
+
         setGameMode(mode);
         placeStartingTiles();
         view.startMatch();
-        
+
         // If not online, assign the player to the black tiles
         if (mode != GameMode.ONLINE)
             setPlayerToWhite(false);
         else
             setPlayerTurn(false);
-        
+
         // TODO - turn should always be false at start, but set isPlayerTurn is player can go first
         //  (online=variable, ai=alwaysStart, pvp=?)
     }
     public void gameEnd(boolean won) {
         // TODO - do general game end stuff here, and call onGameWon() or onGameLost()
-        
+
         if (won) onGameWon();
         else     onGameLost();
     }
@@ -124,7 +123,7 @@ public class ReversiModel implements Cloneable{
         else
             gameEnd(false);
     }
-    
+
     /**
      * Resets the game variables.
      */
@@ -154,7 +153,7 @@ public class ReversiModel implements Cloneable{
     private void turnEnd() {
         // Update the view on the end of each turn
         boolean gameFinished = isGameFinished();
-    
+
         switchTurn();
         
         updateView();
@@ -189,28 +188,28 @@ public class ReversiModel implements Cloneable{
      */
     public void clickPositionNew(int x, int y) {
 //        if (isGameFinished()) return;
-        
+
         // Get and check for possible tiles that can be flipped at the clicked position
         ArrayList<Vector2> tilesToFlip = getTilesToFlip(x, y);
         boolean validClick = tilesToFlip.size() > 0;
-        
+
         // Return if the click was not on a valid position
         if (!validClick) return;
-        
+
         // Flip all tiles that need to be flipped
         flipTiles(tilesToFlip);
-        
+
         // Also flip the clicked tile
         ArrayList<Vector2> clickedPosition = new ArrayList<>();
         clickedPosition.add(new Vector2(x, y));
         flipTiles(clickedPosition, false);
         if (isWhiteTurn())  addScoreToWhite();
         else                addScoreToBlack();
-        
+
         // Send the move to the server (only if this command came from our client (it is our turn) )
         if (isPlayerTurn())
             sender.sendMove(convertPositionToIndex(x, y));
-        
+
         turnHandler();
     }
     
@@ -219,34 +218,34 @@ public class ReversiModel implements Cloneable{
      */
     public void placeStartingTiles() {
         view.resetTiles();
-        
+
         ArrayList<Vector2> tilesToFlip = new ArrayList<>();
-        
+
 //        setTurn(false); //TODO for if we want a standard layout for the starting tiles, otherwise remove this.
-        
+
         // Place the first 2 white/black tiles
         tilesToFlip.add(new Vector2(3, 4));
         tilesToFlip.add(new Vector2(4, 3));
         flipTiles(tilesToFlip, false);
-        
+
         // Switch turns so we can place the other color
         switchTurn();
-    
+
         // Place the second 2 black/white tiles
         tilesToFlip.set(0, new Vector2(3, 3));
         tilesToFlip.set(1, new Vector2(4, 4));
         flipTiles(tilesToFlip, false);
-        
+
         // Switch turns again so we end up where we were
         switchTurn();
-        
+
         // Add 2 points to both black and white
         addScoreToBlack(2);
         addScoreToWhite(2);
-        
+
         updateView();
     }
-    
+
     /**
      * Flip all tiles from the list to the color of the current active player. Also add score to the current active
      * player, and remove score from the waiting player.
@@ -263,14 +262,14 @@ public class ReversiModel implements Cloneable{
      */
     private void flipTiles(ArrayList<Vector2> tiles, boolean addScore) {
         if (tiles.size() <= 0) return;
-    
+
         // Flip all tiles in the list
         for (Vector2 tile : tiles) {
             view.updateTileGraphic(isWhiteTurn(), (int)tile.x, (int)tile.y);
-            
+
             // Skip adding score, if we don't need to
             if (!addScore) continue;
-            
+
             // Add score to the correct player, and remove score from the other player
             if (isWhiteTurn()) {
                 addScoreToWhite();
@@ -282,7 +281,7 @@ public class ReversiModel implements Cloneable{
             }
         }
     }
-    
+
     /**
      * Search for tiles that can be flipped from the given point. Returns a list of vectors which contain all tiles
      * that can be flipped.
@@ -294,18 +293,18 @@ public class ReversiModel implements Cloneable{
     private ArrayList<Vector2> getTilesToFlip(int x, int y) {
         // Check if the clicked position is empty
         if (!view.getTileId(x, y).equals(view.getEmptyId())) return new ArrayList<>();
-        
+
         // Check all directions for tiles that can be flipped
         ArrayList<Vector2> tilesUp       = getTilesInDirection(x, y,  0, -1);
         ArrayList<Vector2> tilesDown     = getTilesInDirection(x, y,  0,  1);
         ArrayList<Vector2> tilesLeft     = getTilesInDirection(x, y, -1,  0);
         ArrayList<Vector2> tilesRight    = getTilesInDirection(x, y,  1,  0);
-    
+
         ArrayList<Vector2> tilesUpLeft   = getTilesInDirection(x, y, -1, -1);
         ArrayList<Vector2> tilesUpRight  = getTilesInDirection(x, y,  1, -1);
         ArrayList<Vector2> tilesDownLeft = getTilesInDirection(x, y, -1,  1);
         ArrayList<Vector2> tilesDownRight= getTilesInDirection(x, y,  1,  1);
-        
+
         // Merge all directions to 1 list
         ArrayList<Vector2> r = new ArrayList<>();
         r.addAll(tilesUp);
@@ -316,7 +315,7 @@ public class ReversiModel implements Cloneable{
         r.addAll(tilesUpRight);
         r.addAll(tilesDownLeft);
         r.addAll(tilesDownRight);
-        
+
         return r;       // Return the merged list
     }
     
@@ -334,29 +333,29 @@ public class ReversiModel implements Cloneable{
         String playerId         = view.getPlayerId(whiteTurn);
         boolean valid = false;
         ArrayList<Vector2> tilesInDirection = new ArrayList<>();
-        
+
         int newX = x + xDir;
         int newY = y + yDir;
-        
+
         // Loop while the new position is still a valid position on the board
         int i = 1;
         while (isPositionInBoard(newX, newY)) {
             // Get the ID of the current tile
             String id = view.getTileId(newX, newY);
-            
+
             // tile = opposite                  add to tiles
             if (id.equals(oppositePlayerId))    tilesInDirection.add(new Vector2(newX, newY));
             // tile = player                    valid and stop
             else if (id.equals(playerId))       { valid = true; break; }
             // tile = empty                     stop
             else                                break;
-    
+
             // Set the new position to 1 tile further in the given direction
             i++;
             newX = x + xDir * i;
             newY = y + yDir * i;
         }
-        
+
         // Only return the tiles if the player encloses the other players' tiles
         return valid ? tilesInDirection : new ArrayList<>();
     }
@@ -443,22 +442,20 @@ public class ReversiModel implements Cloneable{
     }
     
     public GameMode getGameMode() { return gameMode; }
-    
-    public Vector2 getFieldSize() { return fieldSize; }
-    
+
     //TODO - not always true, sometimes there are no available moves left to do,
     // but not all tiles are filled, then the game is also finished
     public boolean isGameFinished() { return scoreWhite + scoreBlack == mapSize * mapSize; }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
     
     public void AiMove() {
         // Return if we are not playing against AI

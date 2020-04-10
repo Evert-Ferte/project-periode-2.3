@@ -23,6 +23,8 @@ import java.util.ArrayList;
 // TODO - use static final variables for colors
 public class ReversiView extends Game{
     private static final Vector2 windowSize = new Vector2(680, 860);
+    private static final Vector2 fieldSize = new Vector2(640, 640);
+
     private static final String emptyId = "e";
     private static final String blackId = "b";
     private static final String whiteId = "w";
@@ -277,8 +279,7 @@ public class ReversiView extends Game{
         // Get a few values from the model
         boolean isWhiteTurn = model.isWhiteTurn();
         int mapSize = model.getMapSize();
-        Vector2 fieldSize = model.getFieldSize();
-    
+
         // Set the image size that all tiles/buttons on the board will use
         imgSize = new Vector2(fieldSize.x / (float)mapSize, fieldSize.y / (float)mapSize);
     
@@ -513,7 +514,6 @@ public class ReversiView extends Game{
     public void resetTiles() {
         for (ArrayList<Button> btns : map) {
             for (Button btn : btns) {
-                Vector2 fieldSize = model.getFieldSize();
                 int mapSize = model.getMapSize();
             
                 // Create an image that we will put over the button
