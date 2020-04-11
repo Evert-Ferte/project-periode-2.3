@@ -257,8 +257,9 @@ public class ReversiView extends Game{
     
     private Scene createGameMenu() {
         // Get a few values from the model
-        boolean isWhiteTurn = model.isWhiteTurn();
-        int mapSize = model.getMapSize();
+        ReversiBoard board = model.getBoard();
+        boolean isWhiteTurn = board.isWhiteTurn();
+        int mapSize = board.getMapSize();
 
         // Set the image size that all tiles/buttons on the board will use
         imgSize = new Vector2(fieldSize.x / (float)mapSize, fieldSize.y / (float)mapSize);
@@ -314,7 +315,7 @@ public class ReversiView extends Game{
         vBox.getChildren().add(grid);
     
         // Loop through the board
-        String emptyId = model.getEmptyId();
+        String emptyId = board.getEmptyId();
         for (int y = 0; y < mapSize; y++) {
             viewMap.add(new ArrayList<>());
             for (int x = 0; x < mapSize; x++) {
@@ -411,8 +412,9 @@ public class ReversiView extends Game{
      */
     public void updateScoreLabel() {
         Platform.runLater(() -> {
-            scoreBlackLabel.setText(String.valueOf(model.getScoreBlack()));
-            scoreWhiteLabel.setText(String.valueOf(model.getScoreWhite()));
+            ReversiBoard board = model.getBoard();
+            scoreBlackLabel.setText(String.valueOf(board.getScoreBlack()));
+            scoreWhiteLabel.setText(String.valueOf(board.getScoreWhite()));
         });
     }
     
@@ -429,16 +431,14 @@ public class ReversiView extends Game{
     }
 
     private void updateViewMap() {
-        if(model.getModelMap() == null){System.out.println("Help");}
-        System.out.println(model.getModelMap());
-        ArrayList<ArrayList<String>> modelMap = model.getModelMap();
-        int mapSize = model.getMapSize();
+        ReversiBoard board = model.getBoard();
+        int mapSize = board.getMapSize();
         for (int y=0; y<mapSize; y++) {
             for(int x=0; x<mapSize; x++ ){
-                String id = modelMap.get(y).get(x);
-                if(id.equals(model.getWhiteId())){
+                String id = board.getModelMap().get(y).get(x);
+                if(id.equals(board.getWhiteId())){
                     updateTileGraphic(true, x, y);
-                }else if (id.equals(model.getBlackId())){
+                }else if (id.equals(board.getBlackId())){
                     updateTileGraphic(false, x, y);
                 }
 
@@ -461,7 +461,7 @@ public class ReversiView extends Game{
             
             Button current = viewMap.get(yPos).get(xPos);
             current.setGraphic(img);
-            current.setId(model.getPlayerId(turn));
+            current.setId(model.getBoard().getPlayerId(turn));
         });
     }
 
@@ -471,7 +471,7 @@ public class ReversiView extends Game{
     public void update() {
         updateViewMap();
         updateScoreLabel();
-        updateTurnLabel(model.isWhiteTurn());
+        updateTurnLabel(model.getBoard().isWhiteTurn());
     }
 
     public String getTileId(int x, int y) { return viewMap.get(y).get(x).getId(); }

@@ -43,7 +43,7 @@ public class Handler {
         game.log("opponent("+player+") moved("+move+")");
         
         if (!player.equals(game.getClientName())) {
-            Vector2 pos = game.convertIndexToPosition(Integer.parseInt(move));
+            Vector2 pos = game.getBoard().convertIndexToPosition(Integer.parseInt(move));
             game.clickPosition((int)pos.x, (int)pos.y);
         }
     }

@@ -2,7 +2,7 @@ package games.reversi;
 
 class Ai {
 
-    static void aiRandom(ReversiModel game){
+    static Vector2 aiRandom(ReversiBoard game){
         // TODO - Check if this if statement is needed. AI can be either black or white
 //        if(game.isWhiteTurn()){
 //        }
@@ -11,21 +11,22 @@ class Ai {
         
         if (avPos.length > 0) {
             Vector2 randomPosition = avPos[(int)(Math.random() * avPos.length)];
-            game.clickPosition((int)randomPosition.x, (int)randomPosition.y);
+            return new Vector2(randomPosition.x, randomPosition.y);
         }
         else {
             System.out.println("WARNING! No available positions for AI to choose from!");
         }
+        return null;
     }
 /*
-    static void aiMiniMax(ReversiModel originalGame, String player, int depth) throws CloneNotSupportedException{
+    static void aiMiniMax(ReversiModel game, String player, int depth) throws CloneNotSupportedException{
 //        if(!originalGame.isWhiteTurn()){
 //            return;
 //        }
         
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;
-        for (Vector2 position : originalGame.getAvailablePositions()) {
+        for (Vector2 position : game.getAvailablePositions(game.getModelMap())) {
             ReversiModel cloneGame = (ReversiModel) originalGame.clone();
             System.out.println("cloned");
             cloneGame.clickPosition((int)position.x, (int)position.y);
@@ -91,5 +92,6 @@ class Ai {
             return optimumScore;
         }
     }
+
  */
 }
