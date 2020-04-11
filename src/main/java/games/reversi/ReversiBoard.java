@@ -2,7 +2,7 @@ package games.reversi;
 
 import java.util.ArrayList;
 
-public class ReversiBoard {
+public class ReversiBoard implements Cloneable{
     private static final int mapSize = 8;
 
     private static final String emptyId = "e";
@@ -14,7 +14,7 @@ public class ReversiBoard {
     private boolean whiteTurn = false;
     private boolean playerTurn = false;
 
-    ArrayList<ArrayList<String>> modelMap;
+    private ArrayList<ArrayList<String>> modelMap;
 
     ReversiBoard(){
         generateModelMap();
@@ -28,6 +28,7 @@ public class ReversiBoard {
         setPlayerTurn(true);
     }
 
+
     private void generateModelMap(){
         modelMap = new ArrayList<>();
         for (int y = 0; y < mapSize; y++) {
@@ -36,7 +37,6 @@ public class ReversiBoard {
                 modelMap.get(y).add(emptyId);
             }
         }
-        System.out.println(modelMap);
     }
 
     public Vector2[] getAvailablePositions() {
@@ -259,6 +259,22 @@ public class ReversiBoard {
         setPlayerTurn(!isPlayerTurn());
     }
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    @Override
+    public String toString() {
+        return "ReversiBoard{" +
+                "scoreWhite=" + scoreWhite +
+                ", scoreBlack=" + scoreBlack +
+                ", whiteTurn=" + whiteTurn +
+                ", playerTurn=" + playerTurn +
+                ", modelMap=" + modelMap +
+                '}';
+    }
+
     /**
      * Assigns the player to black or white.
      *
@@ -278,6 +294,9 @@ public class ReversiBoard {
         this.whiteTurn = whiteTurn;
     }
     public void setPlayerTurn(boolean playerTurn) { this.playerTurn = playerTurn; }
+
+    public boolean getWhiteTurn(){return whiteTurn;}
+    public boolean getPlayerTurn(){return playerTurn;}
 
     public String getPlayerId(boolean turn) { return turn ? whiteId : blackId; }
     public String getEmptyId() { return emptyId; }
@@ -318,5 +337,4 @@ public class ReversiBoard {
     public Vector2 convertIndexToPosition(int i) {
         return new Vector2(i % mapSize, (int)Math.floor(i / (float)mapSize));
     }
-
 }

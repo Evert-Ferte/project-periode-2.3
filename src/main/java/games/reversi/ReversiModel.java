@@ -11,7 +11,7 @@ import java.util.*;
 
 public class ReversiModel{
 
-    private static final String ai = "random";
+    private static final String ai = "minimax";
     private static final int minAiMoveDelay = 180;
     private static final int maxAiMoveDelay = 800;
     
@@ -123,9 +123,6 @@ public class ReversiModel{
 
         updateView();
     }
-    
-
-
 //endregion
     
     /**
@@ -145,22 +142,25 @@ public class ReversiModel{
 
         int delay = minAiMoveDelay + new Random().nextInt(maxAiMoveDelay - minAiMoveDelay);
 
-        ReversiModel modelReference = this;
-
         // Call AiMove after a few milliseconds
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override public void run() {
                 Platform.runLater(() -> {
                     log("ai moving");
-                    if (ai.equals("random")) Ai.aiRandom(board);
+                    Vector2 position = null;
+                    if (ai.equals("random")){
+                        position = Ai.aiRandom(board);
+                    }
                     if (ai.equals("minimax")){
                         try {
-                            //Ai.aiMiniMax(modelReference,"White", 10);
+                            position = Ai.aiMiniMax(board, 5);
+                            clickPosition((int)position.x, (int)position.y);
                         }catch (Exception e){
                             log("Ai couldn't clone model: " + e);
                         }
                     }
+                    clickPosition((int)position.x, (int)position.y);
                 });
             }
         }, delay);
@@ -184,8 +184,8 @@ public class ReversiModel{
                 sender.sendMove(board.convertPositionToIndex(x, y));
 
             turnHandler();
-            updateView();
         }
+        updateView();
     }
 
 //region Networking functions
