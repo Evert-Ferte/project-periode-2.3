@@ -153,17 +153,16 @@ public class ReversiModel{
                         position = Ai.aiRandom(board);
                     }
                     if (ai.equals("minimax")){
-                        try {
-                            position = Ai.aiMiniMax(board, 5);
-                            clickPosition((int)position.x, (int)position.y);
-                        }catch (Exception e){
-                            log("Ai couldn't clone model: " + e);
-                        }
+                        position = Ai.aiMiniMax(board, 5, true);
+                        System.out.println("hi: "+ position.toString());
+                        updateView();
+                        clickPosition((int)position.x, (int)position.y);
                     }
                     clickPosition((int)position.x, (int)position.y);
                 });
             }
         }, delay);
+        System.out.println("hi2");
     }
 
 // endregion

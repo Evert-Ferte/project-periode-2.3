@@ -20,6 +20,19 @@ public class ReversiBoard implements Cloneable{
         generateModelMap();
     }
 
+    /**
+     * Deep copy Constructor
+     * @param board
+     */
+    private ReversiBoard(ReversiBoard board){
+        this.scoreBlack = board.getScoreBlack();
+        this.scoreWhite = board.getScoreWhite();
+        this.playerTurn = board.getPlayerTurn();
+        this.whiteTurn = board.getWhiteTurn();
+        this.modelMap = new ArrayList<>(board.getModelMap());
+
+    }
+
     void reset(){
         generateModelMap();
         setScoreWhite(0);
@@ -260,8 +273,8 @@ public class ReversiBoard implements Cloneable{
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    protected ReversiBoard clone() {
+        return new ReversiBoard(this);
     }
 
     @Override
