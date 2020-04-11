@@ -17,7 +17,7 @@ class Ai {
             System.out.println("WARNING! No available positions for AI to choose from!");
         }
     }
-
+/*
     static void aiMiniMax(ReversiModel originalGame, String player, int depth) throws CloneNotSupportedException{
 //        if(!originalGame.isWhiteTurn()){
 //            return;
@@ -91,4 +91,5 @@ class Ai {
             return optimumScore;
         }
     }
+ */
 }

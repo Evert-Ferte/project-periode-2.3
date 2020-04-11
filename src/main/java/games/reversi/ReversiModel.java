@@ -7,12 +7,9 @@ import network.Handler;
 import network.Receiver;
 import network.Sender;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
-public class ReversiModel implements Cloneable{
+public class ReversiModel{
     private static final int mapSize = 8;
 
     private static final String ai = "random";
@@ -22,12 +19,19 @@ public class ReversiModel implements Cloneable{
     // General variables
     private ReversiView view;
 
+    private static final String emptyId = "e";
+    private static final String blackId = "b";
+    private static final String whiteId = "w";
+
     private int scoreWhite = 0;
     private int scoreBlack = 0;
     private boolean whiteTurn = false;
     private boolean playerTurn = false;
 
+    ArrayList<ArrayList<String>> modelMap;
+
     private GameMode gameMode = GameMode.PLAYER_VS_PLAYER;
+
     public enum GameMode {
         PLAYER_VS_PLAYER,
         PLAYER_VS_AI,
@@ -102,6 +106,7 @@ public class ReversiModel implements Cloneable{
      * Resets the game variables.
      */
     public void resetVariables() {
+        generateModelMap();
         setScoreWhite(0);
         setScoreBlack(0);
         setWhiteTurn(false);
@@ -146,7 +151,18 @@ public class ReversiModel implements Cloneable{
      * Updates all UI components.
      */
     private void updateView() { view.update(); }
-    
+
+    private void generateModelMap(){
+        modelMap = new ArrayList<>();
+        for (int y = 0; y < mapSize; y++) {
+            modelMap.add(new ArrayList<>());
+            for (int x = 0; x < mapSize; x++) {
+                modelMap.get(y).add(emptyId);
+            }
+        }
+        System.out.println(modelMap);
+    }
+
 //region Functions for placing and flipping tiles
     
     /**
@@ -188,8 +204,6 @@ public class ReversiModel implements Cloneable{
      * Places the tiles that form the starting setup.
      */
     public void placeStartingTiles() {
-        view.resetTiles();
-
         ArrayList<Vector2> tilesToFlip = new ArrayList<>();
 
 //        setTurn(false); //TODO for if we want a standard layout for the starting tiles, otherwise remove this.
@@ -236,7 +250,7 @@ public class ReversiModel implements Cloneable{
 
         // Flip all tiles in the list
         for (Vector2 tile : tiles) {
-            view.updateTileGraphic(isWhiteTurn(), (int)tile.x, (int)tile.y);
+            modelMap.get((int)tile.y).set((int)tile.x, getPlayerId(isWhiteTurn()));
 
             // Skip adding score, if we don't need to
             if (!addScore) continue;
@@ -263,7 +277,7 @@ public class ReversiModel implements Cloneable{
      */
     private ArrayList<Vector2> getTilesToFlip(int x, int y) {
         // Check if the clicked position is empty
-        if (!view.getTileId(x, y).equals(view.getEmptyId())) return new ArrayList<>();
+        if (!modelMap.get(y).get(x).equals(emptyId)) return new ArrayList<>();
 
         // Check all directions for tiles that can be flipped
         ArrayList<Vector2> tilesUp       = getTilesInDirection(x, y,  0, -1);
@@ -300,8 +314,8 @@ public class ReversiModel implements Cloneable{
      * @return Returns a list of positions.
      */
     private ArrayList<Vector2> getTilesInDirection(int x, int y, int xDir, int yDir) {
-        String oppositePlayerId = view.getPlayerId(!whiteTurn);
-        String playerId         = view.getPlayerId(whiteTurn);
+        String oppositePlayerId = getPlayerId(!whiteTurn);
+        String playerId         = getPlayerId(whiteTurn);
         boolean valid = false;
         ArrayList<Vector2> tilesInDirection = new ArrayList<>();
 
@@ -312,7 +326,7 @@ public class ReversiModel implements Cloneable{
         int i = 1;
         while (isPositionInBoard(newX, newY)) {
             // Get the ID of the current tile
-            String id = view.getTileId(newX, newY);
+            String id = modelMap.get(newY).get(newX);
 
             // tile = opposite                  add to tiles
             if (id.equals(oppositePlayerId))    tilesInDirection.add(new Vector2(newX, newY));
@@ -351,7 +365,7 @@ public class ReversiModel implements Cloneable{
                     if (ai.equals("random")) Ai.aiRandom(modelReference);
                     if (ai.equals("minimax")){
                         try {
-                            Ai.aiMiniMax(modelReference,"White", 10);
+                            //Ai.aiMiniMax(modelReference,"White", 10);
                         }catch (Exception e){
                             log("Ai couldn't clone model: " + e);
                         }
@@ -378,13 +392,12 @@ public class ReversiModel implements Cloneable{
     
     public Vector2[] getAvailablePositions() {
         ArrayList<Vector2> pos = new ArrayList<>();
-        String emptyId = view.getEmptyId();
-        
+
         // Loop through the map/board
         for (int y = 0; y < mapSize; y++) {
             for (int x = 0; x < mapSize; x++) {
                 // Get the current tile id
-                String tileId = view.getTileId(x, y);
+                String tileId = modelMap.get(y).get(x);
                 
                 // If the tile is empty, check if the current player can place a valid tile here
                 if (tileId.equals(emptyId)) {
@@ -521,7 +534,14 @@ public class ReversiModel implements Cloneable{
     private void addScoreToWhite(int amount) { setScoreWhite(getScoreWhite() + amount); }
     private void subtractScoreFromWhite() { subtractScoreFromWhite(1); }
     private void subtractScoreFromWhite(int amount) { setScoreWhite(getScoreWhite() - amount); }
-    
+
+    public ArrayList<ArrayList<String>> getModelMap() {
+        return modelMap;
+    }
+
+    public String getWhiteId(){ return whiteId;}
+    public String getBlackId(){ return blackId;}
+
     //endregion
     
     public boolean isWhiteTurn() { return whiteTurn; }
@@ -536,7 +556,10 @@ public class ReversiModel implements Cloneable{
         setPlayerTurn(!playerIsWhite);
         setWhiteTurn(false);
     }
-    
+
+    public String getPlayerId(boolean turn) { return turn ? whiteId : blackId; }
+    public String getEmptyId() { return emptyId; }
+
     public boolean isPlayerTurn() { return playerTurn; }
     public void setPlayerTurn(boolean playerTurn) { this.playerTurn = playerTurn; }
     
@@ -568,7 +591,7 @@ public class ReversiModel implements Cloneable{
     
     public int getMapSize() { return mapSize; }
     
-    
+
 //endregion
     
     /**
@@ -602,12 +625,4 @@ public class ReversiModel implements Cloneable{
     
         System.out.println(template + message);
     }
-    
-    /**
-     * Create a copy of this class so we can change information without changing the original class.
-     *
-     * @return Returns the copy.
-     * @throws CloneNotSupportedException Thrown to indicate that the object's class does not implement the Cloneable interface.
-     */
-    public Object clone() throws CloneNotSupportedException{ return super.clone(); }
 }

@@ -24,10 +24,6 @@ import java.util.ArrayList;
 public class ReversiView extends Game{
     private static final Vector2 windowSize = new Vector2(680, 860);
     private static final Vector2 fieldSize = new Vector2(640, 640);
-
-    private static final String emptyId = "e";
-    private static final String blackId = "b";
-    private static final String whiteId = "w";
     
     private ReversiModel model;
     
@@ -51,7 +47,7 @@ public class ReversiView extends Game{
     private Image tileWhite = new Image(getClass().getResourceAsStream("/images/reversi/tile_white_0.png"));
     private Image tileBlack = new Image(getClass().getResourceAsStream("/images/reversi/tile_black_0.png"));
     
-    private ArrayList<ArrayList<Button>> map = new ArrayList<>();
+    private ArrayList<ArrayList<Button>> viewMap = new ArrayList<>();
     
     private Label turnLabel;
     private Label scoreWhiteLabel;
@@ -87,8 +83,8 @@ public class ReversiView extends Game{
      */
     @Override
     public void resetGame() {//TODO check if main reset and stuff , and if true reset all
-        map = new ArrayList<>();
         model.resetVariables();
+        update();
     }
     
     public void closeGame() {
@@ -116,15 +112,7 @@ public class ReversiView extends Game{
         this.stage.setResizable(false);
         this.stage.show();
     }
-    
-    /**
-     * General method for updating all view components.
-     */
-    public void update() {
-        updateScoreLabel(model.getScoreWhite(), model.getScoreBlack());
-        updateTurnLabel(model.isWhiteTurn());
-    }
-    
+
     private Scene createMainMenu() {
         // Create the main title for this screen
         Label title = new Label("Reversi");
@@ -326,14 +314,15 @@ public class ReversiView extends Game{
         vBox.getChildren().add(grid);
     
         // Loop through the board
+        String emptyId = model.getEmptyId();
         for (int y = 0; y < mapSize; y++) {
-            map.add(new ArrayList<>());
+            viewMap.add(new ArrayList<>());
             for (int x = 0; x < mapSize; x++) {
                 // Create a new button for this spot on the board
                 Button btn = new Button();
                 btn.setMinSize(fieldSize.x / (float)mapSize, fieldSize.y / (float)mapSize);
-                map.get(y).add(btn);
-                map.get(y).get(x).setId(emptyId);
+                viewMap.get(y).add(btn);
+                viewMap.get(y).get(x).setId(emptyId);
             
                 // Create an image that we will put over the button
                 ImageView img = new ImageView(tileEmpty);
@@ -419,14 +408,11 @@ public class ReversiView extends Game{
     
     /**
      * Update the black and white score labels.
-     *
-     * @param scoreWhite The new score of white that will be shown.
-     * @param scoreBlack The new score of black that will be shown.
      */
-    public void updateScoreLabel(int scoreWhite, int scoreBlack) {
+    public void updateScoreLabel() {
         Platform.runLater(() -> {
-            scoreBlackLabel.setText(String.valueOf(scoreBlack));
-            scoreWhiteLabel.setText(String.valueOf(scoreWhite));
+            scoreBlackLabel.setText(String.valueOf(model.getScoreBlack()));
+            scoreWhiteLabel.setText(String.valueOf(model.getScoreWhite()));
         });
     }
     
@@ -441,7 +427,25 @@ public class ReversiView extends Game{
             turnLabel.setTextFill(Color.web(turn ? "#ffffff" : "000000"));
         });
     }
-    
+
+    private void updateViewMap() {
+        if(model.getModelMap() == null){System.out.println("Help");}
+        System.out.println(model.getModelMap());
+        ArrayList<ArrayList<String>> modelMap = model.getModelMap();
+        int mapSize = model.getMapSize();
+        for (int y=0; y<mapSize; y++) {
+            for(int x=0; x<mapSize; x++ ){
+                String id = modelMap.get(y).get(x);
+                if(id.equals(model.getWhiteId())){
+                    updateTileGraphic(true, x, y);
+                }else if (id.equals(model.getBlackId())){
+                    updateTileGraphic(false, x, y);
+                }
+
+            }
+        }
+    }
+
     /**
      * Update the graphics (image) for a specific tile.
      *
@@ -455,17 +459,22 @@ public class ReversiView extends Game{
             img.setFitWidth(imgSize.x);
             img.setFitHeight(imgSize.y);
             
-            Button current = map.get(yPos).get(xPos);
+            Button current = viewMap.get(yPos).get(xPos);
             current.setGraphic(img);
-            current.setId(turn ? whiteId : blackId);
+            current.setId(model.getPlayerId(turn));
         });
     }
-    
-    public String getTileId(int x, int y) { return map.get(y).get(x).getId(); }
-    public String getPlayerId(boolean turn) { return turn ? whiteId : blackId; }
-    public String getEmptyId() { return emptyId; }
-    
-    
+
+    /**
+     * General method for updating all view components.
+     */
+    public void update() {
+        updateViewMap();
+        updateScoreLabel();
+        updateTurnLabel(model.isWhiteTurn());
+    }
+
+    public String getTileId(int x, int y) { return viewMap.get(y).get(x).getId(); }
     
     public void challengeReceived(String challenger, String nr) {
         for (Node entry : entryHolders.getChildren()) {
@@ -496,25 +505,5 @@ public class ReversiView extends Game{
         Platform.runLater(() -> {
             stage.setScene(gameMenu);
         });
-    }
-    
-    public void resetTiles() {
-        for (ArrayList<Button> btns : map) {
-            for (Button btn : btns) {
-                int mapSize = model.getMapSize();
-            
-                // Create an image that we will put over the button
-                ImageView img = new ImageView(tileEmpty);
-                img.setFitWidth(fieldSize.x / (float)mapSize);
-                img.setFitHeight(fieldSize.y / (float)mapSize);
-                btn.setGraphic(img);
-            
-                btn.setId(emptyId);
-            }
-        }
-    }
-    
-    public Object clone() throws CloneNotSupportedException{
-        return super.clone();
     }
 }
