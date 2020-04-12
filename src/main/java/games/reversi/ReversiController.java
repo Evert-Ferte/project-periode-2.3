@@ -13,7 +13,7 @@ public class ReversiController {
             if (model.getGameMode() == ReversiModel.GameMode.PLAYER_VS_PLAYER)
                 model.clickPosition(x, y);
             // When not playing player vs player, but player vs ai or online, only let the player click on his turn
-            else if (model.isPlayerTurn())
+            else if (model.getBoard().isPlayerTurn())
                 model.clickPosition(x, y);
         };
     }
