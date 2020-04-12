@@ -27,7 +27,7 @@ class Ai {
 
         System.out.println(board.getModelMap());
         for (Vector2 position : board.getAvailablePositions()) {
-           ReversiBoard cloneBoard = new ReversiBoard(board.getModelMap(), board.getScoreWhite(), board.getScoreBlack(), board.getWhiteTurn(), board.getPlayerTurn());
+           ReversiBoard cloneBoard = board.clone();
             cloneBoard.move((int)position.x, (int)position.y);
             cloneBoard.switchTurn();
             int score = miniMax(cloneBoard, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, player);
@@ -45,7 +45,6 @@ class Ai {
     }
 
     private static int miniMax(ReversiBoard board, int depth, int alpha, int beta, boolean isMaximizing) throws CloneNotSupportedException {
-        //System.out.println("-------cloneBoard-------\n"+ board.toString()+ "\n------------------------");
         if(depth == 0 || board.isGameFinished()) {
             int eval;
             if(board.getScoreWhite() - board.getScoreBlack() == 0){
@@ -61,7 +60,7 @@ class Ai {
         if (isMaximizing){
             optimumScore = Integer.MIN_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = new ReversiBoard(board.getModelMap(), board.getScoreWhite(), board.getScoreBlack(), board.getWhiteTurn(), board.getPlayerTurn());
+                ReversiBoard cloneBoard = board.clone();
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
 
@@ -76,7 +75,7 @@ class Ai {
         else{
             optimumScore = Integer.MAX_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = new ReversiBoard(board.getModelMap(), board.getScoreWhite(), board.getScoreBlack(), board.getWhiteTurn(), board.getPlayerTurn());
+                ReversiBoard cloneBoard = board.clone();
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
                 int score = miniMax(cloneBoard, depth-1, alpha, beta,true);

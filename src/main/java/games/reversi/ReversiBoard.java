@@ -2,7 +2,7 @@ package games.reversi;
 
 import java.util.ArrayList;
 
-public class ReversiBoard{
+public class ReversiBoard implements Cloneable{
     private static final int mapSize = 8;
 
     private static final String emptyId = "e";
@@ -19,7 +19,7 @@ public class ReversiBoard{
     ReversiBoard(){
         generateModelMap();
     }
-
+/*
     ReversiBoard(ArrayList<ArrayList<String>> modelMap, int scoreWhite, int scoreBlack, boolean whiteTurn, boolean playerTurn){
         ArrayList<ArrayList<String>> arrayList = new ArrayList<>();
         for (ArrayList<String> stringArrayList: modelMap){
@@ -32,7 +32,7 @@ public class ReversiBoard{
         this.whiteTurn = whiteTurn;
         this.playerTurn = playerTurn;
     }
-
+*/
     void reset(){
         generateModelMap();
         setScoreWhite(0);
@@ -271,19 +271,23 @@ public class ReversiBoard{
         setWhiteTurn(!isWhiteTurn());
         setPlayerTurn(!isPlayerTurn());
     }
-/*
+
     @Override
     protected ReversiBoard clone() throws CloneNotSupportedException {
-        ReversiBoard clone = (ReversiBoard) super.clone();
-        clone.modelMap = new ArrayList<>(this.modelMap);
-        clone.whiteTurn = this.whiteTurn;
-        clone.playerTurn = this.playerTurn;
-        clone.scoreBlack = this.scoreBlack;
-        clone.scoreWhite = this.scoreWhite;
-
-        return clone;
+        ReversiBoard cloneBoard = (ReversiBoard)super.clone();
+        ArrayList<ArrayList<String>> arrayList = new ArrayList<>();
+        for (ArrayList<String> stringArrayList: modelMap){
+            ArrayList<String> newArrayList = new ArrayList<>(stringArrayList);
+            arrayList.add(newArrayList);
+        }
+        cloneBoard.modelMap = arrayList;
+        cloneBoard.scoreWhite = scoreWhite;
+        cloneBoard.scoreBlack = scoreBlack;
+        cloneBoard.whiteTurn = whiteTurn;
+        cloneBoard.playerTurn = playerTurn;
+        return cloneBoard;
     }
-*/
+
     @Override
     public String toString() {
         return "ReversiBoard{" +
