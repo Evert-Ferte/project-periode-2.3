@@ -2,7 +2,7 @@ package games.reversi;
 
 import java.util.ArrayList;
 
-public class ReversiBoard implements Cloneable{
+public class ReversiBoard{
     private static final int mapSize = 8;
 
     private static final String emptyId = "e";
@@ -20,17 +20,17 @@ public class ReversiBoard implements Cloneable{
         generateModelMap();
     }
 
-    /**
-     * Deep copy Constructor
-     * @param board
-     */
-    private ReversiBoard(ReversiBoard board){
-        this.scoreBlack = board.getScoreBlack();
-        this.scoreWhite = board.getScoreWhite();
-        this.playerTurn = board.getPlayerTurn();
-        this.whiteTurn = board.getWhiteTurn();
-        this.modelMap = new ArrayList<>(board.getModelMap());
-
+    ReversiBoard(ArrayList<ArrayList<String>> modelMap, int scoreWhite, int scoreBlack, boolean whiteTurn, boolean playerTurn){
+        ArrayList<ArrayList<String>> arrayList = new ArrayList<>();
+        for (ArrayList<String> stringArrayList: modelMap){
+            ArrayList<String> newArrayList = new ArrayList<>(stringArrayList);
+            arrayList.add(newArrayList);
+        }
+        this.modelMap = arrayList;
+        this.scoreWhite = scoreWhite;
+        this.scoreBlack = scoreBlack;
+        this.whiteTurn = whiteTurn;
+        this.playerTurn = playerTurn;
     }
 
     void reset(){
@@ -271,12 +271,19 @@ public class ReversiBoard implements Cloneable{
         setWhiteTurn(!isWhiteTurn());
         setPlayerTurn(!isPlayerTurn());
     }
-
+/*
     @Override
-    protected ReversiBoard clone() {
-        return new ReversiBoard(this);
-    }
+    protected ReversiBoard clone() throws CloneNotSupportedException {
+        ReversiBoard clone = (ReversiBoard) super.clone();
+        clone.modelMap = new ArrayList<>(this.modelMap);
+        clone.whiteTurn = this.whiteTurn;
+        clone.playerTurn = this.playerTurn;
+        clone.scoreBlack = this.scoreBlack;
+        clone.scoreWhite = this.scoreWhite;
 
+        return clone;
+    }
+*/
     @Override
     public String toString() {
         return "ReversiBoard{" +

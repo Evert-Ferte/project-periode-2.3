@@ -21,15 +21,13 @@ class Ai {
         return null;
     }
 
-    static Vector2 aiMiniMax(ReversiBoard board, int depth, boolean player){
+    static Vector2 aiMiniMax(ReversiBoard board, int depth, boolean player) throws CloneNotSupportedException {
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;
-        ReversiBoard cloneBoard;
+
         System.out.println(board.getModelMap());
         for (Vector2 position : board.getAvailablePositions()) {
-           cloneBoard = board.clone();
-            //System.out.println("Board cloned");
-           // System.out.println(board.toString()+ "\n");
+           ReversiBoard cloneBoard = new ReversiBoard(board.getModelMap(), board.getScoreWhite(), board.getScoreBlack(), board.getWhiteTurn(), board.getPlayerTurn());
             cloneBoard.move((int)position.x, (int)position.y);
             cloneBoard.switchTurn();
             int score = miniMax(cloneBoard, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, player);
@@ -38,8 +36,6 @@ class Ai {
                 bestMove = position;
             }
         }
-        System.out.println(bestMove);
-        System.out.println(board.getModelMap());
         if(bestMove != null) {
             return new Vector2((int) bestMove.x, (int) bestMove.y);
         } else{
@@ -48,7 +44,7 @@ class Ai {
         return aiRandom(board);
     }
 
-    private static int miniMax(ReversiBoard board, int depth, int alpha, int beta, boolean isMaximizing){
+    private static int miniMax(ReversiBoard board, int depth, int alpha, int beta, boolean isMaximizing) throws CloneNotSupportedException {
         //System.out.println("-------cloneBoard-------\n"+ board.toString()+ "\n------------------------");
         if(depth == 0 || board.isGameFinished()) {
             int eval;
@@ -65,10 +61,7 @@ class Ai {
         if (isMaximizing){
             optimumScore = Integer.MIN_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = board.clone();
-                //System.out.println("cloned");
-                //System.out.println(position.toString());
-                cloneBoard.switchTurn();
+                ReversiBoard cloneBoard = new ReversiBoard(board.getModelMap(), board.getScoreWhite(), board.getScoreBlack(), board.getWhiteTurn(), board.getPlayerTurn());
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
 
@@ -79,13 +72,11 @@ class Ai {
                     break;
                 }
             }
-            //System.out.println("maxi: "+ optimumScore);
         }
         else{
             optimumScore = Integer.MAX_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = board.clone();
-                //System.out.println("cloned");
+                ReversiBoard cloneBoard = new ReversiBoard(board.getModelMap(), board.getScoreWhite(), board.getScoreBlack(), board.getWhiteTurn(), board.getPlayerTurn());
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
                 int score = miniMax(cloneBoard, depth-1, alpha, beta,true);
@@ -95,7 +86,6 @@ class Ai {
                     break;
                 }
             }
-            //System.out.println("mini: " + optimumScore);
         }
         return optimumScore;
     }
