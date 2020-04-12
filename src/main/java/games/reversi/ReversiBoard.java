@@ -3,7 +3,7 @@ package games.reversi;
 import java.util.ArrayList;
 
 public class ReversiBoard implements Cloneable{
-    private static final int mapSize = 8;
+    private int mapSize = 8;
 
     private static final String emptyId = "e";
     private static final String blackId = "b";
@@ -16,25 +16,13 @@ public class ReversiBoard implements Cloneable{
 
     private ArrayList<ArrayList<String>> modelMap;
 
-    ReversiBoard(){
-        generateModelMap();
+    ReversiBoard(int mapSize){
+        this.mapSize = mapSize;
+        generateModelMap(mapSize);
     }
-/*
-    ReversiBoard(ArrayList<ArrayList<String>> modelMap, int scoreWhite, int scoreBlack, boolean whiteTurn, boolean playerTurn){
-        ArrayList<ArrayList<String>> arrayList = new ArrayList<>();
-        for (ArrayList<String> stringArrayList: modelMap){
-            ArrayList<String> newArrayList = new ArrayList<>(stringArrayList);
-            arrayList.add(newArrayList);
-        }
-        this.modelMap = arrayList;
-        this.scoreWhite = scoreWhite;
-        this.scoreBlack = scoreBlack;
-        this.whiteTurn = whiteTurn;
-        this.playerTurn = playerTurn;
-    }
-*/
+
     void reset(){
-        generateModelMap();
+        generateModelMap(mapSize);
         setScoreWhite(0);
         setScoreBlack(0);
         setWhiteTurn(false);
@@ -42,7 +30,7 @@ public class ReversiBoard implements Cloneable{
     }
 
 
-    private void generateModelMap(){
+    private void generateModelMap(int mapSize){
         modelMap = new ArrayList<>();
         for (int y = 0; y < mapSize; y++) {
             modelMap.add(new ArrayList<>());

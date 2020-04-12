@@ -9,11 +9,23 @@ import network.Sender;
 import java.io.IOException;
 import java.util.*;
 
-public class ReversiModel implements Cloneable{
+public class ReversiModel{
     private static final int mapSize = 8;
-    private static final Vector2 fieldSize = new Vector2(640, 640);
-    
+
+    //Ai variables
     private static final String ai = "random";
+    private static final int depth = 5;
+    //risk region values
+    private static final int cornerValue = 15;
+    private static final int antiCornerValue = -14;
+    private static final int edgeValue = 10;
+    private static final int antiEdgeValues = -9;
+
+    private static boolean aiPlayer = true; //true=white, false=black
+    private ArrayList<ArrayList<Integer>> riskRegion;
+
+
+
     private static final int minAiMoveDelay = 10;//180;
     private static final int maxAiMoveDelay = 20;//800;
     
@@ -45,7 +57,9 @@ public class ReversiModel implements Cloneable{
      */
     public ReversiModel(ReversiView view) {
         this.view = view;
-        this.board = new ReversiBoard();
+        this.board = new ReversiBoard(mapSize);
+        riskRegion = Ai.generateRiskRegions(mapSize, cornerValue, antiCornerValue, edgeValue , antiEdgeValues); //mapSize, cornerValue, antiCornerValue, edgeValue.
+
     }
     
     /**
@@ -160,7 +174,7 @@ public class ReversiModel implements Cloneable{
                     }
                     if (ai.equals("minimax")){
                         try {
-                            position = Ai.aiMiniMax(board, 5, true);
+                            position = Ai.aiMiniMaxAlphaBetaPruningRiskRegions(board, riskRegion, depth, aiPlayer);
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
                         }
