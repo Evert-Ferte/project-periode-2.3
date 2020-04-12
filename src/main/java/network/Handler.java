@@ -53,12 +53,19 @@ public class Handler {
         
         if (game.getGameMode() != ReversiModel.GameMode.ONLINE) return;
         
+        game.setPlayerTurn(true);
         game.turnStart();
         game.AiMove();
     }
 
-    public void winHandler(String response) { game.gameEnd(true); }
-    public void lossHandler(String response) { game.gameEnd(false); }
+    public void winHandler(String response) {
+        inMatch = false;
+        game.gameEnd(true);
+    }
+    public void lossHandler(String response) {
+        inMatch = false;
+        game.gameEnd(false);
+    }
 
     public void playerlistHandler(String response) {
         response = stringCleaner(response);
@@ -80,8 +87,7 @@ public class Handler {
         
         game.log("challenge received("+challengeNr+"), from "+challenger+"");
         
-        game.acceptChallenge(challengeNr);
-        
+//        game.acceptChallenge(challengeNr);
         game.challengeReceived(challenger, challengeNr);
     }
 

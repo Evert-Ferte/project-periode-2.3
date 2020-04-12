@@ -386,7 +386,7 @@ public class ReversiView extends Game{
             
             // Create the button where you can challenge and accept challenges
             Button actionButton = new Button("Challenge");
-            actionButton.setOnAction(ReversiController.challengePlayer(model, actionButton));
+            actionButton.addEventHandler(ActionEvent.ACTION, ReversiController.challengePlayer(model, actionButton));
             actionButton.setMinSize(100, 40);
             actionButton.setId(player);
         
@@ -477,7 +477,6 @@ public class ReversiView extends Game{
                     if (entryId.equals(challenger)) {
                         model.log(entryId);
                         Button btn = ((Button) n);
-                        model.log(btn.toString());
     
                         Platform.runLater(() -> {
                             btn.setText("Accept");
@@ -516,5 +515,11 @@ public class ReversiView extends Game{
     
     public Object clone() throws CloneNotSupportedException{
         return super.clone();
+    }
+    
+    public void goToMainMenu() {
+        Platform.runLater(() -> {
+            stage.setScene(mainMenu);
+        });
     }
 }

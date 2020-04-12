@@ -17,8 +17,8 @@ public class ReversiModel implements Cloneable{
     private static final Vector2 fieldSize = new Vector2(640, 640);
     
     private static final String ai = "random";
-    private static final int minAiMoveDelay = 180;
-    private static final int maxAiMoveDelay = 800;
+    private static final int minAiMoveDelay = 10;//180;
+    private static final int maxAiMoveDelay = 20;//800;
     
     // General variables
     private ReversiView view;
@@ -40,7 +40,7 @@ public class ReversiModel implements Cloneable{
     private static final int port = 7789;
     private Connection connection;
     
-    private String clientName = "client_0";
+    private String clientName = "client_1";
     private Sender sender;
     private Handler handler;
     
@@ -85,11 +85,13 @@ public class ReversiModel implements Cloneable{
         // TODO - specific game won stuff here
         
         log("game won");
+        view.goToMainMenu();
     }
     private void onGameLost() {
         // TODO - specific game lost stuff here
         
         log("game lost");
+        view.goToMainMenu();
     }
     public void forfeitGame() {
         if (gameMode == GameMode.ONLINE)
@@ -123,6 +125,7 @@ public class ReversiModel implements Cloneable{
     public void turnStart() {
     
     }
+    int counter = 0;
     private void turnEnd() {
         // Update the view on the end of each turn
         boolean gameFinished = isGameFinished();
@@ -177,8 +180,10 @@ public class ReversiModel implements Cloneable{
         else                addScoreToBlack();
         
         // Send the move to the server (only if this command came from our client (it is our turn) )
-        if (isPlayerTurn() && gameMode == GameMode.ONLINE)
+        if (isPlayerTurn() && gameMode == GameMode.ONLINE) {
             sender.sendMove(convertPositionToIndex(x, y));
+            log("sending info to network");
+        }
         
         turnHandler();
     }
@@ -434,25 +439,28 @@ public class ReversiModel implements Cloneable{
     public void challengePlayer(Button btn) {
         if (!connection.isConnected()) return;
         
-        boolean challenged = true;
-        String id = null;
+        log("challenging player: " + btn.getId().trim());
+        sender.challenge(btn.getId(), "Reversi");
         
-        try {
-            int i = Integer.parseInt(btn.getId());
-            id = btn.getId();
-            challenged = false;
-        }
-        catch (NumberFormatException ignored) { }
-        
-        if (challenged) {
-            log("challenging player:");
-            log("player: " + btn.getId());
-            sender.challenge(btn.getId(), "Reversi");
-        }
-        else {
-            log("accept challenge");
-            sender.acceptAChallenge(id);
-        }
+//        boolean challenged = true;
+//        String id = null;
+//
+//        try {
+//            int i = Integer.parseInt(btn.getId());
+//            id = btn.getId();
+//            challenged = false;
+//        }
+//        catch (NumberFormatException ignored) { }
+//
+//        if (challenged) {
+//            log("challenging player:");
+//            log("player: " + btn.getId());
+//            sender.challenge(btn.getId(), "Reversi");
+//        }
+//        else {
+//            log("accept challenge");
+//            sender.acceptAChallenge(id);
+//        }
     }
     
     /**
@@ -461,15 +469,19 @@ public class ReversiModel implements Cloneable{
      */
     public void acceptChallenge(String nr) {
         if (!connection.isConnected()) return;
+        
         log("challenge " + nr + " accepted");
         sender.acceptAChallenge(nr);
-        
-        // TODO - call method start new game
     }
     
     public void challengeReceived(String challenger, String nr) {
+        log("receiving challenge...");
+        
         if (!connection.isConnected()) return;
-        view.challengeReceived(challenger, nr);
+        
+        acceptChallenge(nr);
+        
+//        view.challengeReceived(challenger, nr);
     }
     
     public String[] getPlayerList() {
@@ -490,11 +502,14 @@ public class ReversiModel implements Cloneable{
             if (!p.equals(clientName.trim()))
                 players.add(p);
         }
+    
+        System.out.println("online players: " + players.toString());
         
         return players.toArray(new String[0]);
     }
     
     public void refreshPlayerList() {
+        System.out.println("getting player list");
         if (!connection.isConnected()) return;
         view.refreshPlayerList(getPlayerList());
     }

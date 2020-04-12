@@ -58,11 +58,11 @@ public class FrameworkController {
             tile.game.startGame();
     
             
-//            ReversiView view = new ReversiView("client_1");
-//            view.stage.setOnCloseRequest(e -> {
-//                view.closeGame();
-//            });
-//            view.startGame();
+            ReversiView view = new ReversiView("client_2");
+            view.stage.setOnCloseRequest(e -> {
+                view.closeGame();
+            });
+            view.startGame();
             
             stage.hide();
         };
