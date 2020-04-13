@@ -1,7 +1,6 @@
 package games.reversi;
 
 import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 class Ai {
 
@@ -90,17 +89,17 @@ class Ai {
 
     private static Integer getStaticEvaluation(ReversiBoard board, int depth) {
         if(depth == 0 || board.isGameFinished()) {
-            return null;
+            int eval;
+            if(board.getScoreWhite() - board.getScoreBlack() == 0){
+                eval = 0;
+            }else if(board.getWhiteTurn()){
+                eval = board.getScoreWhite() - board.getScoreBlack();
+            }else{
+                eval = board.getScoreBlack() - board.getScoreWhite();
+            }
+            return eval;
         }
-        int eval;
-        if(board.getScoreWhite() - board.getScoreBlack() == 0){
-            eval = 0;
-        }else if(board.getWhiteTurn()){
-            eval = board.getScoreWhite() - board.getScoreBlack();
-        }else{
-            eval = board.getScoreBlack() - board.getScoreWhite();
-        }
-        return eval;
+        return null;
     }
     static ArrayList<ArrayList<Integer>> generateRiskRegions(int size, int cornerValue, int antiCornerValue, int edgeValue, int antiEdgeValue){
         int mapSize = size-1;
@@ -199,7 +198,6 @@ class Ai {
         }
         return optimumScore;
     }
-
 
     private static int miniMaxAlphaBetaPruningRiskRegions(ReversiBoard board, ArrayList<ArrayList<Integer>> riskRegions, int depth, int alpha, int beta, boolean isMaximizing) throws CloneNotSupportedException {
         Integer eval = getStaticEvaluation(board, depth);
