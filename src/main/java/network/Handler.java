@@ -55,14 +55,18 @@ public class Handler {
     /**
      * Handler for the help command
      *
-     * @param response raw response from the server
      * @return a string indicating where to get help
      */
-    public String helpHandler (String response) {
+    public String helpHandler () {
         return "For help information checkout Protocol.txt on Blackboard";
     }
 
-    public String gameMatchHandler(String response) {
+    /**
+     * if a new game has started
+     *
+     * @return String that indicated that a new game has started
+     */
+    public String gameMatchHandler() {
         inMatch = true;
         
         game.log("starting...");
@@ -71,6 +75,12 @@ public class Handler {
         return "newGame";
     }
 
+    /**
+     * The move comes from the server in a specific form, here is where the
+     * form is made understandable for the Reversi game
+     *
+     * @param response from the server containing the move details
+     */
     public void gameMoveHandler(String response) {
         HashMap<String, String> map = responseToMap(response);
         String player = map.get("PLAYER");
@@ -83,7 +93,10 @@ public class Handler {
         }
     }
 
-    public void turnHandler(String response) {
+    /**
+     * When it is the client's turn to make a move
+     */
+    public void turnHandler() {
         game.log("your turn...");
         
         if (game.getGameMode() != ReversiModel.GameMode.ONLINE) return;
@@ -93,15 +106,28 @@ public class Handler {
         game.AiMove();
     }
 
-    public void winHandler(String response) {
+    /**
+     * The server message indicating the client has won the match.
+     */
+    public void winHandler() {
         inMatch = false;
         game.gameEnd(true);
     }
-    public void lossHandler(String response) {
+
+    /**
+     * for when the client has lost a game
+     */
+    public void lossHandler() {
         inMatch = false;
         game.gameEnd(false);
     }
 
+    /**
+     * coverts a server response in the form of a string to an array that could be used
+     * to chose a player to challenge for example
+     *
+     * @param response An array containing the players list
+     */
     public void playerlistHandler(String response) {
         response = stringCleaner(response);
         String[] responseArray = toArray(response);
@@ -110,6 +136,7 @@ public class Handler {
     
     /**
      * When receiving a challenge, this handler is called.
+     *
      * @param response the response message.
      */
     public void gameChallengeHandler(String response) {
@@ -126,19 +153,39 @@ public class Handler {
         game.challengeReceived(challenger, challengeNr);
     }
 
-    public void gameDrawHandler(String response) { }
+    public void gameDrawHandler(String response) { //  implement draw condition
+         }
 
+    /**
+     * clean the server response in order for it to be easly split into an array
+     *
+     * @param dirty A string response from the server
+     * @return A string without all the server extras
+     */
     private String stringCleaner(String dirty) {
         dirty = dirty.substring(dirty.indexOf("[") + 1,dirty.indexOf("]"));
         dirty = dirty.replace("\"","");
 //        dirty = dirty.replace(",","");
         return dirty;
     }
+
+    /**
+     *Converting a string to array by splitting on commas
+     *
+     * @param string with  plain player names separated with commas
+     * @return an array containing the names of player
+     */
     public String[] toArray (String string) {
         String[] anArray = string.split(",");
         return anArray;
     }
 
+    /**
+     *Converting the server response onto a Hashmap.
+     *
+     * @param response A string containing the raw server response
+     * @return a Hashmap with the response details sorted out
+     */
     private HashMap<String, String> responseToMap(String response) {
         String server_msg = response.substring(response.indexOf('{') + 1, response.indexOf('}'));
         HashMap<String, String> map = new HashMap<String, String>();

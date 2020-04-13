@@ -11,16 +11,18 @@ import java.util.*;
 
 public class ReversiModel{
     private static final int mapSize = 8;
-
-    // Ai variables
-    private static final int depth = 5;
-    private static String ai = "minimax"; //  random, minimax, minimaxRiskRegion
     
-    // Risk region values
-    private static final int cornerValue = 15;
-    private static final int antiCornerValue = -14;
-    private static final int edgeValue = 10;
-    private static final int antiEdgeValues = -9;
+    //Ai variables
+    private static final int depth = 5;
+    private String ai = "minimax"; //  "random", "minimaxAlphaBeta", "minimaxRiskRegion"
+
+    //risk region values
+    private static final int cornerValue = 100;
+    private static final int antiCornerValue = -50;
+    private static final int antiCornerEdgeValue = -20;
+    private static final int edgeValue = 5;
+    private static final int edgeCornerValue = 10;
+    private static final int antiEdgeValues = -2;
 
     private static boolean aiPlayer = true;     //true=white, false=black
     private ArrayList<ArrayList<Integer>> riskRegion;
@@ -58,7 +60,7 @@ public class ReversiModel{
     public ReversiModel(ReversiView view) {
         this.view = view;
         this.board = new ReversiBoard(mapSize);
-        riskRegion = Ai.generateRiskRegions(mapSize, cornerValue, antiCornerValue, edgeValue , antiEdgeValues); //mapSize, cornerValue, antiCornerValue, edgeValue.
+        riskRegion = Ai.generateRiskRegions(mapSize, cornerValue, antiCornerValue, antiCornerEdgeValue, edgeValue, edgeCornerValue, antiEdgeValues);
     }
     
     /**

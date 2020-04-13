@@ -5,7 +5,6 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -14,7 +13,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.ArrayList;
@@ -45,9 +43,6 @@ public class ReversiView extends Game{
     private Image tileEmpty = new Image(getClass().getResourceAsStream("/images/reversi/tile_empty_2.png"));
     private Image tileWhite = new Image(getClass().getResourceAsStream("/images/reversi/tile_white_2.png"));
     private Image tileBlack = new Image(getClass().getResourceAsStream("/images/reversi/tile_black_2.png"));
-    
-    private Image buttonNormal = new Image(getClass().getResourceAsStream("/images/reversi/button_normal.png"));
-    private Image buttonPressed = new Image(getClass().getResourceAsStream("/images/reversi/button_pressed.png"));
     
     private ArrayList<ArrayList<Button>> viewMap = new ArrayList<>();
     

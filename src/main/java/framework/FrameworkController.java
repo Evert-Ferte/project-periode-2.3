@@ -57,7 +57,7 @@ public class FrameworkController {
             });
             tile.game.startGame();
             
-            int extraTestClients = 0;
+            int extraTestClients = 1;
             for (int i = 0; i < extraTestClients; i++) {
                 ReversiView view = new ReversiView("extra_test_client_" + (i + 1));
                 view.stage.setOnCloseRequest(e -> {
