@@ -15,6 +15,7 @@ public class ReversiModel{
     //Ai variables
     private static final String ai = "minimaxRiskRegion"; //  random, minimaxAlphaBeta, minimaxRiskRegion
     private static final int depth = 5;
+    
     //risk region values
     private static final int cornerValue = 15;
     private static final int antiCornerValue = -14;
@@ -23,9 +24,7 @@ public class ReversiModel{
 
     private static boolean aiPlayer = true; //true=white, false=black
     private ArrayList<ArrayList<Integer>> riskRegion;
-
-
-
+    
     private static final int minAiMoveDelay = 10;//180;
     private static final int maxAiMoveDelay = 20;//800;
     
@@ -310,14 +309,11 @@ public class ReversiModel{
             if (!p.equals(clientName.trim()))
                 players.add(p);
         }
-    
-        System.out.println("online players: " + players.toString());
         
         return players.toArray(new String[0]);
     }
     
     public void refreshPlayerList() {
-        System.out.println("getting player list");
         if (!connection.isConnected()) return;
         view.refreshPlayerList(getPlayerList());
     }
