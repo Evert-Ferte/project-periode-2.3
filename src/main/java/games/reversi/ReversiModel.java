@@ -12,21 +12,21 @@ import java.util.*;
 public class ReversiModel{
     private static final int mapSize = 8;
 
-    //Ai variables
-    private static final String ai = "minimaxRiskRegion"; //  random, minimaxAlphaBeta, minimaxRiskRegion
+    // Ai variables
     private static final int depth = 5;
+    private static String ai = "minimax"; //  random, minimax, minimaxRiskRegion
     
-    //risk region values
+    // Risk region values
     private static final int cornerValue = 15;
     private static final int antiCornerValue = -14;
     private static final int edgeValue = 10;
     private static final int antiEdgeValues = -9;
 
-    private static boolean aiPlayer = true; //true=white, false=black
+    private static boolean aiPlayer = true;     //true=white, false=black
     private ArrayList<ArrayList<Integer>> riskRegion;
     
-    private static final int minAiMoveDelay = 10;//180;
-    private static final int maxAiMoveDelay = 20;//800;
+    private static final int minAiMoveDelay = 10;
+    private static final int maxAiMoveDelay = 20;
     
     // General variables
     private ReversiView view;
@@ -41,11 +41,12 @@ public class ReversiModel{
     }
     
     // Networking variables
-    private static final String ip = /*"145.33.225.170";*/ "localhost"; //"mathijswesterhof.nl";
-    private static final int port = 7789;
+    private String ip = /*"145.33.225.170";*/ "localhost";
+    private int port = 7789;
+    private int timeout = 10;
     private Connection connection;
     
-    private String clientName = "client_1";
+    private String clientName = "D5";
     private Sender sender;
     private Handler handler;
     
@@ -170,7 +171,7 @@ public class ReversiModel{
                     if (ai.equals("random")){
                         position = Ai.aiRandom(board);
                     }
-                    if (ai.equals("minimaxAlphaBeta")){
+                    if (ai.equals("minimax")){
                         try {
                             position = Ai.aiMiniMaxAlphaBetaPruning(board, depth, aiPlayer);
                         } catch (CloneNotSupportedException e) {
@@ -219,8 +220,14 @@ public class ReversiModel{
      * Tries to create a connection with the game server.
      */
     private void createConnection() {
+        // Close the previous connection (if there is one)
+        if (connection != null)
+            connection.terminate();
+        
+        // Create a new connection
         connection = new Connection(ip, port);
-
+        
+        // Create a sender, receiver and handler if a connection was made
         if (connection.isConnected()) {
             handler = new Handler(this);
             
@@ -332,6 +339,35 @@ public class ReversiModel{
     public GameMode getGameMode() { return gameMode; }
 
     public ReversiBoard getBoard(){return board;}
+    
+    public void setAi(String aiType) {
+        aiType = aiType.toLowerCase();
+        switch (aiType) {
+            case "minimaxRiskRegion":
+            case "random":
+                ai = aiType;
+                break;
+            default:
+                ai = "minimax";
+        }
+    }
+    public String getAi() { return ai; }
+    
+    public void setIp(String ip) {
+        this.ip = ip;
+        createConnection();
+    }
+    public String getIp() { return ip; }
+    
+    public void setPort(int port) {
+        this.port = port;
+        createConnection();
+    }
+    public int getPort() { return port; }
+    
+    public void setTimeout(int timeout) { this.timeout = timeout; }
+    public int getTimeout() { return timeout; }
+    
 //endregion
     
     /**
