@@ -2,8 +2,8 @@ package games.reversi;
 
 import java.util.ArrayList;
 
-public class ReversiBoard{
-    private static final int mapSize = 8;
+public class ReversiBoard implements Cloneable{
+    private int mapSize = 8;
 
     private static final String emptyId = "e";
     private static final String blackId = "b";
@@ -16,25 +16,13 @@ public class ReversiBoard{
 
     private ArrayList<ArrayList<String>> modelMap;
 
-    ReversiBoard(){
-        generateModelMap();
-    }
-
-    ReversiBoard(ArrayList<ArrayList<String>> modelMap, int scoreWhite, int scoreBlack, boolean whiteTurn, boolean playerTurn){
-        ArrayList<ArrayList<String>> arrayList = new ArrayList<>();
-        for (ArrayList<String> stringArrayList: modelMap){
-            ArrayList<String> newArrayList = new ArrayList<>(stringArrayList);
-            arrayList.add(newArrayList);
-        }
-        this.modelMap = arrayList;
-        this.scoreWhite = scoreWhite;
-        this.scoreBlack = scoreBlack;
-        this.whiteTurn = whiteTurn;
-        this.playerTurn = playerTurn;
+    ReversiBoard(int mapSize){
+        this.mapSize = mapSize;
+        generateModelMap(mapSize);
     }
 
     void reset(){
-        generateModelMap();
+        generateModelMap(mapSize);
         setScoreWhite(0);
         setScoreBlack(0);
         setWhiteTurn(false);
@@ -42,7 +30,7 @@ public class ReversiBoard{
     }
 
 
-    private void generateModelMap(){
+    private void generateModelMap(int mapSize){
         modelMap = new ArrayList<>();
         for (int y = 0; y < mapSize; y++) {
             modelMap.add(new ArrayList<>());
@@ -271,19 +259,23 @@ public class ReversiBoard{
         setWhiteTurn(!isWhiteTurn());
         setPlayerTurn(!isPlayerTurn());
     }
-/*
+
     @Override
     protected ReversiBoard clone() throws CloneNotSupportedException {
-        ReversiBoard clone = (ReversiBoard) super.clone();
-        clone.modelMap = new ArrayList<>(this.modelMap);
-        clone.whiteTurn = this.whiteTurn;
-        clone.playerTurn = this.playerTurn;
-        clone.scoreBlack = this.scoreBlack;
-        clone.scoreWhite = this.scoreWhite;
-
-        return clone;
+        ReversiBoard cloneBoard = (ReversiBoard)super.clone();
+        ArrayList<ArrayList<String>> arrayList = new ArrayList<>();
+        for (ArrayList<String> stringArrayList: modelMap){
+            ArrayList<String> newArrayList = new ArrayList<>(stringArrayList);
+            arrayList.add(newArrayList);
+        }
+        cloneBoard.modelMap = arrayList;
+        cloneBoard.scoreWhite = scoreWhite;
+        cloneBoard.scoreBlack = scoreBlack;
+        cloneBoard.whiteTurn = whiteTurn;
+        cloneBoard.playerTurn = playerTurn;
+        return cloneBoard;
     }
-*/
+
     @Override
     public String toString() {
         return "ReversiBoard{" +
