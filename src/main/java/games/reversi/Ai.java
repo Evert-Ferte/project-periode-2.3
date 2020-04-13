@@ -39,7 +39,7 @@ class Ai {
         if(bestMove != null) {
             return new Vector2((int) bestMove.x, (int) bestMove.y);
         } else{
-            System.out.println("WARING! No position found with minimax!");
+            System.out.println("WARNING! No position found with minimax!");
         }
         return aiRandom(board);
     }
@@ -60,7 +60,7 @@ class Ai {
         if(bestMove != null) {
             return new Vector2((int) bestMove.x, (int) bestMove.y);
         } else{
-            System.out.println("WARING! No position found with minimax!");
+            System.out.println("WARNING! No position found with minimax!");
         }
         return aiRandom(board);
     }
@@ -83,7 +83,7 @@ class Ai {
         if(bestMove != null) {
             return new Vector2((int) bestMove.x, (int) bestMove.y);
         } else{
-            System.out.println("WARING! No position found with minimax!");
+            System.out.println("WARNING! No position found with minimax!");
         }
         return aiRandom(board);
     }

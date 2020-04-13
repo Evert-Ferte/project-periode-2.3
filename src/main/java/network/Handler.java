@@ -69,7 +69,6 @@ public class Handler {
     public String gameMatchHandler() {
         inMatch = true;
         
-        game.log("starting...");
         game.gameStart(ReversiModel.GameMode.ONLINE);
         
         return "newGame";
@@ -85,7 +84,8 @@ public class Handler {
         HashMap<String, String> map = responseToMap(response);
         String player = map.get("PLAYER");
         String move = map.get("MOVE");
-        game.log("opponent("+player+") moved("+move+")");
+        
+        game.log("Opponent("+player+") moved("+move+")");
         
         if (!player.equals(game.getClientName())) {
             Vector2 pos = game.getBoard().convertIndexToPosition(Integer.parseInt(move));
@@ -97,9 +97,9 @@ public class Handler {
      * When it is the client's turn to make a move
      */
     public void turnHandler() {
-        game.log("your turn...");
-        
         if (game.getGameMode() != ReversiModel.GameMode.ONLINE) return;
+        
+//        game.log("your turn...");
         
         game.getBoard().setPlayerTurn(true);
         game.turnStart();
@@ -146,8 +146,6 @@ public class Handler {
         
         String challenger = result.get("CHALLENGER");
         String challengeNr = result.get("CHALLENGENUMBER");
-        
-        game.log("challenge received("+challengeNr+"), from "+challenger+"");
         
 //        game.acceptChallenge(challengeNr);
         game.challengeReceived(challenger, challengeNr);

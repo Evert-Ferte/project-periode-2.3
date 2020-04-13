@@ -71,7 +71,7 @@ public class ReversiModel{
     }
     
     public void gameStart(GameMode mode) {
-        log("restart");
+//        log("restart");
         resetVariables();
 
         setGameMode(mode);
@@ -84,6 +84,8 @@ public class ReversiModel{
         else
             board.setPlayerTurn(false);
         updateView();
+    
+        log("Starting new game");
     }
     public void gameEnd(boolean won) {
         // TODO - do general game end stuff here, and call onGameWon() or onGameLost()
@@ -130,17 +132,18 @@ public class ReversiModel{
             if (!board.isPlayerTurn())
                 AiMove();
         
-        log("next turn");
-        log("isPlayerTurn: " + board.isPlayerTurn());
+//        log("next turn -> isPlayerTurn: " + board.isPlayerTurn());
+//        log(getClientName() + " is " + (getBoard().isPlayerWhite() ? "white" : "black"));
     }
     public void turnStart() {
-    
+        log("Turn started");
     }
     int counter = 0;
     private void turnEnd() {
         // Update the view on the end of each turn
         boolean gameFinished = board.isGameFinished();
 
+        log("Turn ended, switching turn...");
         board.switchTurn();
 
         updateView();
@@ -168,7 +171,7 @@ public class ReversiModel{
         timer.schedule(new TimerTask() {
             @Override public void run() {
                 Platform.runLater(() -> {
-                    log("ai moving");
+                    log("AI planning a move...");
                     Vector2 position = null;
                     if (ai.equals("random")) {
                         position = Ai.aiRandom(board);
@@ -187,7 +190,9 @@ public class ReversiModel{
                             e.printStackTrace();
                         }
                     }
+                    
                     if(position != null) clickPosition((int)position.x, (int)position.y);
+//                    else log("position null on line 193 in ReversiModel.java");
                     updateView();
                 });
             }
@@ -205,13 +210,21 @@ public class ReversiModel{
      */
 
     public void clickPosition(int x, int y) {
-        if (board.isGameFinished()) return;
-        if(board.move(x,y)){
+        if (board.isGameFinished()) {
+            log("Game finished, no more available spots");
+            return;
+        }
+        if(board.move(x,y)) {
             // Send the move to the server (only if this command came from our client (it is our turn) )
             if (board.isPlayerTurn() && gameMode == GameMode.ONLINE)
                 sender.sendMove(board.convertPositionToIndex(x, y));
 
+            log("Successfully placed tile on ("+x+", "+y+")");
+            
             turnHandler();
+        }
+        else {
+            log("("+x+", "+y+") NOT A VALID POSITION!");
         }
         updateView();
     }
@@ -255,7 +268,7 @@ public class ReversiModel{
     public void challengePlayer(Button btn) {
         if (!connection.isConnected()) return;
         
-        log("challenging player: " + btn.getId().trim());
+        log("Challenging player: " + btn.getId().trim());
         sender.challenge(btn.getId(), "Reversi");
         
 //        boolean challenged = true;
@@ -286,17 +299,16 @@ public class ReversiModel{
     public void acceptChallenge(String nr) {
         if (!connection.isConnected()) return;
         
-        log("challenge " + nr + " accepted");
         sender.acceptAChallenge(nr);
+        log("Challenge " + nr + " accepted");
     }
     
     public void challengeReceived(String challenger, String nr) {
-        log("receiving challenge...");
+        log("Challenge received(" + nr + "), from " + challenger);
         
         if (!connection.isConnected()) return;
         
         acceptChallenge(nr);
-        
 //        view.challengeReceived(challenger, nr);
     }
     

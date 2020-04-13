@@ -110,7 +110,7 @@ public class ReversiView extends Game{
         
         multiplayerMenu.getStylesheets().add("scrollPane.css");
         this.stage.setScene(mainMenu);
-        this.stage.setTitle("Reversi");
+        this.stage.setTitle("Reversi - " + model.getClientName());
         this.stage.setResizable(false);
         this.stage.show();
     }
