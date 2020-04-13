@@ -39,11 +39,11 @@ public class ReversiModel{
     }
     
     // Networking variables
-    private static final String ip = /*"145.33.225.170";*/ "localhost";
+    private static final String ip = /*"145.33.225.170";*/ "145.33.225.170";
     private static final int port = 7789;
     private Connection connection;
     
-    private String clientName = "client_1";
+    private String clientName = "John_2.0";
     private Sender sender;
     private Handler handler;
     

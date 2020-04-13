@@ -30,11 +30,11 @@ public class Receiver extends Thread  {
 
             response = receiver.readLine();
             if (response.startsWith("ERR")) {handler.errHandler (response);}
-            else if (response.startsWith("SVR HELP")) {handler.helpHandler (response);}
-            else if (response.startsWith("SVR GAME MATCH")) {handler.gameMatchHandler(response);}
-            else if (response.startsWith("SVR GAME YOURTURN")) {handler.turnHandler(response);}
-            else if (response.startsWith("SVR GAME WIN")) {handler.winHandler(response);}
-            else if (response.startsWith("SVR GAME LOSS")) {handler.lossHandler(response);}
+            else if (response.startsWith("SVR HELP")) {handler.helpHandler ();}
+            else if (response.startsWith("SVR GAME MATCH")) {handler.gameMatchHandler();}
+            else if (response.startsWith("SVR GAME YOURTURN")) {handler.turnHandler();}
+            else if (response.startsWith("SVR GAME WIN")) {handler.winHandler();}
+            else if (response.startsWith("SVR GAME LOSS")) {handler.lossHandler();}
             else if (response.startsWith("SVR PLAYERLIST")) {handler.playerlistHandler(response);}
             else if (response.startsWith("SVR GAME CHALLENGE")) {handler.gameChallengeHandler(response);}
             else if (response.startsWith("SVR GAME DRAW")) {handler.gameDrawHandler(response);}
