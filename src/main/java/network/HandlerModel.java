@@ -12,7 +12,7 @@ import java.util.Map;
  * @author Zein Bseis
  * @version 3.0
  */
-public class Handler {
+public class HandlerModel {
     /**
      * An array of player names.
      */
@@ -38,7 +38,7 @@ public class Handler {
      *
      * @param game
      */
-    public Handler(ReversiModel game) {
+    public HandlerModel(ReversiModel game) {
         this.game = game;
     }
 
