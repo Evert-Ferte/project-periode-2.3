@@ -7,8 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,6 +20,7 @@ import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Stack;
 
 public class Main extends Game {
@@ -41,8 +41,9 @@ public class Main extends Game {
     private Image oBox = new Image(getClass().getResourceAsStream("/images/tictactoe/o_tile.png"));
     private Image xBox = new Image(getClass().getResourceAsStream("/images/tictactoe/x_tile.png"));
 
-    private  boolean isTurn = false; //if false -> X's turn, if true -> O's turn
+    private boolean isTurn = false; //if false -> X's turn, if true -> O's turn
     private Label labelTurn;
+    private boolean hasPopup = false;
 
     /**
      * Start the game.
@@ -128,7 +129,7 @@ public class Main extends Game {
         float extraHeight = (float)(gameLayout.getPadding().getTop() + gameLayout.getPadding().getBottom());
 
         //Turn label
-        labelTurn = new Label(isTurn ? "O" : "X" + "'s turn");
+        labelTurn = new Label((isTurn ? "O" : "X") + "'s turn");
         labelTurn.setFont(new Font(30));
 
         //Score labels
@@ -190,16 +191,57 @@ public class Main extends Game {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         spacer.setMinSize(10, 1);
 
+        Alert settingsAlert = new Alert(Alert.AlertType.NONE);
+        settingsAlert.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        settingsAlert.setAlertType(Alert.AlertType.WARNING);settingsAlert.setContentText("If you continue the board will be cleared. This doesn't affect the score");
+
+
         StackPane backButtonStack = new StackPane();
         Button backButton = new Button("Done");
         backButton.setStyle("-fx-background-color: transparent;" + "-fx-font-weight: bold;" + "-fx-font-size: 20;" + "-fx-padding: 0;");
-//        backButton.getOnMouseDragOver(backButton.setStyle("-fx-cursor: hand;"));
-        backButton.setOnAction(e -> window.setScene(gameScene));
+
+        backButton.setOnAction(e -> {
+            Optional<ButtonType> result = settingsAlert.showAndWait();
+            if (result.get() == ButtonType.OK){
+                window.setScene(gameScene);
+                resetBoard();
+                labelTurn.setText((isTurn ? "O" : "X") + "'s turn");
+            }
+        });
+
         backButtonStack.setAlignment(Pos.CENTER_RIGHT);
         backButtonStack.getChildren().add(backButton);
         settingsBar.getChildren().addAll(settingsLabel, spacer, backButtonStack);
 
-        settingsLayout.getChildren().addAll(settingsBar);
+
+        HBox selectPlayer = new HBox();
+        selectPlayer.setPadding(new Insets(10));
+        selectPlayer.setSpacing(5);
+        selectPlayer.setAlignment(Pos.CENTER);
+        ToggleGroup togglePlayer = new ToggleGroup();
+        Label togglePlayerLabel = new Label("Choose your player:");
+        togglePlayerLabel.setFont(new Font(20));
+
+        ToggleButton togglePlayerX = new ToggleButton("X");
+        ToggleButton togglePlayerO = new ToggleButton("O");
+
+        if (isTurn){
+            togglePlayerO.setSelected(true);
+        } else {
+            togglePlayerX.setSelected(true);
+        }
+
+        togglePlayerX.setOnAction(e -> isTurn = false);
+        togglePlayerO.setOnAction(e -> isTurn = true);
+
+        togglePlayerO.setToggleGroup(togglePlayer);
+        togglePlayerX.setToggleGroup(togglePlayer);
+
+        selectPlayer.getChildren().addAll(togglePlayerLabel, togglePlayerX, togglePlayerO);
+
+
+
+        settingsLayout.getChildren().addAll(settingsBar, selectPlayer);
 
         settingsScene = new Scene(settingsLayout, 600, 600);
         // End of settingsScene
@@ -255,30 +297,33 @@ public class Main extends Game {
     private void onTileClick(int xPos, int yPos){
         Button current = board.get(yPos).get(xPos);
         String currentId = current.getId();
-
-        if (!currentId.equals(emptyId)) {
-            return;
-        }else {
-            ImageView img = new ImageView(isTurn ? oBox : xBox);
-            img.setFitWidth(150);
-            img.setFitHeight(150);
-            current.setGraphic(img);
-            current.setId(isTurn ? oId : xId);
-        }
-        if(isGameOver()){
-            if(checkWinner(xId)){
-                hasWon(xId);
-                xScoreLabel.setText(""+(Integer.valueOf(xScoreLabel.getText())+1));
-            }else if(checkWinner(oId)){
-                hasWon(oId);
-                oScoreLabel.setText(""+(Integer.valueOf(oScoreLabel.getText())+1));
-            } else {
-                hasWon("draw");
+        if (!hasPopup){
+            if (!currentId.equals(emptyId)) {
+                return;
+            }else {
+                ImageView img = new ImageView(isTurn ? oBox : xBox);
+                img.setFitWidth(150);
+                img.setFitHeight(150);
+                current.setGraphic(img);
+                current.setId(isTurn ? oId : xId);
             }
+            if(isGameOver()){
+                if(checkWinner(xId)){
+                    hasWon(xId);
+                    xScoreLabel.setText(""+(Integer.valueOf(xScoreLabel.getText())+1));
+                }else if(checkWinner(oId)){
+                    hasWon(oId);
+                    oScoreLabel.setText(""+(Integer.valueOf(oScoreLabel.getText())+1));
+                } else {
+                    hasWon("draw");
+                }
 
-            return;
+                hasPopup = true;
+                return;
+            }
+            swapTurn();
         }
-        swapTurn();
+
     }
 
     private void hasWon(String player){
@@ -300,7 +345,7 @@ public class Main extends Game {
         popupBox.setAlignment(Pos.CENTER);
 
         Button okButton = new Button("Play again!");
-        okButton.setOnAction(e -> {resetBoard(); popup.hide();});
+        okButton.setOnAction(e -> {resetBoard(); popup.hide();hasPopup = false;});
         okButton.setMinWidth(200);
         okButton.setMinHeight(50);
 
@@ -310,6 +355,7 @@ public class Main extends Game {
         if (player.equals(oId)) {
             if (Integer.valueOf(oScoreLabel.getText()) == 4) {
                 fooHasWon.setText("O has won the game and reached 5 points!");
+                okButton.setText("Start new game");
                 xScoreLabel.setText("0");
                 oScoreLabel.setText("-1");
             } else {
@@ -318,6 +364,7 @@ public class Main extends Game {
         } else if(player.equals(xId)) {
             if (Integer.valueOf(xScoreLabel.getText()) == 4) {
                 fooHasWon.setText("X has won the game and reached 5 points!");
+                okButton.setText("Start new game");
                 xScoreLabel.setText("-1");
                 oScoreLabel.setText("0");
             } else {
