@@ -2,10 +2,11 @@ package games.reversi;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
-import network.Connection;
-import network.Handler;
-import network.Receiver;
-import network.Sender;
+import network.ConnectionModel;
+import network.HandlerModel;
+import network.ReceiverModel;
+import network.SenderModel;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -45,11 +46,11 @@ public class ReversiModel{
     // Networking variables
     private static final String ip = "localhost";//"145.33.225.170";//  //"mathijswesterhof.nl";
     private static final int port = 7789;
-    private Connection connection;
+    private ConnectionModel connection;
     
     private String clientName = "The Paper (d5)";
-    private Sender sender;
-    private Handler handler;
+    private SenderModel sender;
+    private HandlerModel handler;
     
     /**
      * The constructor. Sets the view reference.
@@ -221,13 +222,13 @@ public class ReversiModel{
      * Tries to create a connection with the game server.
      */
     private void createConnection() {
-        connection = new Connection(ip, port);
+        connection = new ConnectionModel(ip, port);
 
         if (connection.isConnected()) {
-            handler = new Handler(this);
+            handler = new HandlerModel(this);
             
             try {
-                Receiver receiver = new Receiver(connection.getSocket(), handler);
+                ReceiverModel receiver = new ReceiverModel(connection.getSocket(), handler);
                 receiver.start();
                 
                 try {
@@ -235,7 +236,7 @@ public class ReversiModel{
                 } catch (InterruptedException ignored) { }
             } catch (IOException ignored) { }
             
-            sender = new Sender(connection.getSocket());
+            sender = new SenderModel(connection.getSocket());
             sender.login(clientName);
             sender.getPlayerlist();
         }

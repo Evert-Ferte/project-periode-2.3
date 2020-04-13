@@ -11,7 +11,7 @@ import java.net.Socket;
  * @author Zein Bseis
  * @version 3.0
  */
-public class Sender {
+public class SenderModel {
 
     private PrintWriter sender;
 
@@ -21,7 +21,7 @@ public class Sender {
      * @param socket to send information on.
      * @exception IOException in case command couldn't be send to the server successfully
      */
-    public Sender (Socket socket) {
+    public SenderModel (Socket socket) {
         try {
             sender = new PrintWriter(socket.getOutputStream(), true);
         }

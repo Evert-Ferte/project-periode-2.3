@@ -11,11 +11,11 @@ import java.net.Socket;
  * @author Zein Bseis
  * @version 3.0
  */
-public class Receiver extends Thread  {
+public class ReceiverModel extends Thread  {
 
     BufferedReader receiver;
     String response;
-    Handler handler;
+    HandlerModel handler;
 
     /**
      * Make a new receiver to be able to start receiving.
@@ -24,7 +24,7 @@ public class Receiver extends Thread  {
      * @param handler to handle received responses.
      * @throws IOException in case socket couldn't connect to the server
      */
-    public Receiver (Socket socket, Handler handler) throws IOException {
+    public ReceiverModel (Socket socket, HandlerModel handler) throws IOException {
         receiver = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.handler = handler;
     }
