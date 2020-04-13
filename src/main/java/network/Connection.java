@@ -93,12 +93,10 @@ public class Connection {
 
     /**
      * Terminate the connection with the server by closing the socket.
-     *
-     * @exception IOException if the connection couldn't be terminated.
      */
     public void terminate() {
         // Return if not connected
-        if (isConnected()) return;
+        if (!isConnected()) return;
         
         // Close the socket connection
         try {

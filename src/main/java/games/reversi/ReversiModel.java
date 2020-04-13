@@ -12,8 +12,9 @@ import java.util.*;
 public class ReversiModel implements Cloneable{
     private static final int mapSize = 8;
     private static final Vector2 fieldSize = new Vector2(640, 640);
+    private static final int miniMaxDepth = 5;
     
-    private static final String ai = "random";
+    private static final String ai = "minimax";
     private static final int minAiMoveDelay = 10;//180;
     private static final int maxAiMoveDelay = 20;//800;
     
@@ -160,7 +161,7 @@ public class ReversiModel implements Cloneable{
                     }
                     if (ai.equals("minimax")){
                         try {
-                            position = Ai.aiMiniMax(board, 5, true);
+                            position = Ai.aiMiniMax(board, miniMaxDepth, true);
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
                         }
@@ -290,14 +291,11 @@ public class ReversiModel implements Cloneable{
             if (!p.equals(clientName.trim()))
                 players.add(p);
         }
-    
-        System.out.println("online players: " + players.toString());
         
         return players.toArray(new String[0]);
     }
     
     public void refreshPlayerList() {
-        System.out.println("getting player list");
         if (!connection.isConnected()) return;
         view.refreshPlayerList(getPlayerList());
     }

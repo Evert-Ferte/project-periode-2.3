@@ -1,6 +1,8 @@
 package customization;
 
 public class ColorSet {
+    public String name = "";
+    
     public String primary = "";
     public String secondary = "";
     public String complementary = "";
@@ -9,7 +11,8 @@ public class ColorSet {
     public String textSecondary = "";
     
     public ColorSet() { }
-    public ColorSet(String primary, String secondary, String complementary, String textPrimary, String textSecondary) {
+    public ColorSet(String name, String primary, String secondary, String complementary, String textPrimary, String textSecondary) {
+        this.name = name;
         this.primary = primary;
         this.secondary = secondary;
         this.complementary = complementary;

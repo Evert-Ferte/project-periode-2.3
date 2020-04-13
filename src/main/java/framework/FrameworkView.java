@@ -8,20 +8,16 @@ import games.tictactoe.Main;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.ColorInput;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -31,18 +27,14 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.EventListener;
-import java.util.EventObject;
+import java.util.*;
 
 // TODO - font for framework, reversi and ttt
 public class FrameworkView extends Application {
     private static final Vector2 WINDOW_SIZE = new Vector2(1000, 600);
-    private static final ColorSet DARK_THEME = new ColorSet("#212121", "#1e1e1e", "#878787", "#ffffff", "#000000");
-    private static final ColorSet LIGHT_THEME = new ColorSet("#e5e5e5", "#d8d8d8", "#333333", "#000000", "#ffffff");
+    private static final ColorSet DARK_THEME = new ColorSet("Dark theme", "#212121", "#1e1e1e", "#878787", "#ffffff", "#000000");
+    private static final ColorSet LIGHT_THEME = new ColorSet("Light theme", "#e5e5e5", "#d8d8d8", "#333333", "#000000", "#ffffff");
     
     private ColorSet currentColorSet = DARK_THEME;
     
@@ -61,9 +53,11 @@ public class FrameworkView extends Application {
     private Scene mainScene;
     private Scene optionScene;
     
-    //TEMP
-    BooleanProperty booleanProperty = new SimpleBooleanProperty(true);
-    //TEMP
+    private Label currentTimeLabel;
+    private ChoiceBox<String> themeChoiceBox;
+    
+    private boolean use12HourNotation = false;
+    CheckBox cb;
     
     /**
      * This function is called on the start of the application.
@@ -74,34 +68,18 @@ public class FrameworkView extends Application {
     @Override
     public void start(Stage stage) {
         // Create the game label, game tiles and buttons
+        optionScene                 = createSettingsMenu(stage);
         BorderPane notificationBar  = createNotificationBar();
         gameLabel                   = createGameLabel();
         ScrollPane scrollPane       = createGameTiles(stage);
         HBox buttonHolder           = createButtons(stage);
-        
-        optionScene                 = createSettingsMenu(stage);
         
         // Create a vertical layout for all UI components
         VBox vBox = new VBox(notificationBar, gameLabel, scrollPane, buttonHolder);
         vBox.setSpacing(20);
         vBox.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.primary), null, null)));
         
-//        changeListener listener = new changeListener() {
-//            @Override
-//            public void stateChanged(ChangeEvent event) {
-//                System.out.println("Detected change to: " + event.getDispatcher().getValue() + ". Event: " + event);
-//            }
-//        };
-        
-//        booleanProperty.addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-//                System.out.println("changed " + oldValue + " to " + newValue);
-//                themeChanged(newValue);
-//            }
-//        });
-        
-//        vBox.event
+        addThemeChangeListener(change -> vBox.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.primary), null, null))));
         
         // Create a new scene containing the vertical layout
         mainScene = new Scene(vBox, WINDOW_SIZE.x, WINDOW_SIZE.y);
@@ -117,7 +95,8 @@ public class FrameworkView extends Application {
         int barHeight = 30;
         
         // Create the current time label
-        Label currentTimeLabel = new Label(new SimpleDateFormat("HH:mm").format(new Date()));
+        currentTimeLabel = new Label();
+        updateTimeLabel(currentTimeLabel);
         currentTimeLabel.setFont(new Font(16));
         currentTimeLabel.setTextFill(Color.web(currentColorSet.textPrimary));
         HBox timeBox = new HBox(currentTimeLabel);
@@ -152,9 +131,20 @@ public class FrameworkView extends Application {
         bar.setLeft(timeBox);
         bar.setRight(iconsBox);
         
-        Timeline timeUpdater = new Timeline(new KeyFrame(Duration.seconds(1), event -> currentTimeLabel.setText(new SimpleDateFormat("HH:mm").format(new Date()))));
+        // Create a variable that will update the time every 1 second
+        Timeline timeUpdater = new Timeline(new KeyFrame(Duration.seconds(1), event -> updateTimeLabel(currentTimeLabel)));
         timeUpdater.setCycleCount(Timeline.INDEFINITE);
         timeUpdater.play();
+        
+        // Add an event that will change the color of the time label and bar when the theme changes
+        addThemeChangeListener(change -> {
+            currentTimeLabel.setTextFill(Color.web(currentColorSet.textPrimary));
+            bar.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.secondary), null, null)));
+        });
+        cb.addEventHandler(ActionEvent.ACTION, e -> {
+            use12HourNotation = !use12HourNotation;
+            updateTimeLabel(currentTimeLabel);
+        });
         
         return bar;
     }
@@ -171,6 +161,8 @@ public class FrameworkView extends Application {
         label.setTextFill(Color.web(currentColorSet.textPrimary));
         label.setFont(new Font(26));
         label.setPadding(new Insets(30, 0, -15, 60));   // INFO: Insets(TOP, RIGHT, BOTTOM, LEFT)
+        
+        addThemeChangeListener(change -> label.setTextFill(Color.web(currentColorSet.textPrimary)));
         
         return label;
     }
@@ -243,7 +235,7 @@ public class FrameworkView extends Application {
             @Override
             public void changed(ObservableValue<? extends Skin<?>> observable, Skin<?> oldValue, Skin<?> newValue) {
                 scrollPane.skinProperty().removeListener(this);
-                
+
                 // Find the ScrollBar in the ScrollPane
                 for (Node node : scrollPane.lookupAll(".scroll-bar")) {
                     if (node instanceof ScrollBar) {
@@ -257,6 +249,19 @@ public class FrameworkView extends Application {
         };
         scrollPane.skinProperty().addListener(skinChangeListener);
         
+        addThemeChangeListener(change -> scrollPane.setStyle("-fx-background-color: " +  currentColorSet.primary +
+                "; -fx-background: " + currentColorSet.primary + ";"));
+        addThemeChangeListener(change -> {
+            Set<Node> nodes = scrollPane.lookupAll(".scroll-bar");
+            for (final Node node : nodes) {
+                if (node instanceof ScrollBar) {
+                    ScrollBar sb = (ScrollBar) node;
+                    if (sb.getOrientation() == Orientation.HORIZONTAL)
+                        sb.setStyle("-fx-background-color: " + currentColorSet.primary + "; -fx-background: " + currentColorSet.primary + ";");
+                }
+            }
+        });
+        
         return scrollPane;
     }
     
@@ -266,11 +271,10 @@ public class FrameworkView extends Application {
      * @return Returns a HBox component containing all buttons.
     */
     private HBox createButtons(Stage stage) {
-        int bSize = 60;
-        String btnStyle = "-fx-background-color: " + currentColorSet.complementary + "; -fx-background-radius: 5em; " +
-                "-fx-min-width: " + bSize + "px; -fx-min-height: " + bSize + "px; -fx-max-width: " + bSize +
-                "px; -fx-max-height: " + bSize + "px;";
-        bSize = 40;
+        final int bSize = 40;
+        final String btnStyle = "-fx-background-color: " + currentColorSet.complementary +
+                "; -fx-background-radius: 5em; -fx-min-width: " + (bSize + 20) + "px; -fx-min-height: " + (bSize + 20) +
+                "px; -fx-max-width: " + (bSize + 20) + "px; -fx-max-height: " + (bSize + 20) + "px;";
         
         // Create the settings button
         Button settingsButton = new Button();
@@ -305,6 +309,13 @@ public class FrameworkView extends Application {
         buttonHolder.setAlignment(Pos.CENTER);
         buttonHolder.setPadding(new Insets(20, 0, 0, 0));
         
+        // Add an event listener, so that the button's color changes when the theme changes
+        addThemeChangeListener(change -> {
+            settingsButton.setStyle(btnStyle);
+            homeButton.setStyle(btnStyle);
+            closeButton.setStyle(btnStyle);
+        });
+        
         return buttonHolder;
     }
     
@@ -314,22 +325,35 @@ public class FrameworkView extends Application {
         themeLabel.setTextFill(Color.web(currentColorSet.textPrimary));
         
         // Create a choice box containing the light and dark theme
-        ChoiceBox<String> themeChoiceBox = new ChoiceBox<>();
+        themeChoiceBox = new ChoiceBox<>();
         themeChoiceBox.getItems().addAll("Light theme", "Dark theme");
         themeChoiceBox.setMinWidth(120);
-        themeChoiceBox.setValue("Dark theme");
+        themeChoiceBox.setValue(currentColorSet.hashCode() == DARK_THEME.hashCode() ? "Dark theme" : "Light theme");
         themeChoiceBox.setOnAction(e -> themeChanged(themeChoiceBox.getValue()));
         
-        BorderPane bp = new BorderPane();
-        bp.setMaxSize(500, 100);
-        bp.setLeft(themeLabel);
-        bp.setRight(themeChoiceBox);
+        BorderPane option1 = new BorderPane();
+        option1.setMaxSize(500, 100);
+        option1.setLeft(themeLabel);
+        option1.setRight(themeChoiceBox);
+        
+        // Create a check box to toggle between 12 or 24 hour time notation
+        Label timeNotationLabel = new Label("Use 24 hour time notation");
+        timeNotationLabel.setTextFill(Color.web(currentColorSet.textPrimary));
+        
+        cb = new CheckBox();
+        cb.fire();
+        
+        BorderPane option2 = new BorderPane();
+        option2.setPadding(new Insets(50, 0, 0, 0));
+        option2.setMaxSize(500, 100);
+        option2.setLeft(timeNotationLabel);
+        option2.setRight(cb);
     
-        int bSize = 60;
-        String btnStyle = "-fx-background-color: " + currentColorSet.complementary + "; -fx-background-radius: 5em; " +
-                "-fx-min-width: " + bSize + "px; -fx-min-height: " + bSize + "px; -fx-max-width: " + bSize + "px; " +
-                "-fx-max-height: " + bSize + "px;";
-        bSize = 40;
+        // Create the back/home button
+        final int bSize = 40;
+        final String btnStyle = "-fx-background-color: " + currentColorSet.complementary + "; -fx-background-radius: 5em; " +
+                "-fx-min-width: " + (bSize + 20) + "px; -fx-min-height: " + (bSize + 20) + "px; -fx-max-width: " + (bSize + 20) + "px; " +
+                "-fx-max-height: " + (bSize + 20) + "px;";
         
         // Create the home button
         Button homeButton = new Button();
@@ -338,34 +362,47 @@ public class FrameworkView extends Application {
         homeImage.setFitWidth(bSize);
         homeImage.setFitHeight(bSize);
         homeButton.setGraphic(homeImage);
-        homeButton.setOnAction(e -> stage.setScene(mainScene));
+        homeButton.addEventHandler(ActionEvent.ACTION, e -> stage.setScene(mainScene));
         
         // Create a border pane so we can align the home button to the bottom of the screen
         BorderPane homeButtonHolder = new BorderPane();
         homeButtonHolder.setMinSize(WINDOW_SIZE.x, WINDOW_SIZE.y);
         homeButtonHolder.setBottom(homeButton);
         BorderPane.setAlignment(homeButton, Pos.BOTTOM_CENTER);
-        homeButtonHolder.setPadding(new Insets(0, 0, bSize * 2 + 60, 0));
+        homeButtonHolder.setPadding(new Insets(0, 0, bSize * 3 + 27 + 60, 0));
         
-        VBox vBox = new VBox(bp, homeButtonHolder);
+        VBox vBox = new VBox(option1, option2, homeButtonHolder);
         vBox.setAlignment(Pos.TOP_CENTER);
         vBox.setPadding(new Insets(80, 0, 0, 0));
-        vBox.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.primary), null, null)));
+        vBox.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.primary),
+                null, null)));
+        
+        // Add a change listener, that changes the color if the theme has changed
+        addThemeChangeListener(change -> {
+            vBox.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.primary)
+                    , null, null)));
+            homeButton.setStyle(btnStyle);
+            themeLabel.setTextFill(Color.web(currentColorSet.textPrimary));
+            timeNotationLabel.setTextFill(Color.web(currentColorSet.textPrimary));
+        });
         
         return new Scene(vBox, WINDOW_SIZE.x, WINDOW_SIZE.y);
     }
     
-    private void themeChanged(String value) {
-        System.out.println("Theme "+value);
-        // Set to light theme
-        if (value.equals("Light theme"))
-            currentColorSet = LIGHT_THEME;
-        // Set to dark theme
-        else
-            currentColorSet = DARK_THEME;
+    private void addThemeChangeListener(InvalidationListener listener) {
+        themeChoiceBox.valueProperty().addListener(listener);
     }
-    private void themeChanged(boolean value) {
-        themeChanged(value ? "Light theme" : "Dark theme");
+    
+    private void themeChanged(String value) {
+        // Set to theme based on the given value
+        currentColorSet = value.equals("Light theme") ? LIGHT_THEME : DARK_THEME;
+    }
+    
+    private void updateTimeLabel(Label timeLabel) {
+        if (use12HourNotation)
+            timeLabel.setText(new SimpleDateFormat("hh:mm a").format(new Date()));
+        else
+            timeLabel.setText(new SimpleDateFormat("HH:mm").format(new Date()));
     }
     
     /**
@@ -388,24 +425,3 @@ public class FrameworkView extends Application {
         }
     }
 }
-
-//interface ChangeDispatcher {
-//    public void addChangeListener(changeListener listener);
-//    public String getValue();
-//    public void setValue(String value);
-//}
-//
-//interface changeListener extends EventListener {
-//    public void stateChanged(ChangeEvent event);
-//}
-//
-//class ChangeEvent extends EventObject {
-//    private final ChangeDispatcher dispatcher;
-//
-//    public ChangeEvent(ChangeDispatcher dispatcher) {
-//        super(dispatcher);
-//        this.dispatcher = dispatcher;
-//    }
-//
-//    public ChangeDispatcher getDispatcher() { return dispatcher; }
-//}
