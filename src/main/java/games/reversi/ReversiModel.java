@@ -2,20 +2,19 @@ package games.reversi;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
-import network.ConnectionModel;
-import network.HandlerModel;
-import network.ReceiverModel;
-import network.SenderModel;
-
+import network.Connection;
+import network.Handler;
+import network.Receiver;
+import network.Sender;
 import java.io.IOException;
 import java.util.*;
 
 public class ReversiModel{
     private static final int mapSize = 8;
-
+    
     //Ai variables
-    private static final String ai = "minimaxAlphaBeta"; //  "random", "minimaxAlphaBeta", "minimaxRiskRegion"
     private static final int depth = 5;
+    private String ai = "minimax"; //  "random", "minimaxAlphaBeta", "minimaxRiskRegion"
 
     //risk region values
     private static final int cornerValue = 100;
@@ -25,11 +24,11 @@ public class ReversiModel{
     private static final int edgeCornerValue = 10;
     private static final int antiEdgeValues = -2;
 
-    private static boolean aiPlayer = true; //true=white, false=black
+    private static boolean aiPlayer = true;     //true=white, false=black
     private ArrayList<ArrayList<Integer>> riskRegion;
     
-    private static final int minAiMoveDelay = 10;//180;
-    private static final int maxAiMoveDelay = 20;//800;
+    private static final int minAiMoveDelay = 10;
+    private static final int maxAiMoveDelay = 20;
     
     // General variables
     private ReversiView view;
@@ -44,13 +43,14 @@ public class ReversiModel{
     }
     
     // Networking variables
-    private static final String ip = "localhost";//"145.33.225.170";//  //"mathijswesterhof.nl";
-    private static final int port = 7789;
-    private ConnectionModel connection;
+    private String ip = /*"145.33.225.170";*/ "localhost";
+    private int port = 7789;
+    private int timeout = 10;
+    private Connection connection;
     
-    private String clientName = "The Paper (d5)";
-    private SenderModel sender;
-    private HandlerModel handler;
+    private String clientName = "D5";
+    private Sender sender;
+    private Handler handler;
     
     /**
      * The constructor. Sets the view reference.
@@ -170,17 +170,17 @@ public class ReversiModel{
                 Platform.runLater(() -> {
                     log("ai moving");
                     Vector2 position = null;
-                    if (ai.equals("random")){
+                    if (ai.equals("random")) {
                         position = Ai.aiRandom(board);
                     }
-                    if (ai.equals("minimaxAlphaBeta")){
+                    if (ai.equals("minimax")) {
                         try {
                             position = Ai.aiMiniMaxAlphaBetaPruning(board, depth, aiPlayer);
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
                         }
                     }
-                    if (ai.equals("minimaxRiskRegion")){
+                    if (ai.equals("minimaxRiskRegion")) {
                         try {
                             position = Ai.aiMiniMaxAlphaBetaPruningRiskRegions(board, riskRegion, depth, aiPlayer);
                         } catch (CloneNotSupportedException e) {
@@ -222,13 +222,19 @@ public class ReversiModel{
      * Tries to create a connection with the game server.
      */
     private void createConnection() {
-        connection = new ConnectionModel(ip, port);
-
+        // Close the previous connection (if there is one)
+        if (connection != null)
+            connection.terminate();
+        
+        // Create a new connection
+        connection = new Connection(ip, port);
+        
+        // Create a sender, receiver and handler if a connection was made
         if (connection.isConnected()) {
-            handler = new HandlerModel(this);
+            handler = new Handler(this);
             
             try {
-                ReceiverModel receiver = new ReceiverModel(connection.getSocket(), handler);
+                Receiver receiver = new Receiver(connection.getSocket(), handler);
                 receiver.start();
                 
                 try {
@@ -236,7 +242,7 @@ public class ReversiModel{
                 } catch (InterruptedException ignored) { }
             } catch (IOException ignored) { }
             
-            sender = new SenderModel(connection.getSocket());
+            sender = new Sender(connection.getSocket());
             sender.login(clientName);
             sender.getPlayerlist();
         }
@@ -335,6 +341,35 @@ public class ReversiModel{
     public GameMode getGameMode() { return gameMode; }
 
     public ReversiBoard getBoard(){return board;}
+    
+    public void setAi(String aiType) {
+        aiType = aiType.toLowerCase();
+        switch (aiType) {
+            case "minimaxRiskRegion":
+            case "random":
+                ai = aiType;
+                break;
+            default:
+                ai = "minimax";
+        }
+    }
+    public String getAi() { return ai; }
+    
+    public void setIp(String ip) {
+        this.ip = ip;
+        createConnection();
+    }
+    public String getIp() { return ip; }
+    
+    public void setPort(int port) {
+        this.port = port;
+        createConnection();
+    }
+    public int getPort() { return port; }
+    
+    public void setTimeout(int timeout) { this.timeout = timeout; }
+    public int getTimeout() { return timeout; }
+    
 //endregion
     
     /**
