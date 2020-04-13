@@ -11,7 +11,9 @@ import java.util.*;
 
 public class ReversiModel{
     private static final int mapSize = 8;
-    private static final String ai = "random";
+
+    //Ai variables
+    private static final String ai = "minimaxRiskRegion"; //  random, minimaxAlphaBeta, minimaxRiskRegion
     private static final int depth = 5;
     
     //risk region values
@@ -39,11 +41,11 @@ public class ReversiModel{
     }
     
     // Networking variables
-    private static final String ip = /*"145.33.225.170";*/ "145.33.225.170";
+    private static final String ip = /*"145.33.225.170";*/ "localhost"; //"mathijswesterhof.nl";
     private static final int port = 7789;
     private Connection connection;
     
-    private String clientName = "John_2.0";
+    private String clientName = "client_1";
     private Sender sender;
     private Handler handler;
     
@@ -56,7 +58,6 @@ public class ReversiModel{
         this.view = view;
         this.board = new ReversiBoard(mapSize);
         riskRegion = Ai.generateRiskRegions(mapSize, cornerValue, antiCornerValue, edgeValue , antiEdgeValues); //mapSize, cornerValue, antiCornerValue, edgeValue.
-
     }
     
     /**
@@ -169,7 +170,14 @@ public class ReversiModel{
                     if (ai.equals("random")){
                         position = Ai.aiRandom(board);
                     }
-                    if (ai.equals("minimax")){
+                    if (ai.equals("minimaxAlphaBeta")){
+                        try {
+                            position = Ai.aiMiniMaxAlphaBetaPruning(board, depth, aiPlayer);
+                        } catch (CloneNotSupportedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (ai.equals("minimaxRiskRegion")){
                         try {
                             position = Ai.aiMiniMaxAlphaBetaPruningRiskRegions(board, riskRegion, depth, aiPlayer);
                         } catch (CloneNotSupportedException e) {
