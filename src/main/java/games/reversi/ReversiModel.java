@@ -170,17 +170,17 @@ public class ReversiModel{
                 Platform.runLater(() -> {
                     log("ai moving");
                     Vector2 position = null;
-                    if (ai.equals("random")){
+                    if (ai.equals("random")) {
                         position = Ai.aiRandom(board);
                     }
-                    if (ai.equals("minimax")){
+                    if (ai.equals("minimax")) {
                         try {
                             position = Ai.aiMiniMaxAlphaBetaPruning(board, depth, aiPlayer);
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
                         }
                     }
-                    if (ai.equals("minimaxRiskRegion")){
+                    if (ai.equals("minimaxRiskRegion")) {
                         try {
                             position = Ai.aiMiniMaxAlphaBetaPruningRiskRegions(board, riskRegion, depth, aiPlayer);
                         } catch (CloneNotSupportedException e) {
