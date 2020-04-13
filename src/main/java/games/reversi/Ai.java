@@ -1,6 +1,7 @@
 package games.reversi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 class Ai {
 
@@ -101,7 +102,8 @@ class Ai {
         }
         return null;
     }
-    static ArrayList<ArrayList<Integer>> generateRiskRegions(int size, int cornerValue, int antiCornerValue, int edgeValue, int antiEdgeValue){
+    //mapSize, cornerValue, antiCornerValue, antiCornerEdgeValue, edgeValue, edgeCornerValue, antiEdgeValues
+    static ArrayList<ArrayList<Integer>> generateRiskRegions(int size, int cornerValue, int antiCornerValue, int antiCornerEdgeValue, int edgeValue, int edgeCornerValue, int antiEdgeValue ){
         int mapSize = size-1;
 
         if(mapSize <= 2){
@@ -116,13 +118,19 @@ class Ai {
                 //Corner values
                 if((x == 0 || x == mapSize) && (y == 0 || y == mapSize)){
                     col.add(cornerValue);
-                }else if(((y == 1 || y == mapSize-1) && (x == 0 || x == 1 || x == mapSize-1 || x == mapSize)) || ((x == 1 || x == mapSize-1) && (y == 0 || y == mapSize)) ){
+                }else if(((y == 1 || y == mapSize-1) && (x == 0 || x == mapSize)) || ((x == 1 || x == mapSize-1) && (y == 0 || y == mapSize))){
+                    //anti corner edge values
+                    col.add(antiCornerEdgeValue);
+                }else if(((y == 1 || y == mapSize-1) && (x == 1 || x == mapSize-1))){
                     //anti corner values
                     col.add(antiCornerValue);
-                }else if(((x > 1 && x < mapSize-1) && (y == 0 || y == mapSize) || ((y > 1 && y < mapSize-1) && (x == 0 || x == mapSize)))){
+                }else if((((x > 2 && x < mapSize-2) && (y == 0 || y == mapSize)) || ((y > 2 && y < mapSize-2) && (x == 0 || x == mapSize)))){
                     // Edge values
                     col.add(edgeValue);
-                }else if(((x > 1 && x < mapSize-1) && (y == 1 || y == mapSize-1) || ((y > 1 && y < mapSize-1) && (x == 1 || x == mapSize-1)))){
+                }else if((((x == 2 || x == mapSize-2) && (y == 0 || y == mapSize)) || ((y == 2 && y == mapSize-2) || (x == 0 || x == mapSize)))){
+                    // Edge corner values
+                    col.add(edgeCornerValue);
+                }else if((((x > 1 && x < mapSize-1) && (y == 1 || y == mapSize-1)) || ((y > 1 && y < mapSize-1) && (x == 1 || x == mapSize-1)))){
                     //anti edge values
                     col.add(antiEdgeValue);
                 }else{
@@ -131,7 +139,9 @@ class Ai {
             }
             riskRegions.add(col);
         }
-        System.out.println(riskRegions);
+        for (ArrayList<Integer> list : riskRegions) {
+            System.out.println(Arrays.toString(list.toArray()));
+        }
         return riskRegions;
     }
 

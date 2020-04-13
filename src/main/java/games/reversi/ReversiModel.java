@@ -13,14 +13,16 @@ public class ReversiModel{
     private static final int mapSize = 8;
 
     //Ai variables
-    private static final String ai = "minimaxRiskRegion"; //  random, minimaxAlphaBeta, minimaxRiskRegion
+    private static final String ai = "minimaxAlphaBeta"; //  "random", "minimaxAlphaBeta", "minimaxRiskRegion"
     private static final int depth = 5;
-    
+
     //risk region values
-    private static final int cornerValue = 15;
-    private static final int antiCornerValue = -14;
-    private static final int edgeValue = 10;
-    private static final int antiEdgeValues = -9;
+    private static final int cornerValue = 100;
+    private static final int antiCornerValue = -50;
+    private static final int antiCornerEdgeValue = -20;
+    private static final int edgeValue = 5;
+    private static final int edgeCornerValue = 10;
+    private static final int antiEdgeValues = -2;
 
     private static boolean aiPlayer = true; //true=white, false=black
     private ArrayList<ArrayList<Integer>> riskRegion;
@@ -41,11 +43,11 @@ public class ReversiModel{
     }
     
     // Networking variables
-    private static final String ip = /*"145.33.225.170";*/ "localhost"; //"mathijswesterhof.nl";
+    private static final String ip = "localhost";//"145.33.225.170";//  //"mathijswesterhof.nl";
     private static final int port = 7789;
     private Connection connection;
     
-    private String clientName = "client_1";
+    private String clientName = "The Paper (d5)";
     private Sender sender;
     private Handler handler;
     
@@ -57,7 +59,7 @@ public class ReversiModel{
     public ReversiModel(ReversiView view) {
         this.view = view;
         this.board = new ReversiBoard(mapSize);
-        riskRegion = Ai.generateRiskRegions(mapSize, cornerValue, antiCornerValue, edgeValue , antiEdgeValues); //mapSize, cornerValue, antiCornerValue, edgeValue.
+        riskRegion = Ai.generateRiskRegions(mapSize, cornerValue, antiCornerValue, antiCornerEdgeValue, edgeValue, edgeCornerValue, antiEdgeValues);
     }
     
     /**
