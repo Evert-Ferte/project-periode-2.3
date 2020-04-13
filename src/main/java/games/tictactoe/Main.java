@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -247,35 +248,8 @@ public class Main extends Game {
                 img.setFitHeight(150);
                 board.get(i).get(j).setGraphic(img);
                 board.get(i).get(j).setId(emptyId);
-
             }
         }
-    }
-
-    private void hasWon(String player){
-        Popup popup = new Popup();
-        Label fooHasWon = new Label("eww");
-        Button okButton = new Button("confirm");
-        okButton.setOnAction(e -> popup.hide());
-        okButton.setAlignment(Pos.CENTER);
-        fooHasWon.setMinWidth(250);
-        fooHasWon.setMinHeight(250);
-        fooHasWon.setAlignment(Pos.CENTER);
-        fooHasWon.setStyle("-fx-background-color: #fff");
-        popup.getContent().addAll(fooHasWon, okButton);
-        if (player.equals(oId)){
-            fooHasWon.setText("O has Won");
-        } if(player.equals(xId)) {
-            fooHasWon.setText("X has Won");
-        } else {
-            fooHasWon.setText("It's a draw!");
-        }
-        System.out.println(fooHasWon);
-        if (!popup.isShowing())
-            popup.show(stage);
-        else
-            popup.hide();
-
     }
 
     private void onTileClick(int xPos, int yPos){
@@ -283,7 +257,6 @@ public class Main extends Game {
         String currentId = current.getId();
 
         if (!currentId.equals(emptyId)) {
-            System.out.println("eee");
             return;
         }else {
             ImageView img = new ImageView(isTurn ? oBox : xBox);
@@ -294,26 +267,76 @@ public class Main extends Game {
         }
         if(isGameOver()){
             if(checkWinner(xId)){
-                //TODO print /label x has won the game
                 hasWon(xId);
                 xScoreLabel.setText(""+(Integer.valueOf(xScoreLabel.getText())+1));
             }else if(checkWinner(oId)){
-                //TODO print /label o has won the game
-//                Label oWon = new Label("O has won the game");
                 hasWon(oId);
                 oScoreLabel.setText(""+(Integer.valueOf(oScoreLabel.getText())+1));
-
             } else {
-                hasWon("");
+                hasWon("draw");
             }
-            resetBoard();
-            //TODO if score == 5 print x has won the game and reset the game
+
             return;
         }
         swapTurn();
     }
 
+    private void hasWon(String player){
+        Popup popup = new Popup();
+        VBox popupBox = new VBox();
+
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setRadius(5.0);
+        dropShadow.setColor(Color.color(0.4, 0.5, 0.5));
+        popupBox.setEffect(dropShadow);
+
+        Label fooHasWon = new Label();
+        fooHasWon.setMinHeight(50);
+        fooHasWon.setMinWidth(250);
+        fooHasWon.setAlignment(Pos.CENTER);
+
+        popupBox.setBackground(new Background(new BackgroundFill(Color.web("#fff"), null, null)));
+        popupBox.setStyle("-fx-padding: 20 0;");
+        popupBox.setAlignment(Pos.CENTER);
+
+        Button okButton = new Button("Play again!");
+        okButton.setOnAction(e -> {resetBoard(); popup.hide();});
+        okButton.setMinWidth(200);
+        okButton.setMinHeight(50);
+
+        popupBox.getChildren().addAll(fooHasWon, okButton);
+        popup.getContent().addAll(popupBox);
+
+        if (player.equals(oId)) {
+            if (Integer.valueOf(oScoreLabel.getText()) == 4) {
+                fooHasWon.setText("O has won the game and reached 5 points!");
+                xScoreLabel.setText("0");
+                oScoreLabel.setText("-1");
+            } else {
+                fooHasWon.setText("O has won the game!");
+            }
+        } else if(player.equals(xId)) {
+            if (Integer.valueOf(xScoreLabel.getText()) == 4) {
+                fooHasWon.setText("X has won the game and reached 5 points!");
+                xScoreLabel.setText("-1");
+                oScoreLabel.setText("0");
+            } else {
+                fooHasWon.setText("X has won the game!");
+            }
+        } else {
+            fooHasWon.setText("It's a draw!");
+        }
+
+        if (!popup.isShowing()){
+            popup.show(stage);
+        }
+        else {
+            popup.hide();
+        }
+
+    }
     class ButtonHandler implements EventHandler<ActionEvent> {
+
         private int xPos;
         private int yPos;
         private Main main;
