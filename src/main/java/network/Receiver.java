@@ -5,17 +5,33 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+/**
+ * This class receives the server response and then passes it to the Handler to be handled
+ *
+ * @author Zein Bseis
+ * @version 3.0
+ */
 public class Receiver extends Thread  {
 
     BufferedReader receiver;
     String response;
     Handler handler;
-    
+
+    /**
+     * Make a new receiver to be able to start receiving.
+     *
+     * @param socket to monitor and wait unit a response is received.
+     * @param handler to handle received responses.
+     * @throws IOException in case socket couldn't connect to the server
+     */
     public Receiver (Socket socket, Handler handler) throws IOException {
         receiver = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.handler = handler;
     }
 
+    /**
+     * Run receive on its own thread
+     */
     @Override
     public void run() {
         try {
@@ -25,6 +41,12 @@ public class Receiver extends Thread  {
         }
     }
 
+    /**
+     * with an infinite while loop it, this method reads the server response constancy looking for
+     * responses that could be handled by the client
+     *
+     * @throws IOException in case reading from the socket wasn't successful
+     */
     private void receive () throws IOException {
         while (true) {
 

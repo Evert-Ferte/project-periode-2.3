@@ -170,16 +170,22 @@ public class Handler {
     }
 
     /**
+     *Converting a string to array by splitting on commas
      *
-     *
-     * @param string
-     * @return
+     * @param string with  plain player names separated with commas
+     * @return an array containing the names of player
      */
     public String[] toArray (String string) {
         String[] anArray = string.split(",");
         return anArray;
     }
 
+    /**
+     *Converting the server response onto a Hashmap.
+     *
+     * @param response A string containing the raw server response
+     * @return a Hashmap with the response details sorted out
+     */
     private HashMap<String, String> responseToMap(String response) {
         String server_msg = response.substring(response.indexOf('{') + 1, response.indexOf('}'));
         HashMap<String, String> map = new HashMap<String, String>();
