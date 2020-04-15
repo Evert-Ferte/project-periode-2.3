@@ -14,6 +14,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -44,6 +45,9 @@ public class Main extends Game {
     private boolean isTurn = false; //if false -> X's turn, if true -> O's turn
     private Label labelTurn;
     private boolean hasPopup = false;
+
+    private String cf4 = "-fx-text-fill: #f4f4f4";
+    private String c1c = "-fx-text-fill: #1c1c1c";
 
     /**
      * Start the game.
@@ -81,7 +85,8 @@ public class Main extends Game {
         homeScreenButton.setOnAction(e -> window.setScene(homeScene));
 
         Label gameTitle = new Label("Tic Tac Toe");
-        gameTitle.setStyle("-fx-font-weight: 500;" + "-fx-font-size: 30;");
+        gameTitle.setStyle("-fx-font-size: 30;" + cf4);
+        gameTitle.setFont(Font.font("Verdana", FontWeight.SEMI_BOLD, 25));
 //        gameTitle.setFont(new Font(30));
 
         //Settings button
@@ -93,9 +98,10 @@ public class Main extends Game {
 
         // Home Scene
         VBox homeLayout = new VBox(20);
+        homeLayout.setStyle("-fx-background-color: #2b2b2b;");
 
         Label homeTitle = new Label("Tic Tac Toe");
-        homeTitle.setStyle("-fx-font-weight: bold");
+        homeTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #f4f4f4");
         homeTitle.setFont(new Font(50));
         Button continueGame = new Button("Continue game");
         continueGame.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
@@ -120,7 +126,7 @@ public class Main extends Game {
 
         // GameScene
         VBox gameLayout = new VBox();
-//        gameLayout.getChildren().add(test);
+        gameLayout.setStyle("-fx-background-color: #2b2b2b;");
 
         gameLayout.setAlignment(Pos.CENTER);
         window.setResizable(false);
@@ -131,11 +137,17 @@ public class Main extends Game {
         //Turn label
         labelTurn = new Label((isTurn ? "O" : "X") + "'s turn");
         labelTurn.setFont(new Font(30));
+        labelTurn.setStyle(cf4);
 
         //Score labels
         HBox hbox = new HBox();
         Label xLabel = new Label("X:");
         Label oLabel = new Label("O:");
+        oLabel.setStyle(cf4);
+        xLabel.setStyle(cf4);
+        xLabel.setStyle(cf4);
+        xScoreLabel.setStyle(cf4);
+        oScoreLabel.setStyle(cf4);
         //Label xScoreLabel = new Label("0");
         //Label oScoreLabel = new Label("0");
         xScoreLabel.setPadding(new Insets(0 ,100, 0, 0));
@@ -149,7 +161,7 @@ public class Main extends Game {
         grid.setHgap(5);
         grid.setVgap(5);
         grid.setAlignment(Pos.CENTER);
-        grid.setStyle("-fx-background-color: #2a2a2a;");
+        grid.setStyle("-fx-background-color: #1c1c1c");
 
         //creating buttons
         for (int y = 0; y < 3; y++) {
@@ -164,7 +176,7 @@ public class Main extends Game {
 
                 ImageView img = new ImageView(eBox);
                 img.setFitWidth(150);
-                img.setFitHeight(150);
+                img.setFitHeight(151);
                 btn.setGraphic(img);
 
                 btn.setOnAction(new ButtonHandler(x, y, this));
@@ -178,13 +190,15 @@ public class Main extends Game {
 
         // SettingsScene
         VBox settingsLayout = new VBox();
+        settingsLayout.setStyle("-fx-background-color: #2b2b2b");
 
         // Title bar
         HBox settingsBar = new HBox();
         settingsBar.setPadding(new Insets(10, 12, 15, 12));
         settingsBar.setSpacing(10);
-        settingsBar.setStyle("-fx-border-style: none none none none; -fx-border-width: 1; -fx-border-color: #cfcfcf;");
+        settingsBar.setStyle("-fx-background-color: #323232");
         Label settingsLabel = new Label("Settings");
+        settingsLabel.setStyle(cf4);
         settingsLabel.setFont(new Font(25));
         settingsLabel.setAlignment(Pos.CENTER);
         final Pane spacer = new Pane();
@@ -198,7 +212,7 @@ public class Main extends Game {
 
         StackPane backButtonStack = new StackPane();
         Button backButton = new Button("Done");
-        backButton.setStyle("-fx-background-color: transparent;" + "-fx-font-weight: bold;" + "-fx-font-size: 20;" + "-fx-padding: 0;");
+        backButton.setStyle("-fx-background-color: transparent;" + "-fx-font-weight: bold;" + "-fx-font-size: 20;" + "-fx-padding: 0;" + cf4);
 
         backButton.setOnAction(e -> {
             Optional<ButtonType> result = settingsAlert.showAndWait();
@@ -220,6 +234,7 @@ public class Main extends Game {
         selectPlayer.setAlignment(Pos.CENTER);
         ToggleGroup togglePlayer = new ToggleGroup();
         Label togglePlayerLabel = new Label("Choose your player:");
+        togglePlayerLabel.setStyle(cf4);
         togglePlayerLabel.setFont(new Font(20));
 
         ToggleButton togglePlayerX = new ToggleButton("X");
@@ -287,7 +302,7 @@ public class Main extends Game {
             for(int i=0; i<3; i++){
                 ImageView img = new ImageView(eBox);
                 img.setFitWidth(150);
-                img.setFitHeight(150);
+                img.setFitHeight(151);
                 board.get(i).get(j).setGraphic(img);
                 board.get(i).get(j).setId(emptyId);
             }
@@ -303,7 +318,7 @@ public class Main extends Game {
             }else {
                 ImageView img = new ImageView(isTurn ? oBox : xBox);
                 img.setFitWidth(150);
-                img.setFitHeight(150);
+                img.setFitHeight(151);
                 current.setGraphic(img);
                 current.setId(isTurn ? oId : xId);
             }
