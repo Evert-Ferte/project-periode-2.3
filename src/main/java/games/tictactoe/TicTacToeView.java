@@ -7,18 +7,21 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+
+import java.util.Optional;
+import java.util.Stack;
 
 public class TicTacToeView extends Game {
     private Stage window;
@@ -38,6 +41,10 @@ public class TicTacToeView extends Game {
 
     private boolean isTurn = false; //if false -> X's turn, if true -> O's turn
     private Label labelTurn;
+    private boolean hasPopup = false;
+
+    private String cf4 = "-fx-text-fill: #f4f4f4";
+    private String c1c = "-fx-text-fill: #1c1c1c";
 
     TicTacToeView() {
         this.model = new TicTacToeModel(this);
@@ -85,7 +92,8 @@ public class TicTacToeView extends Game {
         homeScreenButton.setOnAction(e -> window.setScene(homeScene));
 
         Label gameTitle = new Label("Tic Tac Toe");
-        gameTitle.setStyle("-fx-font-weight: 500;" + "-fx-font-size: 30;");
+        gameTitle.setStyle("-fx-font-size: 30;" + cf4);
+        gameTitle.setFont(Font.font("Verdana", FontWeight.SEMI_BOLD, 25));
 //        gameTitle.setFont(new Font(30));
 
         //Settings button
@@ -97,9 +105,10 @@ public class TicTacToeView extends Game {
 
         // Home Scene
         VBox homeLayout = new VBox(20);
+        homeLayout.setStyle("-fx-background-color: #2b2b2b;");
 
         Label homeTitle = new Label("Tic Tac Toe");
-        homeTitle.setStyle("-fx-font-weight: bold");
+        homeTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #f4f4f4");
         homeTitle.setFont(new Font(50));
         Button continueGame = new Button("Continue game");
         continueGame.setStyle("-fx-background-color: #1da4e2;" + "-fx-background-radius: 30;" + "fx-border-radius: 30;" + "-fx-padding: 8 20;" + "-fx-font-weight: bold;" + "-fx-font-size: 15;" + "-fx-text-fill: white");
@@ -124,7 +133,7 @@ public class TicTacToeView extends Game {
 
         // GameScene
         VBox gameLayout = new VBox();
-//        gameLayout.getChildren().add(test);
+        gameLayout.setStyle("-fx-background-color: #2b2b2b;");
 
         gameLayout.setAlignment(Pos.CENTER);
         window.setResizable(false);
@@ -133,13 +142,19 @@ public class TicTacToeView extends Game {
         float extraHeight = (float) (gameLayout.getPadding().getTop() + gameLayout.getPadding().getBottom());
 
         //Turn label
-        labelTurn = new Label(isTurn ? "O" : "X" + "'s turn");
+        labelTurn = new Label((isTurn ? "O" : "X") + "'s turn");
         labelTurn.setFont(new Font(30));
+        labelTurn.setStyle(cf4);
 
         //Score labels
         HBox hbox = new HBox();
         Label xLabel = new Label("X:");
         Label oLabel = new Label("O:");
+        oLabel.setStyle(cf4);
+        xLabel.setStyle(cf4);
+        xLabel.setStyle(cf4);
+        xScoreLabel.setStyle(cf4);
+        oScoreLabel.setStyle(cf4);
         //Label xScoreLabel = new Label("0");
         //Label oScoreLabel = new Label("0");
         xScoreLabel.setPadding(new Insets(0, 100, 0, 0));
@@ -153,7 +168,7 @@ public class TicTacToeView extends Game {
         grid.setHgap(5);
         grid.setVgap(5);
         grid.setAlignment(Pos.CENTER);
-        grid.setStyle("-fx-background-color: #2a2a2a;");
+        grid.setStyle("-fx-background-color: #1c1c1c");
 
         //creating buttons
         for (int y = 0; y < 3; y++) {
@@ -168,7 +183,7 @@ public class TicTacToeView extends Game {
 
                 ImageView img = new ImageView(eBox);
                 img.setFitWidth(150);
-                img.setFitHeight(150);
+                img.setFitHeight(151);
                 btn.setGraphic(img);
 
                 btn.setOnAction(new ButtonHandler(x, y, this));
@@ -182,29 +197,73 @@ public class TicTacToeView extends Game {
 
         // SettingsScene
         VBox settingsLayout = new VBox();
+        settingsLayout.setStyle("-fx-background-color: #2b2b2b");
 
         // Title bar
         HBox settingsBar = new HBox();
         settingsBar.setPadding(new Insets(10, 12, 15, 12));
         settingsBar.setSpacing(10);
-        settingsBar.setStyle("-fx-border-style: none none none none; -fx-border-width: 1; -fx-border-color: #cfcfcf;");
+        settingsBar.setStyle("-fx-background-color: #323232");
         Label settingsLabel = new Label("Settings");
+        settingsLabel.setStyle(cf4);
         settingsLabel.setFont(new Font(25));
         settingsLabel.setAlignment(Pos.CENTER);
         final Pane spacer = new Pane();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         spacer.setMinSize(10, 1);
 
+        Alert settingsAlert = new Alert(Alert.AlertType.NONE);
+        settingsAlert.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        settingsAlert.setAlertType(Alert.AlertType.WARNING);settingsAlert.setContentText("If you continue the board will be cleared. This doesn't affect the score");
+
+
         StackPane backButtonStack = new StackPane();
         Button backButton = new Button("Done");
-        backButton.setStyle("-fx-background-color: transparent;" + "-fx-font-weight: bold;" + "-fx-font-size: 20;" + "-fx-padding: 0;");
-//        backButton.getOnMouseDragOver(backButton.setStyle("-fx-cursor: hand;"));
-        backButton.setOnAction(e -> window.setScene(gameScene));
+        backButton.setStyle("-fx-background-color: transparent;" + "-fx-font-weight: bold;" + "-fx-font-size: 20;" + "-fx-padding: 0;" + cf4);
+
+        backButton.setOnAction(e -> {
+            Optional<ButtonType> result = settingsAlert.showAndWait();
+            if (result.get() == ButtonType.OK){
+                window.setScene(gameScene);
+                resetBoard();
+                labelTurn.setText((isTurn ? "O" : "X") + "'s turn");
+            }
+        });
+
         backButtonStack.setAlignment(Pos.CENTER_RIGHT);
         backButtonStack.getChildren().add(backButton);
         settingsBar.getChildren().addAll(settingsLabel, spacer, backButtonStack);
 
-        settingsLayout.getChildren().addAll(settingsBar);
+
+        HBox selectPlayer = new HBox();
+        selectPlayer.setPadding(new Insets(10));
+        selectPlayer.setSpacing(5);
+        selectPlayer.setAlignment(Pos.CENTER);
+        ToggleGroup togglePlayer = new ToggleGroup();
+        Label togglePlayerLabel = new Label("Choose your player:");
+        togglePlayerLabel.setStyle(cf4);
+        togglePlayerLabel.setFont(new Font(20));
+
+        ToggleButton togglePlayerX = new ToggleButton("X");
+        ToggleButton togglePlayerO = new ToggleButton("O");
+
+        if (isTurn){
+            togglePlayerO.setSelected(true);
+        } else {
+            togglePlayerX.setSelected(true);
+        }
+
+        togglePlayerX.setOnAction(e -> isTurn = false);
+        togglePlayerO.setOnAction(e -> isTurn = true);
+
+        togglePlayerO.setToggleGroup(togglePlayer);
+        togglePlayerX.setToggleGroup(togglePlayer);
+
+        selectPlayer.getChildren().addAll(togglePlayerLabel, togglePlayerX, togglePlayerO);
+
+
+
+        settingsLayout.getChildren().addAll(settingsBar, selectPlayer);
 
         settingsScene = new Scene(settingsLayout, 600, 600);
         // End of settingsScene
@@ -225,29 +284,33 @@ public class TicTacToeView extends Game {
         Button current = viewMap.get(yPos).get(xPos);
         String currentId = current.getId();
 
-        if (!currentId.equals(emptyId)) {
-            return;
-        } else {
-            ImageView img = new ImageView(isTurn ? oBox : xBox);
-            img.setFitWidth(150);
-            img.setFitHeight(150);
-            current.setGraphic(img);
-            current.setId(isTurn ? oId : xId);
-        }
-        if (isGameOver()) {
-            if (checkWinner(xId)) {
-                hasWon(xId);
-                xScoreLabel.setText("" + (Integer.valueOf(xScoreLabel.getText()) + 1));
-            } else if (checkWinner(oId)) {
-                hasWon(oId);
-                oScoreLabel.setText("" + (Integer.valueOf(oScoreLabel.getText()) + 1));
-            } else {
-                hasWon("draw");
+        if (!hasPopup){
+            if (!currentId.equals(emptyId)) {
+                return;
+            }else {
+                ImageView img = new ImageView(isTurn ? oBox : xBox);
+                img.setFitWidth(150);
+                img.setFitHeight(151);
+                current.setGraphic(img);
+                current.setId(isTurn ? oId : xId);
             }
+            if(isGameOver()){
+                if(checkWinner(xId)){
+                    hasWon(xId);
+                    xScoreLabel.setText(""+(Integer.valueOf(xScoreLabel.getText())+1));
+                }else if(checkWinner(oId)){
+                    hasWon(oId);
+                    oScoreLabel.setText(""+(Integer.valueOf(oScoreLabel.getText())+1));
+                } else {
+                    hasWon("draw");
+                }
 
-            return;
+                hasPopup = true;
+                return;
+            }
+            swapTurn();
         }
-        swapTurn();
+
     }
 
     private void hasWon(String player) {
@@ -269,10 +332,8 @@ public class TicTacToeView extends Game {
         popupBox.setAlignment(Pos.CENTER);
 
         Button okButton = new Button("Play again!");
-        okButton.setOnAction(e -> {
-            resetBoard();
-            popup.hide();
-        });
+
+        okButton.setOnAction(e -> {resetBoard(); popup.hide();hasPopup = false;});
         okButton.setMinWidth(200);
         okButton.setMinHeight(50);
 
@@ -282,6 +343,7 @@ public class TicTacToeView extends Game {
         if (player.equals(oId)) {
             if (Integer.valueOf(oScoreLabel.getText()) == 4) {
                 fooHasWon.setText("O has won the game and reached 5 points!");
+                okButton.setText("Start new game");
                 xScoreLabel.setText("0");
                 oScoreLabel.setText("-1");
             } else {
@@ -290,6 +352,7 @@ public class TicTacToeView extends Game {
         } else if (player.equals(xId)) {
             if (Integer.valueOf(xScoreLabel.getText()) == 4) {
                 fooHasWon.setText("X has won the game and reached 5 points!");
+                okButton.setText("Start new game");
                 xScoreLabel.setText("-1");
                 oScoreLabel.setText("0");
             } else {
