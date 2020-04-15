@@ -1,7 +1,7 @@
 package games.tictactoe;
 
 import games.Game;
-import javafx.application.Application;
+import games.Vector2;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -17,32 +17,31 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
-public class Main extends Game {
+public class TicTacToeView extends Game {
     private Stage window;
     private Scene homeScene, gameScene, settingsScene;
 
-    private static final String emptyId = "e";
-    private static final String xId = "x";
-    private static final String oId = "o";
+    private TicTacToeModel model;
 
     private Label xScoreLabel = new Label("0");
     private Label oScoreLabel = new Label("0");
 
-    private Controller playField = new Controller(600, 600);
-    private ArrayList<ArrayList<Button>> board = new ArrayList<>();
+    private Vector2 playField = new Vector2(600, 600);
+    private ArrayList<ArrayList<Button>> viewMap = new ArrayList<>();
 
     private Image eBox = new Image(getClass().getResourceAsStream("/images/tictactoe/ttt_empty.png"));
     private Image oBox = new Image(getClass().getResourceAsStream("/images/tictactoe/o_tile.png"));
     private Image xBox = new Image(getClass().getResourceAsStream("/images/tictactoe/x_tile.png"));
 
-    private  boolean isTurn = false; //if false -> X's turn, if true -> O's turn
+    private boolean isTurn = false; //if false -> X's turn, if true -> O's turn
     private Label labelTurn;
+
+    TicTacToeView() {
+        this.model = new TicTacToeModel(this);
+    }
 
     /**
      * Start the game.
@@ -60,7 +59,13 @@ public class Main extends Game {
         xScoreLabel.setText("0");
         oScoreLabel.setText("0");
         isTurn = false;
-        board = new ArrayList<>();
+        viewMap = new ArrayList<>();
+    }
+
+
+    @Override
+    public void update() {
+
     }
 
     /**
@@ -69,7 +74,7 @@ public class Main extends Game {
      * @param stage DO NOT USE, USE 'this.stage'.
      */
     @Override
-    public void start(Stage stage){
+    public void start(Stage stage) {
         //primary stage
         window = this.stage;
         window.setTitle("Tic Tac Toe");
@@ -124,8 +129,8 @@ public class Main extends Game {
         gameLayout.setAlignment(Pos.CENTER);
         window.setResizable(false);
         gameLayout.setPadding(new Insets(70));
-        float extraWidth = (float)(gameLayout.getPadding().getLeft() + gameLayout.getPadding().getRight());
-        float extraHeight = (float)(gameLayout.getPadding().getTop() + gameLayout.getPadding().getBottom());
+        float extraWidth = (float) (gameLayout.getPadding().getLeft() + gameLayout.getPadding().getRight());
+        float extraHeight = (float) (gameLayout.getPadding().getTop() + gameLayout.getPadding().getBottom());
 
         //Turn label
         labelTurn = new Label(isTurn ? "O" : "X" + "'s turn");
@@ -137,7 +142,7 @@ public class Main extends Game {
         Label oLabel = new Label("O:");
         //Label xScoreLabel = new Label("0");
         //Label oScoreLabel = new Label("0");
-        xScoreLabel.setPadding(new Insets(0 ,100, 0, 0));
+        xScoreLabel.setPadding(new Insets(0, 100, 0, 0));
         hbox.getChildren().addAll(xLabel, xScoreLabel, oLabel, oScoreLabel);
         hbox.setAlignment(Pos.CENTER);
 
@@ -152,12 +157,12 @@ public class Main extends Game {
 
         //creating buttons
         for (int y = 0; y < 3; y++) {
-            board.add(new ArrayList<>());
+            viewMap.add(new ArrayList<>());
             for (int x = 0; x < 3; x++) {
                 Button btn = new Button();
-                board.get(y).add(btn);
+                viewMap.get(y).add(btn);
                 btn.setStyle("-fx-background-radius:0;" + "-fx-focus-color: #cfcfcf;");
-                board.get(y).get(x).setId(emptyId);
+                viewMap.get(y).get(x).setId(model.getBoard().getEmptyId());
 
                 btn.setMinSize(150, 150);
 
@@ -208,70 +213,34 @@ public class Main extends Game {
         window.show();
     }
 
-    private boolean checkEmptySpaces(){
-        int emptySpaces = 0;
-        for (int j=0; j<3; j++){
-            for (int i=0; i<3; i++){
-                if(board.get(i).get(j).getId().equals(emptyId)){
-                    emptySpaces++;
-                }
-            }
-        }
-        return emptySpaces == 0;
+    private Scene createMainMenu() {
+
     }
 
-    private boolean isGameOver(){
-        return checkWinner(xId) || checkWinner(oId) || checkEmptySpaces();
+    private Scene createGameMenu() {
+
     }
 
-    boolean checkWinner(String player) {
-        //Diagonal wins.
-        if ((board.get(0).get(0).getId().equals(board.get(1).get(1).getId()) && board.get(0).get(0).getId().equals(board.get(2).get(2).getId()) && board.get(0).get(0).getId().equals(player)) ||
-                (board.get(2).get(0).getId().equals(board.get(1).get(1).getId()) && board.get(2).get(0).getId().equals(board.get(0).get(2).getId()) && board.get(2).get(0).getId().equals(player))) {
-            return true;
-        }
-        //Vertical and horizontal wins.
-        for (int i = 0; i < 3; ++i) {
-            if (((board.get(i).get(0).getId().equals(board.get(i).get(1).getId()) && board.get(i).get(0).getId().equals(board.get(i).get(2).getId()) && board.get(i).get(0).getId().equals(player))
-                    || (board.get(0).get(i).getId().equals(board.get(1).get(i).getId()) && board.get(0).get(i).getId().equals(board.get(2).get(i).getId()) && board.get(0).get(i).getId().equals(player)))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void resetBoard(){
-        for(int j=0; j<3; j++){
-            for(int i=0; i<3; i++){
-                ImageView img = new ImageView(eBox);
-                img.setFitWidth(150);
-                img.setFitHeight(150);
-                board.get(i).get(j).setGraphic(img);
-                board.get(i).get(j).setId(emptyId);
-            }
-        }
-    }
-
-    private void onTileClick(int xPos, int yPos){
-        Button current = board.get(yPos).get(xPos);
+    private void onTileClick(int xPos, int yPos) {
+        Button current = viewMap.get(yPos).get(xPos);
         String currentId = current.getId();
 
         if (!currentId.equals(emptyId)) {
             return;
-        }else {
+        } else {
             ImageView img = new ImageView(isTurn ? oBox : xBox);
             img.setFitWidth(150);
             img.setFitHeight(150);
             current.setGraphic(img);
             current.setId(isTurn ? oId : xId);
         }
-        if(isGameOver()){
-            if(checkWinner(xId)){
+        if (isGameOver()) {
+            if (checkWinner(xId)) {
                 hasWon(xId);
-                xScoreLabel.setText(""+(Integer.valueOf(xScoreLabel.getText())+1));
-            }else if(checkWinner(oId)){
+                xScoreLabel.setText("" + (Integer.valueOf(xScoreLabel.getText()) + 1));
+            } else if (checkWinner(oId)) {
                 hasWon(oId);
-                oScoreLabel.setText(""+(Integer.valueOf(oScoreLabel.getText())+1));
+                oScoreLabel.setText("" + (Integer.valueOf(oScoreLabel.getText()) + 1));
             } else {
                 hasWon("draw");
             }
@@ -281,7 +250,7 @@ public class Main extends Game {
         swapTurn();
     }
 
-    private void hasWon(String player){
+    private void hasWon(String player) {
         Popup popup = new Popup();
         VBox popupBox = new VBox();
 
@@ -300,7 +269,10 @@ public class Main extends Game {
         popupBox.setAlignment(Pos.CENTER);
 
         Button okButton = new Button("Play again!");
-        okButton.setOnAction(e -> {resetBoard(); popup.hide();});
+        okButton.setOnAction(e -> {
+            resetBoard();
+            popup.hide();
+        });
         okButton.setMinWidth(200);
         okButton.setMinHeight(50);
 
@@ -315,7 +287,7 @@ public class Main extends Game {
             } else {
                 fooHasWon.setText("O has won the game!");
             }
-        } else if(player.equals(xId)) {
+        } else if (player.equals(xId)) {
             if (Integer.valueOf(xScoreLabel.getText()) == 4) {
                 fooHasWon.setText("X has won the game and reached 5 points!");
                 xScoreLabel.setText("-1");
@@ -327,21 +299,21 @@ public class Main extends Game {
             fooHasWon.setText("It's a draw!");
         }
 
-        if (!popup.isShowing()){
+        if (!popup.isShowing()) {
             popup.show(stage);
-        }
-        else {
+        } else {
             popup.hide();
         }
 
     }
+
     class ButtonHandler implements EventHandler<ActionEvent> {
 
         private int xPos;
         private int yPos;
-        private Main main;
+        private TicTacToeView main;
 
-        public ButtonHandler(int xPos, int yPos, Main main) {
+        public ButtonHandler(int xPos, int yPos, TicTacToeView main) {
             this.xPos = xPos;
             this.yPos = yPos;
             this.main = main;
@@ -353,25 +325,13 @@ public class Main extends Game {
         }
     }
 
-    private void swapTurn () {
+    @Override
+    public void startMatch() {
 
-        if (isTurn) isTurn = false;
-        else isTurn = true;
-
-        labelTurn.setText((isTurn ? "O" : "X") + "'s turn");
     }
 
-//    public String getPosId(int x, int y) { return board.get(y).get(x).getId(); }
-//    public String getPlayerId(boolean turn) { return isTurn ? oId : xId; }
-//    public String getEmptyId() { return emptyId; }
-//    public boolean getTurn() { return isTurn; }
-//    public Controller getPlayField() { return playField; }
-//    public Label getScoreO() { return oScoreLabel; }
-//    public Label getScoreX() { return xScoreLabel; }
+    @Override
+    public void goToMainMenu() {
 
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
-

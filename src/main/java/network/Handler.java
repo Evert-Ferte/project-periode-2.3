@@ -1,7 +1,7 @@
 package network;
 
 import games.reversi.ReversiModel;
-import games.reversi.Vector2;
+import games.Vector2;
 import java.util.HashMap;
 import java.util.Map;
 
