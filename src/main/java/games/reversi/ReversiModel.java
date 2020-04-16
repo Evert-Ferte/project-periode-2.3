@@ -1,5 +1,8 @@
 package games.reversi;
 
+import games.Ai;
+import games.Model;
+import games.Vector2;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import network.ConnectionModel;
@@ -9,12 +12,16 @@ import network.SenderModel;
 import java.io.IOException;
 import java.util.*;
 
-public class ReversiModel{
-    private static final int mapSize = 8;
-    
+
+public class ReversiModel extends Model {
+    private  static final int mapSize = 8;
+
     //Ai variables
     private static final int depth = 5;
     private String ai = "minimax"; //  "random", "minimaxAlphaBeta", "minimaxRiskRegion"
+
+    private static boolean aiPlayer = true; //true=white, false=black
+    private ArrayList<ArrayList<Integer>> riskRegion;
 
     //risk region values
     private static final int cornerValue = 100;
@@ -25,32 +32,22 @@ public class ReversiModel{
     private static final int antiEdgeValues = -2;
 
     private static boolean aiPlayer = true;     //true=white, false=black
-    private ArrayList<ArrayList<Integer>> riskRegion;
-    
-    private static final int minAiMoveDelay = 10;
-    private static final int maxAiMoveDelay = 20;
-    
-    // General variables
+
+    //General variables
+
     private ReversiView view;
     private ReversiBoard board;
 
-    private GameMode gameMode = GameMode.PLAYER_VS_PLAYER;
-
-    public enum GameMode {
-        PLAYER_VS_PLAYER,
-        PLAYER_VS_AI,
-        ONLINE
-    }
-    
     // Networking variables
     private String ip = /*"145.33.225.170";*/ "localhost";
     private int port = 7789;
     private int timeout = 10;
     private ConnectionModel connection;
-    
+
     private String clientName = "D5";
     private SenderModel sender;
     private HandlerModel handler;
+
     
     /**
      * The constructor. Sets the view reference.
@@ -66,10 +63,12 @@ public class ReversiModel{
     /**
      * Called when clicking on a game tile. Tries to create a connection with the game server.
      */
+    @Override
     public void startApplication() {
         createConnection();
     }
-    
+
+    @Override
     public void gameStart(GameMode mode) {
 //        log("restart");
         resetVariables();
@@ -87,6 +86,8 @@ public class ReversiModel{
     
         log("Starting new game");
     }
+
+    @Override
     public void gameEnd(boolean won) {
         // TODO - do general game end stuff here, and call onGameWon() or onGameLost()
 
@@ -97,18 +98,24 @@ public class ReversiModel{
         
         // TODO - close game here
     }
-    private void onGameWon() {
+
+    @Override
+    public void onGameWon() {
         // TODO - specific game won stuff here
         
         log("game won");
         view.goToMainMenu();
     }
-    private void onGameLost() {
+
+    @Override
+    public void onGameLost() {
         // TODO - specific game lost stuff here
         
         log("game lost");
         view.goToMainMenu();
     }
+
+    @Override
     public void forfeitGame() {
         if (gameMode == GameMode.ONLINE)
             sender.forfeitAGame();
@@ -119,33 +126,35 @@ public class ReversiModel{
     /**
      * Resets the game variables.
      */
-    public void resetVariables() {
+    @Override
+    protected void resetVariables() {
         board.reset();
     }
-    
+
 //region Turn handling functions
-    
-    private void turnHandler() {
+    @Override
+    public void turnHandler() {
         turnEnd();
-        
+
         if (gameMode == GameMode.PLAYER_VS_AI)
             if (!board.isPlayerTurn())
                 AiMove();
         
 //        log("next turn -> isPlayerTurn: " + board.isPlayerTurn());
 //        log(getClientName() + " is " + (getBoard().isPlayerWhite() ? "white" : "black"));
+
     }
+
+    @Override
     public void turnStart() {
         log("Turn started");
     }
-    int counter = 0;
-    private void turnEnd() {
+
+
+    @Override
+    public void turnEnd() {
         // Update the view on the end of each turn
-        boolean gameFinished = board.isGameFinished();
-
-        log("Turn ended, switching turn...");
         board.switchTurn();
-
         updateView();
     }
 //endregion
@@ -153,13 +162,15 @@ public class ReversiModel{
     /**
      * Updates all UI components.
      */
-    private void updateView() { view.update(); }
+    @Override
+    public void updateView() { view.update(); }
 
 // region ai movement
 
     /**
      * Desc here...
      */
+    @Override
     public void AiMove() {
         // Return if we are not playing against AI
         if (gameMode == GameMode.PLAYER_VS_PLAYER) return;
@@ -208,7 +219,7 @@ public class ReversiModel{
      * @param x X position where the tile will be placed.
      * @param y Y position where the tile will be placed.
      */
-
+    @Override
     public void clickPosition(int x, int y) {
         if (board.isGameFinished()) {
             log("Game finished, no more available spots");
@@ -343,15 +354,9 @@ public class ReversiModel{
 
 //region Getters and setters
 
-    private void setGameMode(GameMode mode) {
-        gameMode = mode;
-    }
-
     public String getClientName() { return clientName; }
     public void setClientName(String name) { this.clientName = name; }
     
-    public GameMode getGameMode() { return gameMode; }
-
     public ReversiBoard getBoard(){return board;}
     
     public void setAi(String aiType) {
@@ -383,36 +388,4 @@ public class ReversiModel{
     public int getTimeout() { return timeout; }
     
 //endregion
-    
-    /**
-     * log a message, like System.out.println(), but add the client's name before the message.
-     *
-     * @param message The message that will be printed.
-     */
-    public void log(String message) {
-        StringBuilder template = new StringBuilder();
-        
-        int length = 20;
-        int curOffLength = length - 4;
-        for (int i = 0; i < length; i++) {
-            String txt = "";
-            
-            if (i < clientName.length() && i < curOffLength)
-                txt = String.valueOf(clientName.charAt(i));
-            else if (i < curOffLength)
-                txt = " ";
-            else if (clientName.length() < curOffLength)
-                txt = " ";
-            else if (i < length - 1)
-                txt = ".";
-            
-            // Always add this on the last node
-            if (i == length - 1)
-                txt = " : ";
-            
-            template.append(txt);
-        }
-    
-        System.out.println(template + message);
-    }
 }

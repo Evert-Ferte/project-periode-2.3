@@ -1,4 +1,4 @@
-package games.reversi;
+package games;
 
 public class Vector2 {
     public float x;

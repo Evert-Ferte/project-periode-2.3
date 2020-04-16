@@ -22,13 +22,21 @@ public abstract class Game extends Application {
      * Reset the game and it's values.
      */
     public abstract void resetGame();
-    
-    /**
-     * This function is called once on the start of the application.
-     *
-     * @param stage DO NOT USE, USE 'this.stage'.
-     * @throws Exception Throws any exceptions caught.
-     */
+
+    public abstract void startMatch();
+
+    public abstract void goToMainMenu();
+
+    public abstract void update();
+
+    public abstract void closeGame();
+
+        /**
+         * This function is called once on the start of the application.
+         *
+         * @param stage DO NOT USE, USE 'this.stage'.
+         * @throws Exception Throws any exceptions caught.
+         */
     @Override
     public abstract void start(Stage stage) throws Exception;
 }

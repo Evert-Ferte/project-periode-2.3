@@ -1,11 +1,13 @@
-package games.reversi;
+package games;
+
+import games.reversi.ReversiBoard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-class Ai {
+public class Ai {
 
-    static Vector2 aiRandom(ReversiBoard board){
+    public static Vector2 aiRandom(Board board){
         // TODO - Check if this if statement is needed. AI can be either black or white
 //        if(game.isWhiteTurn()){
 //        }
@@ -22,12 +24,33 @@ class Ai {
         return null;
     }
 
-    static Vector2 aiMiniMax(ReversiBoard board, int depth, boolean player) throws CloneNotSupportedException {
+    static Vector2 aiMiniMax(Board board, int depth, boolean player) throws CloneNotSupportedException {
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;
 
         for (Vector2 position : board.getAvailablePositions()) {
-           ReversiBoard cloneBoard = board.clone();
+           Board cloneBoard = board.clone();
+            cloneBoard.move((int)position.x, (int)position.y);
+            cloneBoard.switchTurn();
+            int score = miniMax(cloneBoard, depth, player);
+            if (score > optimumScore) {
+                optimumScore = score;
+                bestMove = position;
+            }
+        }
+        if(bestMove != null) {
+            return new Vector2((int) bestMove.x, (int) bestMove.y);
+        } else{
+            System.out.println("WARNING! No position found with minimax!");
+        }
+        return aiRandom(board);
+    }
+    public static Vector2 aiMiniMaxAlphaBetaPruning(Board board, int depth, boolean player) throws CloneNotSupportedException {
+        int optimumScore = Integer.MIN_VALUE;
+        Vector2 bestMove = null;
+
+        for (Vector2 position : board.getAvailablePositions()) {
+            Board cloneBoard = board.clone();
             cloneBoard.move((int)position.x, (int)position.y);
             cloneBoard.switchTurn();
             int score = miniMaxAlphaBetaPruning(cloneBoard, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, player);
@@ -43,35 +66,14 @@ class Ai {
         }
         return aiRandom(board);
     }
-    static Vector2 aiMiniMaxAlphaBetaPruning(ReversiBoard board, int depth, boolean player) throws CloneNotSupportedException {
-        int optimumScore = Integer.MIN_VALUE;
-        Vector2 bestMove = null;
-
-        for (Vector2 position : board.getAvailablePositions()) {
-            ReversiBoard cloneBoard = board.clone();
-            cloneBoard.move((int)position.x, (int)position.y);
-            cloneBoard.switchTurn();
-            int score = miniMaxAlphaBetaPruning(cloneBoard, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, player);
-            if (score > optimumScore) {
-                optimumScore = score;
-                bestMove = position;
-            }
-        }
-        if(bestMove != null) {
-            return new Vector2((int) bestMove.x, (int) bestMove.y);
-        } else{
-            System.out.println("WARNING! No position found with minimax!");
-        }
-        return aiRandom(board);
-    }
-    static Vector2 aiMiniMaxAlphaBetaPruningRiskRegions(ReversiBoard board, ArrayList<ArrayList<Integer>> riskRegions, int depth, boolean player) throws CloneNotSupportedException {
+    public static Vector2 aiMiniMaxAlphaBetaPruningRiskRegions(ReversiBoard board, ArrayList<ArrayList<Integer>> riskRegions, int depth, boolean player) throws CloneNotSupportedException {
         //Initial values
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;
 
         //Looping though positions and getting the score of those positions
         for (Vector2 position : board.getAvailablePositions()) {
-            ReversiBoard cloneBoard = board.clone();
+            ReversiBoard cloneBoard = (ReversiBoard) board.clone();
             cloneBoard.move((int)position.x, (int)position.y);
             cloneBoard.switchTurn();
             int score = miniMaxAlphaBetaPruningRiskRegions(cloneBoard, riskRegions, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, player) + riskRegions.get((int)position.y).get((int)position.x);
@@ -88,7 +90,7 @@ class Ai {
         return aiRandom(board);
     }
 
-    private static Integer getStaticEvaluation(ReversiBoard board, int depth) {
+    private static Integer getStaticEvaluation(Board board, int depth) {
         if(depth == 0 || board.isGameFinished()) {
             int eval;
             if(board.getScoreWhite() - board.getScoreBlack() == 0){
@@ -103,7 +105,7 @@ class Ai {
         return null;
     }
     //mapSize, cornerValue, antiCornerValue, antiCornerEdgeValue, edgeValue, edgeCornerValue, antiEdgeValues
-    static ArrayList<ArrayList<Integer>> generateRiskRegions(int size, int cornerValue, int antiCornerValue, int antiCornerEdgeValue, int edgeValue, int edgeCornerValue, int antiEdgeValue ){
+    public static ArrayList<ArrayList<Integer>> generateRiskRegions(int size, int cornerValue, int antiCornerValue, int antiCornerEdgeValue, int edgeValue, int edgeCornerValue, int antiEdgeValue){
         int mapSize = size-1;
 
         if(mapSize <= 2){
@@ -145,14 +147,14 @@ class Ai {
         return riskRegions;
     }
 
-    private static int miniMax(ReversiBoard board, int depth, boolean isMaximizing) throws CloneNotSupportedException {
+    private static int miniMax(Board board, int depth, boolean isMaximizing) throws CloneNotSupportedException {
         Integer eval = getStaticEvaluation(board, depth);
         if (eval != null) return eval;
         int optimumScore;
         if (isMaximizing){
             optimumScore = Integer.MIN_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = board.clone();
+                Board cloneBoard = board.clone();
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
 
@@ -163,7 +165,7 @@ class Ai {
         else{
             optimumScore = Integer.MAX_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = board.clone();
+                Board cloneBoard = board.clone();
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
                 int score = miniMax(cloneBoard, depth-1,true);
@@ -173,14 +175,14 @@ class Ai {
         return optimumScore;
     }
 
-    private static int miniMaxAlphaBetaPruning(ReversiBoard board, int depth, int alpha, int beta, boolean isMaximizing) throws CloneNotSupportedException {
+    private static int miniMaxAlphaBetaPruning(Board board, int depth, int alpha, int beta, boolean isMaximizing) throws CloneNotSupportedException {
         Integer eval = getStaticEvaluation(board, depth);
         if (eval != null) return eval;
         int optimumScore;
         if (isMaximizing){
             optimumScore = Integer.MIN_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = board.clone();
+                Board cloneBoard = board.clone();
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
 
@@ -195,7 +197,7 @@ class Ai {
         else{
             optimumScore = Integer.MAX_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = board.clone();
+                Board cloneBoard = board.clone();
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
                 int score = miniMaxAlphaBetaPruning(cloneBoard, depth-1, alpha, beta,true);
@@ -216,7 +218,7 @@ class Ai {
         if (isMaximizing){
             optimumScore = Integer.MIN_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = board.clone();
+                ReversiBoard cloneBoard = (ReversiBoard) board.clone();
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
 
@@ -231,7 +233,7 @@ class Ai {
         else{
             optimumScore = Integer.MAX_VALUE;
             for (Vector2 position : board.getAvailablePositions()) {
-                ReversiBoard cloneBoard = board.clone();
+                ReversiBoard cloneBoard = (ReversiBoard) board.clone();
                 cloneBoard.move((int)position.x, (int)position.y);
                 cloneBoard.switchTurn();
                 int score = miniMaxAlphaBetaPruningRiskRegions(cloneBoard, riskRegions, depth-1, alpha, beta,true) - riskRegions.get((int)position.y).get((int)position.x);

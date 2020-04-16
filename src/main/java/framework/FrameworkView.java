@@ -3,8 +3,8 @@ package framework;
 import customization.ColorSet;
 import games.Game;
 import games.reversi.ReversiView;
-import games.reversi.Vector2;
-import games.tictactoe.Main;
+import games.Vector2;
+import games.tictactoe.TicTacToeView;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -177,7 +177,7 @@ public class FrameworkView extends Application {
         // Create a list with games and some empty tiles
         GameTile[] gameTiles = new GameTile[] {
                 new GameTile("Reversi", gameImages[0], new ReversiView()),
-                new GameTile("Tic Tac Toe", gameImages[1], new Main()),
+                new GameTile("Tic Tac Toe", gameImages[1], new TicTacToeView()),
                 new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(), new GameTile(),
         };
         

@@ -1,6 +1,7 @@
 package games.reversi;
 
 import games.Game;
+import games.Vector2;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
