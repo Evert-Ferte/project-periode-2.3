@@ -31,8 +31,6 @@ public class ReversiModel extends Model {
     private static final int edgeCornerValue = 10;
     private static final int antiEdgeValues = -2;
 
-    private static boolean aiPlayer = true;     //true=white, false=black
-
     //General variables
 
     private ReversiView view;
