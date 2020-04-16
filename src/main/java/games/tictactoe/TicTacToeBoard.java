@@ -13,12 +13,6 @@ public class TicTacToeBoard extends Board {
         generateModelMap(mapSize);
     }
 
-
-    @Override
-    public void reset() {
-
-    }
-
     @Override
     public boolean isGameFinished() {
         return checkWinner(whiteId) || checkWinner(blackId) || (getAvailablePositions().length <= 0);
@@ -55,7 +49,13 @@ public class TicTacToeBoard extends Board {
 
     @Override
     public boolean move(int x, int y) {
+        if (!modelMap.get(y).get(x).equals(emptyId)){
+            modelMap.get(y).set(x,getPlayerId(whiteTurn));
+            return true;
+        }
+
         return false;
+
     }
 
     @Override

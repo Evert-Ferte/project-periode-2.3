@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class ReversiModel extends Model {
-
+    private  static final int mapSize = 8;
     //Ai variables
     private static final String ai = "minimaxAlphaBeta"; //  "random", "minimaxAlphaBeta", "minimaxRiskRegion"
     private static final int depth = 5;

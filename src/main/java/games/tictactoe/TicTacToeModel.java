@@ -16,7 +16,7 @@ public class TicTacToeModel extends Model {
     private static final String ai = "minimaxAlphaBeta"; //  "random", "minimaxAlphaBeta", "minimaxRiskRegion"
     private static final int depth = 5;
 
-    private static boolean aiPlayer = true; //true=white, false=black
+    private boolean aiPlayer = true; //true=white, false=black
 
     //General variables
     private TicTacToeView view;
@@ -115,11 +115,6 @@ public class TicTacToeModel extends Model {
     public void AiMove() {
         if (gameMode == GameMode.PLAYER_VS_PLAYER) return;
 
-    }
-
-    @Override
-    public void clickPosition(int x, int y) {
-        if (board.isGameFinished()) return;
         int delay = minAiMoveDelay + new Random().nextInt(maxAiMoveDelay - minAiMoveDelay);
 
         // Call AiMove after a few milliseconds
@@ -147,8 +142,20 @@ public class TicTacToeModel extends Model {
         }, delay);
     }
 
+    @Override
+    public void clickPosition(int x, int y) {
+        if (board.isGameFinished()) return;
+        if(board.move(x,y)){
+            System.out.println("handel");
+            turnHandler();
+        }
+        updateView();
+    }
+
     public String getClientName() { return clientName; }
     public void setClientName(String name) { this.clientName = name; }
+
+    public void setAiPlayer(boolean player){aiPlayer = player;}
 
     public TicTacToeBoard getBoard(){return board;}
 

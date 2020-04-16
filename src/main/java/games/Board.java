@@ -1,5 +1,7 @@
 package games;
 
+import javafx.scene.Scene;
+
 import java.util.ArrayList;
 
 //TODo make abstract class
@@ -46,7 +48,8 @@ public abstract class Board implements Cloneable {
                 modelMap.get(y).add(emptyId);
             }
         }
-    };
+        System.out.println(modelMap);
+    }
 
     public abstract Vector2[] getAvailablePositions();
 

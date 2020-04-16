@@ -9,6 +9,7 @@ public class ReversiBoard extends Board {
 
     ReversiBoard(int mapSize){
         this.mapSize = mapSize;
+        System.out.println(mapSize + " reversi");
         generateModelMap(mapSize);
     }
 
@@ -216,6 +217,11 @@ public class ReversiBoard extends Board {
         if (isWhiteTurn())  addScoreToWhite();
         else                addScoreToBlack();
         return true;
+    }
+
+    @Override
+    public ReversiBoard clone() throws CloneNotSupportedException {
+        return (ReversiBoard) super.clone();
     }
 
     @Override

@@ -29,6 +29,8 @@ public abstract class Game extends Application {
 
     public abstract void update();
 
+    public abstract void closeGame();
+
         /**
          * This function is called once on the start of the application.
          *
