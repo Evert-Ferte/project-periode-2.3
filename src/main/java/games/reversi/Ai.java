@@ -6,10 +6,6 @@ import java.util.Arrays;
 class Ai {
 
     static Vector2 aiRandom(ReversiBoard board){
-        // TODO - Check if this if statement is needed. AI can be either black or white
-//        if(game.isWhiteTurn()){
-//        }
-        
         Vector2[] avPos = board.getAvailablePositions();
         
         if (avPos.length > 0) {

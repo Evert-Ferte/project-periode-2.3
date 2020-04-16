@@ -30,34 +30,33 @@ import javafx.util.Duration;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-// TODO - font for framework, reversi and ttt
 public class FrameworkView extends Application {
     private static final Vector2 WINDOW_SIZE = new Vector2(1000, 600);
     private static final ColorSet DARK_THEME = new ColorSet("Dark theme", "#212121", "#1e1e1e", "#878787", "#ffffff", "#000000");
     private static final ColorSet LIGHT_THEME = new ColorSet("Light theme", "#e5e5e5", "#d8d8d8", "#333333", "#000000", "#ffffff");
     
     private ColorSet currentColorSet = DARK_THEME;
+    private boolean use12HourNotation = false;
     
+    // UI variables
+    private Scene mainScene;
+    private Scene optionScene;
+    
+    private Label currentTimeLabel;
     private Label gameLabel;
-    
-    private Image emptyTileImage = new Image(getClass().getResourceAsStream("/images/framework/inner-shadow_2.png"));
-    private Image[] gameImages = new Image[] {
-            new Image(getClass().getResourceAsStream("/images/framework/game_reversi.png")),
-            new Image(getClass().getResourceAsStream("/images/framework/game_tic_tac_toe.png"))
-    };
     
     private Image settingsImage = new Image(getClass().getResourceAsStream("/images/general/settings.png"));
     private Image homeImage = new Image(getClass().getResourceAsStream("/images/general/home.png"));
     private Image closeImage = new Image(getClass().getResourceAsStream("/images/general/power.png"));
     
-    private Scene mainScene;
-    private Scene optionScene;
-    
-    private Label currentTimeLabel;
     private ChoiceBox<String> themeChoiceBox;
+    private CheckBox use12HourCheckBox;
     
-    private boolean use12HourNotation = false;
-    CheckBox cb;
+    private final Image emptyTileImage = new Image(getClass().getResourceAsStream("/images/framework/inner-shadow_2.png"));
+    private final Image[] gameImages = new Image[] {
+            new Image(getClass().getResourceAsStream("/images/framework/game_reversi.png")),
+            new Image(getClass().getResourceAsStream("/images/framework/game_tic_tac_toe.png"))
+    };
     
     /**
      * This function is called on the start of the application.
@@ -67,7 +66,7 @@ public class FrameworkView extends Application {
      */
     @Override
     public void start(Stage stage) {
-        // Create the game label, game tiles and buttons
+        // Create all UI parts and components
         optionScene                 = createSettingsMenu(stage);
         BorderPane notificationBar  = createNotificationBar();
         gameLabel                   = createGameLabel();
@@ -78,7 +77,6 @@ public class FrameworkView extends Application {
         VBox vBox = new VBox(notificationBar, gameLabel, scrollPane, buttonHolder);
         vBox.setSpacing(20);
         vBox.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.primary), null, null)));
-        
         addThemeChangeListener(change -> vBox.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.primary), null, null))));
         
         // Create a new scene containing the vertical layout
@@ -91,6 +89,13 @@ public class FrameworkView extends Application {
         stage.show();
     }
     
+//region UI creation
+    
+    /**
+     * Creates and returns the notification bar we see at the top of the screen.
+     *
+     * @return Returns the notification bar
+     */
     private BorderPane createNotificationBar() {
         int barHeight = 30;
         
@@ -99,6 +104,7 @@ public class FrameworkView extends Application {
         updateTimeLabel(currentTimeLabel);
         currentTimeLabel.setFont(new Font(16));
         currentTimeLabel.setTextFill(Color.web(currentColorSet.textPrimary));
+        
         HBox timeBox = new HBox(currentTimeLabel);
         timeBox.setAlignment(Pos.CENTER_LEFT);
         timeBox.setPadding(new Insets(0, 0, 0, 20));
@@ -109,7 +115,7 @@ public class FrameworkView extends Application {
         iconsBox.setSpacing(5);
         iconsBox.setPadding(new Insets(0, 20, 0, 0));
         
-        // Set all images in the bar
+        // Get all images in the bar
         ImageView[] icons = new ImageView[] {
                 new ImageView(new Image(getClass().getResourceAsStream("/images/general/high-volume.png"))),
                 new ImageView(new Image(getClass().getResourceAsStream("/images/general/wifi-signal.png"))),
@@ -141,7 +147,9 @@ public class FrameworkView extends Application {
             currentTimeLabel.setTextFill(Color.web(currentColorSet.textPrimary));
             bar.setBackground(new Background(new BackgroundFill(Color.web(currentColorSet.secondary), null, null)));
         });
-        cb.addEventHandler(ActionEvent.ACTION, e -> {
+        
+        // Add functionality to the checkbox that toggles 12/24 hour time notation
+        use12HourCheckBox.addEventHandler(ActionEvent.ACTION, e -> {
             use12HourNotation = !use12HourNotation;
             updateTimeLabel(currentTimeLabel);
         });
@@ -222,7 +230,6 @@ public class FrameworkView extends Application {
         }
         
         // Create a scroll pane containing all (game)tiles
-        // TODO - disable vertical scrolling (dragging)
         ScrollPane scrollPane = new ScrollPane(tiles);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setPannable(true);
@@ -249,9 +256,10 @@ public class FrameworkView extends Application {
         };
         scrollPane.skinProperty().addListener(skinChangeListener);
         
-        addThemeChangeListener(change -> scrollPane.setStyle("-fx-background-color: " +  currentColorSet.primary +
-                "; -fx-background: " + currentColorSet.primary + ";"));
         addThemeChangeListener(change -> {
+            scrollPane.setStyle("-fx-background-color: " +  currentColorSet.primary +
+                    "; -fx-background: " + currentColorSet.primary + ";");
+    
             Set<Node> nodes = scrollPane.lookupAll(".scroll-bar");
             for (final Node node : nodes) {
                 if (node instanceof ScrollBar) {
@@ -319,6 +327,11 @@ public class FrameworkView extends Application {
         return buttonHolder;
     }
     
+    /**
+     * Creates the settings menu with all its components.
+     * @param stage A reference to the main stage.
+     * @return Returns the settings menu in type 'Scene'.
+     */
     private Scene createSettingsMenu(Stage stage) {
         // Create the color theme label
         Label themeLabel = new Label("Interface theme");
@@ -331,6 +344,7 @@ public class FrameworkView extends Application {
         themeChoiceBox.setValue(currentColorSet.hashCode() == DARK_THEME.hashCode() ? "Dark theme" : "Light theme");
         themeChoiceBox.setOnAction(e -> themeChanged(themeChoiceBox.getValue()));
         
+        // Combine the label and choice box to create the first options
         BorderPane option1 = new BorderPane();
         option1.setMaxSize(500, 100);
         option1.setLeft(themeLabel);
@@ -340,16 +354,16 @@ public class FrameworkView extends Application {
         Label timeNotationLabel = new Label("Use 24 hour time notation");
         timeNotationLabel.setTextFill(Color.web(currentColorSet.textPrimary));
         
-        cb = new CheckBox();
-        cb.fire();
-        
+        use12HourCheckBox = new CheckBox();
+        use12HourCheckBox.fire();
+    
+        // Combine the label and check box to create the second options
         BorderPane option2 = new BorderPane();
         option2.setPadding(new Insets(50, 0, 0, 0));
         option2.setMaxSize(500, 100);
         option2.setLeft(timeNotationLabel);
-        option2.setRight(cb);
+        option2.setRight(use12HourCheckBox);
     
-        // Create the back/home button
         final int bSize = 40;
         final String btnStyle = "-fx-background-color: " + currentColorSet.complementary + "; -fx-background-radius: 5em; " +
                 "-fx-min-width: " + (bSize + 20) + "px; -fx-min-height: " + (bSize + 20) + "px; -fx-max-width: " + (bSize + 20) + "px; " +
@@ -371,6 +385,7 @@ public class FrameworkView extends Application {
         BorderPane.setAlignment(homeButton, Pos.BOTTOM_CENTER);
         homeButtonHolder.setPadding(new Insets(0, 0, bSize * 3 + 27 + 60, 0));
         
+        // Create a vertical box that contains all options and the back button
         VBox vBox = new VBox(option1, option2, homeButtonHolder);
         vBox.setAlignment(Pos.TOP_CENTER);
         vBox.setPadding(new Insets(80, 0, 0, 0));
@@ -389,20 +404,27 @@ public class FrameworkView extends Application {
         return new Scene(vBox, WINDOW_SIZE.x, WINDOW_SIZE.y);
     }
     
-    private void addThemeChangeListener(InvalidationListener listener) {
-        themeChoiceBox.valueProperty().addListener(listener);
-    }
+//endregion
     
-    private void themeChanged(String value) {
-        // Set to theme based on the given value
-        currentColorSet = value.equals("Light theme") ? LIGHT_THEME : DARK_THEME;
-    }
+    /**
+     * Add an event that will be handled when the theme has been switched.
+     * @param listener The listener that will be added.
+     */
+    private void addThemeChangeListener(InvalidationListener listener) { themeChoiceBox.valueProperty().addListener(listener); }
     
+    /**
+     * Change the current theme.
+     * @param value Given value can be 'Light theme' or 'Dark theme'.
+     */
+    private void themeChanged(String value) { currentColorSet = value.equals("Light theme") ? LIGHT_THEME : DARK_THEME; }
+    
+    /**
+     * Updates the time label to the current time with the correct time notation.
+     * @param timeLabel The label that shows the current time
+     */
     private void updateTimeLabel(Label timeLabel) {
-        if (use12HourNotation)
-            timeLabel.setText(new SimpleDateFormat("hh:mm a").format(new Date()));
-        else
-            timeLabel.setText(new SimpleDateFormat("HH:mm").format(new Date()));
+        String timeNotation = "hh:mm" + (use12HourNotation ? " a":"");
+        timeLabel.setText(new SimpleDateFormat(timeNotation).format(new Date()));
     }
     
     /**

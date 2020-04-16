@@ -1,6 +1,5 @@
 package framework;
 
-import games.Game;
 import games.reversi.ReversiView;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -50,13 +49,16 @@ public class FrameworkController {
      */
     public static EventHandler<MouseEvent> MOUSE_RELEASED(FrameworkView.GameTile tile, Stage stage) {
         return mouseEvent -> {
+            // When we close the window, close the game and show the framework
             tile.game.stage.setOnCloseRequest(e -> {
-                ReversiView view = (ReversiView) tile.game;
-                view.closeGame();
+                tile.game.closeGame();
                 stage.show();
             });
+            
+            // Start the game
             tile.game.startGame();
             
+            // FOR TESTING PURPOSE      : If value is bigger than 0, start # extra clients
             int extraTestClients = 0;
             for (int i = 0; i < extraTestClients; i++) {
                 ReversiView view = new ReversiView("extra_test_client_" + (i + 1));
@@ -67,6 +69,7 @@ public class FrameworkController {
                 view.stage.setMaximized(false);
             }
             
+            // Hide the framework window
             stage.hide();
         };
     }

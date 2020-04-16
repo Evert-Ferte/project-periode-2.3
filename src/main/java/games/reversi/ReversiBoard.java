@@ -3,11 +3,11 @@ package games.reversi;
 import java.util.ArrayList;
 
 public class ReversiBoard implements Cloneable{
-    private int mapSize = 8;
-
     private static final String emptyId = "e";
     private static final String blackId = "b";
     private static final String whiteId = "w";
+
+    private int mapSize = 8;
 
     private int scoreWhite = 0;
     private int scoreBlack = 0;
@@ -15,22 +15,31 @@ public class ReversiBoard implements Cloneable{
     private boolean playerTurn = false;
 
     private ArrayList<ArrayList<String>> modelMap;
-
+    
+    /**
+     * The constructor for this class. Initializes the map.
+     * @param mapSize The map size for the reversi board (standard = 8).
+     */
     ReversiBoard(int mapSize){
         this.mapSize = mapSize;
-        generateModelMap(mapSize);
+        generateModelMap();
     }
-
+    
+    /**
+     * Resets the board and its values.
+     */
     void reset(){
-        generateModelMap(mapSize);
+        generateModelMap();
         setScoreWhite(0);
         setScoreBlack(0);
         setWhiteTurn(false);
         setPlayerTurn(true);
     }
-
-
-    private void generateModelMap(int mapSize){
+    
+    /**
+     * Generates the initial state board (without starting tiles).
+     */
+    private void generateModelMap(){
         modelMap = new ArrayList<>();
         for (int y = 0; y < mapSize; y++) {
             modelMap.add(new ArrayList<>());
@@ -39,7 +48,11 @@ public class ReversiBoard implements Cloneable{
             }
         }
     }
-
+    
+    /**
+     * Returns all available positions for the current active player/ai.
+     * @return Returns an array of vectors containing all available positions.
+     */
     public Vector2[] getAvailablePositions() {
         ArrayList<Vector2> pos = new ArrayList<>();
 
@@ -51,9 +64,6 @@ public class ReversiBoard implements Cloneable{
 
                 // If the tile is empty, check if the current player can place a valid tile here
                 if (tileId.equals(emptyId)) {
-//                    if (isValidTile(x, y))
-//                        pos.add(new Vector2(x, y));
-                    // TODO - sometimes it cannot find tiles on the first move of the game (fix this)
                     ArrayList<Vector2> p = getTilesToFlip(x, y);
 
                     if (p.size() > 0)
@@ -70,9 +80,7 @@ public class ReversiBoard implements Cloneable{
      */
     public void placeStartingTiles() {
         ArrayList<Vector2> tilesToFlip = new ArrayList<>();
-
-//        setTurn(false); //TODO for if we want a standard layout for the starting tiles, otherwise remove this.
-
+        
         // Place the first 2 white/black tiles
         tilesToFlip.add(new Vector2(3, 4));
         tilesToFlip.add(new Vector2(4, 3));
@@ -101,6 +109,7 @@ public class ReversiBoard implements Cloneable{
      * @param tiles Tiles that will be flipped.
      */
     private void flipTiles(ArrayList<Vector2> tiles) { flipTiles(tiles, true); }
+    
     /**
      * Flip all tiles from the list to the color of the current active player. You have the option to add/remove
      * score or not.
@@ -163,8 +172,9 @@ public class ReversiBoard implements Cloneable{
         r.addAll(tilesUpRight);
         r.addAll(tilesDownLeft);
         r.addAll(tilesDownRight);
-
-        return r;       // Return the merged list
+    
+        // Return the merged list
+        return r;
     }
 
     /**
@@ -177,6 +187,7 @@ public class ReversiBoard implements Cloneable{
      * @return Returns a list of positions.
      */
     private ArrayList<Vector2> getTilesInDirection(int x, int y, int xDir, int yDir) {
+        // Get/set some initial values for later use
         String oppositePlayerId = getPlayerId(!whiteTurn);
         String playerId         = getPlayerId(whiteTurn);
         boolean valid = false;
@@ -193,7 +204,7 @@ public class ReversiBoard implements Cloneable{
 
             // tile = opposite                  add to tiles
             if (id.equals(oppositePlayerId))    tilesInDirection.add(new Vector2(newX, newY));
-                // tile = player                    valid and stop
+            // tile = player                    valid and stop
             else if (id.equals(playerId))       { valid = true; break; }
             // tile = empty                     stop
             else                                break;
@@ -216,9 +227,13 @@ public class ReversiBoard implements Cloneable{
      * @return Returns if the given position is in the board.
      */
     private boolean isPositionInBoard(int x, int y) { return (x >= 0 && x < mapSize) && (y >= 0 && y < mapSize); }
-
+    
     public boolean isPlayerWhite() { return isWhiteTurn() == isPlayerTurn(); }
-
+    
+    /**
+     * Checks if there are any available spots left on the board, and thus checking if the game is finished or not.
+     * @return Returns true if that game is finished.
+     */
     public boolean isGameFinished() {
         // Loop through the map and find tiles that can still be flipped
         for (int y = 0; y < mapSize; y++) {
@@ -230,12 +245,10 @@ public class ReversiBoard implements Cloneable{
                     return false;
             }
         }
-
-//        return scoreWhite + scoreBlack == mapSize * mapSize;
         return true;
     }
 
-    boolean move(int x, int y){
+    public boolean move(int x, int y){
         // Get and check for possible tiles that can be flipped at the clicked position
         ArrayList<Vector2> tilesToFlip = getTilesToFlip(x, y);
         boolean validClick = tilesToFlip.size() > 0;
@@ -254,12 +267,21 @@ public class ReversiBoard implements Cloneable{
         else                addScoreToBlack();
         return true;
     }
-
+    
+    /**
+     * Switches the player turn to the opposite player.
+     */
     void switchTurn() {
         setWhiteTurn(!isWhiteTurn());
         setPlayerTurn(!isPlayerTurn());
     }
-
+    
+    /**
+     * Clones the current state of the board.
+     *
+     * @return Returns the cloned board.
+     * @throws CloneNotSupportedException Throws an exception if the clone could not be made.
+     */
     @Override
     protected ReversiBoard clone() throws CloneNotSupportedException {
         ReversiBoard cloneBoard = (ReversiBoard)super.clone();
@@ -275,7 +297,11 @@ public class ReversiBoard implements Cloneable{
         cloneBoard.playerTurn = playerTurn;
         return cloneBoard;
     }
-
+    
+    /**
+     * Returns a string representation of the board, score and turn.
+     * @return Returns a string containing the current state of the board.
+     */
     @Override
     public String toString() {
         return "ReversiBoard{" +
@@ -301,51 +327,65 @@ public class ReversiBoard implements Cloneable{
     public boolean isPlayerTurn() { return playerTurn; }
 
 
-    //region Getters and Setters
+//region Getters and Setters
+    
     private void setWhiteTurn(boolean whiteTurn) {
         this.whiteTurn = whiteTurn;
     }
     public void setPlayerTurn(boolean playerTurn) { this.playerTurn = playerTurn; }
 
-    public boolean getWhiteTurn(){return whiteTurn;}
-    public boolean getPlayerTurn(){return playerTurn;}
+    public boolean getWhiteTurn() { return whiteTurn; }
+    public boolean getPlayerTurn() { return playerTurn; }
 
     public String getPlayerId(boolean turn) { return turn ? whiteId : blackId; }
     public String getEmptyId() { return emptyId; }
 
     public int getMapSize() { return mapSize; }
 
-    //region Getters and setters for the score (both black and white score)
+//region Getters and setters for the score (both black and white score)
 
-        private void setScoreBlack(int score) { this.scoreBlack = score; }
-        private void setScoreWhite(int score) { this.scoreWhite = score; }
+    private void setScoreBlack(int score) { this.scoreBlack = score; }
+    private void setScoreWhite(int score) { this.scoreWhite = score; }
 
-        public int getScoreBlack() { return scoreBlack; }
-        public int getScoreWhite() { return scoreWhite; }
+    public int getScoreBlack() { return scoreBlack; }
+    public int getScoreWhite() { return scoreWhite; }
 
-        private void addScoreToBlack() { addScoreToBlack(1); }
-        private void addScoreToBlack(int amount) { setScoreBlack(getScoreBlack() + amount); }
-        private void subtractScoreFromBlack() { subtractScoreFromBlack(1); }
-        private void subtractScoreFromBlack(int amount) { setScoreBlack(getScoreBlack() - amount); }
+    private void addScoreToBlack() { addScoreToBlack(1); }
+    private void addScoreToBlack(int amount) { setScoreBlack(getScoreBlack() + amount); }
+    private void subtractScoreFromBlack() { subtractScoreFromBlack(1); }
+    private void subtractScoreFromBlack(int amount) { setScoreBlack(getScoreBlack() - amount); }
 
-        private void addScoreToWhite() { addScoreToWhite(1); }
-        private void addScoreToWhite(int amount) { setScoreWhite(getScoreWhite() + amount); }
-        private void subtractScoreFromWhite() { subtractScoreFromWhite(1); }
-        private void subtractScoreFromWhite(int amount) { setScoreWhite(getScoreWhite() - amount); }
+    private void addScoreToWhite() { addScoreToWhite(1); }
+    private void addScoreToWhite(int amount) { setScoreWhite(getScoreWhite() + amount); }
+    private void subtractScoreFromWhite() { subtractScoreFromWhite(1); }
+    private void subtractScoreFromWhite(int amount) { setScoreWhite(getScoreWhite() - amount); }
 
-        public ArrayList<ArrayList<String>> getModelMap() {
-            return modelMap;
-        }
+    public ArrayList<ArrayList<String>> getModelMap() {
+        return modelMap;
+    }
 
-        public String getWhiteId(){ return whiteId;}
-        public String getBlackId(){ return blackId;}
+    public String getWhiteId(){ return whiteId;}
+    public String getBlackId(){ return blackId;}
 
-        //endregion
+//endregion
 
-    //endregion
-
-    //Converters
+//endregion
+    
+    /**
+     * Converts an (X, Y) position to an index value.
+     *
+     * @param x The X position.
+     * @param y The Y position.
+     * @return Returns in int value containing the index.
+     */
     public int convertPositionToIndex(int x, int y) { return mapSize * y + x; }
+    
+    /**
+     * Converts and index value to an (X, Y) position.
+     *
+     * @param i The index value that will be converted.
+     * @return Returns an (X, Y) position contained in a Vector2.
+     */
     public Vector2 convertIndexToPosition(int i) {
         return new Vector2(i % mapSize, (int)Math.floor(i / (float)mapSize));
     }

@@ -60,6 +60,14 @@ public class Main extends Game {
     }
     
     /**
+     * Closes the game.
+     */
+    @Override
+    public void closeGame() {
+        stage.close();
+    }
+    
+    /**
      * This function is called once on the start of the application.
      *
      * @param stage DO NOT USE, USE 'this.stage'.

@@ -14,7 +14,7 @@ public class ReversiModel{
     
     //Ai variables
     private static final int depth = 5;
-    private String ai = "minimax"; //  "random", "minimaxAlphaBeta", "minimaxRiskRegion"
+    private String ai = "minimax";              // random, minimax, minimaxRiskRegion
 
     //risk region values
     private static final int cornerValue = 100;
@@ -43,7 +43,7 @@ public class ReversiModel{
     }
     
     // Networking variables
-    private String ip = /*"145.33.225.170";*/ "localhost";
+    private String ip = "localhost";        // server ip: 145.33.225.170
     private int port = 7789;
     private int timeout = 10;
     private ConnectionModel connection;
@@ -70,8 +70,14 @@ public class ReversiModel{
         createConnection();
     }
     
+//region Game state functions (on game start, end, win, loss, etc)
+    
+    /**
+     * Call on the start of the game. Sets up the game for use.
+     *
+     * @param mode In what game mode should the game be started?
+     */
     public void gameStart(GameMode mode) {
-//        log("restart");
         resetVariables();
 
         setGameMode(mode);
@@ -87,28 +93,38 @@ public class ReversiModel{
     
         log("Starting new game");
     }
+    
+    /**
+     * Called on the end of a game. Sets the state of the game to won/loss.
+     *
+     * @param won Has the game been won by the client?
+     */
     public void gameEnd(boolean won) {
-        // TODO - do general game end stuff here, and call onGameWon() or onGameLost()
-
         if (won) onGameWon();
         else     onGameLost();
-        
-//        updateView();
-        
-        // TODO - close game here
     }
+    
+    /**
+     * Called when the game has been won by the client.
+     */
     private void onGameWon() {
-        // TODO - specific game won stuff here
-        
-        log("game won");
+        log("Game won");
         view.goToMainMenu();
     }
+    
+    /**
+     * Called when the game has been lost by the client.
+     */
     private void onGameLost() {
-        // TODO - specific game lost stuff here
-        
-        log("game lost");
+        log("Game lost");
         view.goToMainMenu();
     }
+    
+//endregion
+    
+    /**
+     * Forfeits the game and brings the user back to the menu.
+     */
     public void forfeitGame() {
         if (gameMode == GameMode.ONLINE)
             sender.forfeitAGame();
@@ -125,20 +141,27 @@ public class ReversiModel{
     
 //region Turn handling functions
     
+    /**
+     * Handles the turns. End the turn and enables the next player to make a move.
+     */
     private void turnHandler() {
         turnEnd();
         
         if (gameMode == GameMode.PLAYER_VS_AI)
             if (!board.isPlayerTurn())
                 AiMove();
-        
-//        log("next turn -> isPlayerTurn: " + board.isPlayerTurn());
-//        log(getClientName() + " is " + (getBoard().isPlayerWhite() ? "white" : "black"));
     }
+    
+    /**
+     * Called on the start of a turn.
+     */
     public void turnStart() {
         log("Turn started");
     }
-    int counter = 0;
+    
+    /**
+     * Called on the end of a turn.
+     */
     private void turnEnd() {
         // Update the view on the end of each turn
         boolean gameFinished = board.isGameFinished();
@@ -148,6 +171,7 @@ public class ReversiModel{
 
         updateView();
     }
+    
 //endregion
     
     /**
@@ -158,7 +182,7 @@ public class ReversiModel{
 // region ai movement
 
     /**
-     * Desc here...
+     * Makes the AI make a move based on the given algorithm.
      */
     public void AiMove() {
         // Return if we are not playing against AI
@@ -261,39 +285,28 @@ public class ReversiModel{
         }
     }
     
+    /**
+     * Closes the current active connection (if there is one).
+     */
     public void closeConnection() {
         connection.terminate();
     }
     
+    /**
+     * Challenges a player to a game of reversi.
+     *
+     * @param btn The pressed challenge button.
+     */
     public void challengePlayer(Button btn) {
         if (!connection.isConnected()) return;
         
         log("Challenging player: " + btn.getId().trim());
         sender.challenge(btn.getId(), "Reversi");
-        
-//        boolean challenged = true;
-//        String id = null;
-//
-//        try {
-//            int i = Integer.parseInt(btn.getId());
-//            id = btn.getId();
-//            challenged = false;
-//        }
-//        catch (NumberFormatException ignored) { }
-//
-//        if (challenged) {
-//            log("challenging player:");
-//            log("player: " + btn.getId());
-//            sender.challenge(btn.getId(), "Reversi");
-//        }
-//        else {
-//            log("accept challenge");
-//            sender.acceptAChallenge(id);
-//        }
     }
     
     /**
-     * Accept a challenge from someon else.
+     * Accept a challenge from someone else.
+     *
      * @param nr Challenge number.
      */
     public void acceptChallenge(String nr) {
@@ -303,21 +316,33 @@ public class ReversiModel{
         log("Challenge " + nr + " accepted");
     }
     
+    /**
+     * Called when a challenge has been received by another user.
+     *
+     * @param challenger The use we have received the challenge from.
+     * @param nr The number of the received challenge.
+     */
     public void challengeReceived(String challenger, String nr) {
         log("Challenge received(" + nr + "), from " + challenger);
         
         if (!connection.isConnected()) return;
         
         acceptChallenge(nr);
-//        view.challengeReceived(challenger, nr);
     }
     
+    /**
+     * Get a list of active players on the current active connection.
+     *
+     * @return Returns a list of player names.
+     */
     public String[] getPlayerList() {
         if (connection.isConnected()) sender.getPlayerlist();
         
+        // Wait for 16 milliseconds to enable the network to get the player list
         try { Thread.sleep(16); }
         catch (InterruptedException ignored) { }
         
+        // Set the list of all online players
         String[] allPlayers;
         if (connection.isConnected())
             allPlayers = handler.playerlist == null ? new String[0] : handler.playerlist;
@@ -325,6 +350,7 @@ public class ReversiModel{
         
         ArrayList<String> players = new ArrayList<>();
         
+        // Remove this client from the player list.
         for (String p : allPlayers) {
             p = p.trim();
             if (!p.equals(clientName.trim()))
@@ -334,6 +360,9 @@ public class ReversiModel{
         return players.toArray(new String[0]);
     }
     
+    /**
+     * Refreshes the list of online players on the active connection.
+     */
     public void refreshPlayerList() {
         if (!connection.isConnected()) return;
         view.refreshPlayerList(getPlayerList());
@@ -343,19 +372,19 @@ public class ReversiModel{
 
 //region Getters and setters
 
-    private void setGameMode(GameMode mode) {
-        gameMode = mode;
-    }
+    public GameMode getGameMode() { return gameMode; }
+    private void setGameMode(GameMode mode) { gameMode = mode; }
 
     public String getClientName() { return clientName; }
     public void setClientName(String name) { this.clientName = name; }
     
-    public GameMode getGameMode() { return gameMode; }
-
     public ReversiBoard getBoard(){return board;}
     
+    public String getAi() { return ai; }
     public void setAi(String aiType) {
         aiType = aiType.toLowerCase();
+        
+        // Set the ai type to the given ai type, if no match was found, set the ai type to minimax.
         switch (aiType) {
             case "minimaxRiskRegion":
             case "random":
@@ -365,22 +394,21 @@ public class ReversiModel{
                 ai = "minimax";
         }
     }
-    public String getAi() { return ai; }
     
+    public String getIp() { return ip; }
     public void setIp(String ip) {
         this.ip = ip;
         createConnection();
     }
-    public String getIp() { return ip; }
     
+    public int getPort() { return port; }
     public void setPort(int port) {
         this.port = port;
         createConnection();
     }
-    public int getPort() { return port; }
     
-    public void setTimeout(int timeout) { this.timeout = timeout; }
     public int getTimeout() { return timeout; }
+    public void setTimeout(int timeout) { this.timeout = timeout; }
     
 //endregion
     
@@ -394,6 +422,8 @@ public class ReversiModel{
         
         int length = 20;
         int curOffLength = length - 4;
+        
+        // Prevent the name from overflowing the name part of the log message
         for (int i = 0; i < length; i++) {
             String txt = "";
             
@@ -412,7 +442,8 @@ public class ReversiModel{
             
             template.append(txt);
         }
-    
+        
+        // Log the given message with the template
         System.out.println(template + message);
     }
 }

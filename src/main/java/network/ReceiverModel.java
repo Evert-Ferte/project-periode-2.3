@@ -49,8 +49,10 @@ public class ReceiverModel extends Thread  {
      */
     private void receive () throws IOException {
         while (true) {
-
             response = receiver.readLine();
+            
+            if (response == null) return;
+            
             if (response.startsWith("ERR")) {handler.errHandler (response);}
             else if (response.startsWith("SVR HELP")) {handler.helpHandler ();}
             else if (response.startsWith("SVR GAME MATCH")) {handler.gameMatchHandler();}

@@ -17,10 +17,9 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.ArrayList;
 
-// TODO - use static final variables for colors
 public class ReversiView extends Game{
     private static final Vector2 windowSize = new Vector2(680, 860);
-    private static final Vector2 fieldSize = new Vector2(560, 560); // 640, 640
+    private static final Vector2 fieldSize = new Vector2(560, 560);
     
     private ReversiModel model;
     
@@ -50,7 +49,7 @@ public class ReversiView extends Game{
     private Label scoreWhiteLabel;
     private Label scoreBlackLabel;
     
-    private Vector2 imgSize;
+    private Vector2 tileImgSize;
     
     private String btnStyle = "-fx-background-color: #000000, linear-gradient(#7ebcea, #2f4b8f),"+
             "linear-gradient(#426ab7, #263e75), linear-gradient(#395cab, #223768); -fx-background-insets: 0,1,2,3;"+
@@ -63,15 +62,18 @@ public class ReversiView extends Game{
         this.model = new ReversiModel(this);
     }
     
-    //TEMP
+    /**
+     * The constructor. Creates a new model for this view. Also sets the name of this client.
+     */
     public ReversiView(String name) {
         this();
         model.setClientName(name);
     }
-    //TEMP
+    
+//region Concrete methods that derive from the extended Game.java class.
     
     /**
-     * Start the game.
+     * Starts the game.
      */
     @Override
     public void startGame() {
@@ -83,11 +85,15 @@ public class ReversiView extends Game{
      * Reset the game and it's values.
      */
     @Override
-    public void resetGame() {//TODO check if main reset and stuff , and if true reset all
+    public void resetGame() {
         model.resetVariables();
         update();
     }
     
+    /**
+     * Closes the game.
+     */
+    @Override
     public void closeGame() {
         model.closeConnection();
         stage.close();
@@ -115,6 +121,15 @@ public class ReversiView extends Game{
         this.stage.show();
     }
     
+//endregion
+
+//region This regions contains all methods that have something to do with the initial creation of the UI.
+    
+    /**
+     * Creates and returns the main menu scene and all its UI components.
+     *
+     * @return Returns the main menu scene.
+     */
     private Scene createMainMenu() {
         // Create the main title for this screen
         Label title = new Label("Reversi");
@@ -158,6 +173,11 @@ public class ReversiView extends Game{
         return new Scene(container, windowSize.x, windowSize.y);
     }
     
+    /**
+     * Creates and returns the multiplayer scene and all its UI components.
+     *
+     * @return Returns the multiplayer scene.
+     */
     private Scene createMultiplayerMenu() {
         // Create the main title for this screen
         Label title = new Label("Multiplayer");
@@ -213,6 +233,11 @@ public class ReversiView extends Game{
         return new Scene(container, windowSize.x, windowSize.y);
     }
     
+    /**
+     * Creates and returns the settings scene and all its UI components.
+     *
+     * @return Returns the settings scene.
+     */
     private Scene createSettingsMenu() {
         // Create the main title for this screen
         Label title = new Label("Settings");
@@ -334,6 +359,11 @@ public class ReversiView extends Game{
         return new Scene(container, windowSize.x, windowSize.y);
     }
     
+    /**
+     * Creates and returns the scene where we can choose our game mode.
+     *
+     * @return Returns the choose game mode scene.
+     */
     private Scene createChooseModeMenu() {
         // Create the main title for this screen
         Label title = new Label("Choose game mode");
@@ -374,13 +404,18 @@ public class ReversiView extends Game{
         return new Scene(container, windowSize.x, windowSize.y);
     }
     
+    /**
+     * Creates and returns the game scene and all its UI components.
+     *
+     * @return Returns the game scene.
+     */
     private Scene createGameMenu() {
         // Get and set some initial variables
         ReversiBoard board = model.getBoard();
         boolean isWhiteTurn = model.getBoard().isWhiteTurn();
         boolean isPlayerTurn = model.getBoard().isPlayerTurn();
         int mapSize = model.getBoard().getMapSize();
-        imgSize = new Vector2(fieldSize.x / (float)mapSize, fieldSize.y / (float)mapSize);
+        tileImgSize = new Vector2(fieldSize.x / (float)mapSize, fieldSize.y / (float)mapSize);
         
         // Create and set the background
         ImageView background = new ImageView(new Image(getClass().getResourceAsStream("/images/reversi/interface_design.png")));
@@ -478,21 +513,31 @@ public class ReversiView extends Game{
         return new Scene(sp, windowSize.x, windowSize.y);
     }
     
+//endregion
+    
+    /**
+     * Sets the action listeners / event handlers for all buttons in the reversi game.
+     */
     private void setActionListeners() {
-//        startButton.setOnAction(ReversiController.setSceneInStage(stage, gameMenu));
+        // Set the event handlers for the start, multiplayer and settings button in the main menu
         startButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, choseModeMenu));
         multiplayerButton.setOnAction(ReversiController.setSceneInStage(stage, multiplayerMenu));
         settingsButton.setOnAction(ReversiController.setSceneInStage(stage, settingsMenu));
-
-//        vsPlayerButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(true));
+        
+        // Set the event handlers for the player vs player button
         vsPlayerButton.addEventHandler(ActionEvent.ACTION, event -> model.gameStart(ReversiModel.GameMode.PLAYER_VS_PLAYER));
         vsPlayerButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
-
-//        vsAiButton.addEventHandler(ActionEvent.ACTION, event -> model.setAgainstPlayer(false));
+        
+        // Set the event handlers for the player vs computer(ai) button
         vsAiButton.addEventHandler(ActionEvent.ACTION, event -> model.gameStart(ReversiModel.GameMode.PLAYER_VS_AI));
         vsAiButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
     }
     
+    /**
+     * Refreshes the player list in the multiplayer menu.
+     *
+     * @param players A list of players that will be shown.
+     */
     public void refreshPlayerList(String[] players) {
         if (entryHolders == null) return;
         
@@ -538,6 +583,40 @@ public class ReversiView extends Game{
     }
     
     /**
+     * Sets the button, of a given player in the multiplayer menu, to 'Accept' instead of 'Challenge'.
+     *
+     * @param challenger The name of the challenger.
+     * @param nr The challenge number.
+     */
+    public void challengeReceived(String challenger, String nr) {
+        // Loop through all nodes in the player list
+        for (Node entry : entryHolders.getChildren()) {
+            for (Node node : ((BorderPane) entry).getChildren()) {
+                VBox b = (VBox) node;
+                Node n = b.getChildren().get(0);
+                String entryId = n.getId();
+                
+                // Find the correct challenger
+                if (entryId != null) {
+                    if (entryId.equals(challenger)) {
+                        model.log(entryId);
+                        Button btn = ((Button) n);
+                        
+                        Platform.runLater(() -> {
+                            btn.setText("Accept");
+                            btn.setBackground(new Background(new BackgroundFill(Color.web("#10d12d"), null, null)));
+                        });
+                        n.setId(nr);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+//region This region contains methods that have something to do with updates in the game scene.
+    
+    /**
      * Update the black and white score labels.
      */
     public void updateScoreLabel() {
@@ -560,20 +639,26 @@ public class ReversiView extends Game{
         });
     }
     
+    /**
+     * Updates the board shown in the UI based on the board contained in the model.
+     */
     private void updateViewMap() {
         ReversiBoard board = model.getBoard();
         int mapSize = board.getMapSize();
-        for (int y=0; y<mapSize; y++) {
-            for(int x=0; x<mapSize; x++ ){
+        
+        // Loop through all tiles on the board
+        for (int y = 0; y < mapSize; y++) {
+            for(int x = 0; x < mapSize; x++){
+                // Get the ID of the current tile
                 String id = board.getModelMap().get(y).get(x);
-                if(id.equals(board.getWhiteId())){
+                
+                // Set the image based on the ID from above
+                if (id.equals(board.getWhiteId()))
                     updateTileGraphic(true, x, y);
-                }else if (id.equals(board.getBlackId())){
+                else if (id.equals(board.getBlackId()))
                     updateTileGraphic(false, x, y);
-                }
-                else {
+                else
                     updateTileGraphic(x, y);
-                }
             }
         }
     }
@@ -588,19 +673,26 @@ public class ReversiView extends Game{
     public void updateTileGraphic(boolean turn, int xPos, int yPos) {
         Platform.runLater(() -> {
             ImageView img = new ImageView(turn ? tileWhite : tileBlack);
-            img.setFitWidth(imgSize.x);
-            img.setFitHeight(imgSize.y);
+            img.setFitWidth(tileImgSize.x);
+            img.setFitHeight(tileImgSize.y);
             
             Button current = viewMap.get(yPos).get(xPos);
             current.setGraphic(img);
             current.setId(model.getBoard().getPlayerId(turn));
         });
     }
+    
+    /**
+     * Update the graphics (image) for a specific tile to an empty tile.
+     *
+     * @param xPos The X position on the board.
+     * @param yPos The Y position on the board.
+     */
     public void updateTileGraphic(int xPos, int yPos) {
         Platform.runLater(() -> {
             ImageView img = new ImageView(tileEmpty);
-            img.setFitWidth(imgSize.x);
-            img.setFitHeight(imgSize.y);
+            img.setFitWidth(tileImgSize.x);
+            img.setFitHeight(tileImgSize.y);
             
             Button current = viewMap.get(yPos).get(xPos);
             current.setGraphic(img);
@@ -614,42 +706,32 @@ public class ReversiView extends Game{
     public void update() {
         updateViewMap();
         updateScoreLabel();
-//        updateTurnLabel(model.getBoard().isWhiteTurn());
         updateTurnLabel(model.getBoard().isPlayerTurn());
     }
     
+//endregion
+    
+    /**
+     * Get the ID of a given tile on the board.
+     *
+     * @param x The X position.
+     * @param y The Y position.
+     * @return Returns a string value containing the ID.
+     */
     public String getTileId(int x, int y) { return viewMap.get(y).get(x).getId(); }
     
-    public void challengeReceived(String challenger, String nr) {
-        for (Node entry : entryHolders.getChildren()) {
-            for (Node node : ((BorderPane) entry).getChildren()) {
-                VBox b = (VBox) node;
-                Node n = b.getChildren().get(0);
-                String entryId = n.getId();
-                
-                if (entryId != null) {
-                    if (entryId.equals(challenger)) {
-                        model.log(entryId);
-                        Button btn = ((Button) n);
-                        
-                        Platform.runLater(() -> {
-                            btn.setText("Accept");
-                            btn.setBackground(new Background(new BackgroundFill(Color.web("#10d12d"), null, null)));
-                        });
-                        n.setId(nr);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
+    /**
+     * Makes the stage show the game menu.
+     */
     public void startMatch() {
         Platform.runLater(() -> {
             stage.setScene(gameMenu);
         });
     }
     
+    /**
+     * Makes the stage show the main menu.
+     */
     public void goToMainMenu() {
         Platform.runLater(() -> {
             stage.setScene(mainMenu);

@@ -24,6 +24,11 @@ public abstract class Game extends Application {
     public abstract void resetGame();
     
     /**
+     * Closes the game.
+     */
+    public abstract void closeGame();
+    
+    /**
      * This function is called once on the start of the application.
      *
      * @param stage DO NOT USE, USE 'this.stage'.

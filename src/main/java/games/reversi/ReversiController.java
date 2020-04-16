@@ -18,10 +18,12 @@ public class ReversiController {
         };
     }
     
+    /**
+     * Shows a scene in a given stage.
+     */
     public static EventHandler<ActionEvent> setSceneInStage(Stage stage, Scene scene) {
         return event -> {
-            if (stage == null) System.out.println("stage null");
-            if (scene == null) System.out.println("scene null");
+            if (stage == null || scene == null) return;
             stage.setScene(scene);
         };
     }
