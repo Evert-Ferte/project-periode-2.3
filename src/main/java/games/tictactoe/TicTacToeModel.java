@@ -152,6 +152,7 @@ public class TicTacToeModel extends Model {
         updateView();
     }
 
+
     public String getClientName() { return clientName; }
     public void setClientName(String name) { this.clientName = name; }
 

@@ -14,6 +14,15 @@ public class TicTacToeBoard extends Board {
     }
 
     @Override
+    public void reset() {
+        generateModelMap(mapSize);
+        scoreBlack = 0;
+        scoreWhite = 0;
+        setWhiteTurn(false);
+        setPlayerTurn(true);
+    }
+
+    @Override
     public boolean isGameFinished() {
         return checkWinner(whiteId) || checkWinner(blackId) || (getAvailablePositions().length <= 0);
     }
@@ -49,7 +58,7 @@ public class TicTacToeBoard extends Board {
 
     @Override
     public boolean move(int x, int y) {
-        if (!modelMap.get(y).get(x).equals(emptyId)){
+        if (modelMap.get(y).get(x).equals(emptyId)){
             modelMap.get(y).set(x,getPlayerId(whiteTurn));
             return true;
         }
@@ -64,4 +73,8 @@ public class TicTacToeBoard extends Board {
         return cloneBoard;
     }
 
+    @Override
+    public int getMapSize(){
+        return mapSize;
+    }
 }

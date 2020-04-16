@@ -300,6 +300,7 @@ public class TicTacToeView extends Game {
     @Override
     public void update() {
         updateViewMap();
+        System.out.println(viewMap);
         updateScoreLabel();
         updateTurnLabel(model.getBoard().isWhiteTurn());
     }
