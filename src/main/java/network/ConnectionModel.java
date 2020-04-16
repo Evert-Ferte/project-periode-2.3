@@ -12,7 +12,7 @@ import java.net.Socket;
  * @version 3.0
  *
  */
-public class Connection {
+public class ConnectionModel {
     private String ip;
     private int port;
     private Socket socket;
@@ -24,7 +24,7 @@ public class Connection {
      * @param port The Port associated with the IP address.
      * @exception IOException if the the connection with the server couldn't be established.
      */
-    public Connection (String ip, int port) {
+    public ConnectionModel (String ip, int port) {
         this.ip = ip;
         this.port = port;
         try {

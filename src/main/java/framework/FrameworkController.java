@@ -56,14 +56,17 @@ public class FrameworkController {
                 stage.show();
             });
             tile.game.startGame();
-    
-            /*
-            ReversiView view = new ReversiView("client_2");
-            view.stage.setOnCloseRequest(e -> {
-                view.closeGame();
-            });
-            view.startGame();
-            //*/
+            
+            int extraTestClients = 0;
+            for (int i = 0; i < extraTestClients; i++) {
+                ReversiView view = new ReversiView("extra_test_client_" + (i + 1));
+                view.stage.setOnCloseRequest(e -> {
+                    view.closeGame();
+                });
+                view.startGame();
+                view.stage.setMaximized(false);
+            }
+            
             stage.hide();
         };
     }
