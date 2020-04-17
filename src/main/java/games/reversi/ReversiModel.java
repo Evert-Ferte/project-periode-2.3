@@ -12,6 +12,12 @@ import network.SenderModel;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * This is where all the logical operation happens and the related data is stored
+ *
+ * @author Evert de la Ferté
+ * @version 1.0
+ */
 
 public class ReversiModel extends Model {
     private  static final int mapSize = 8;
@@ -66,6 +72,11 @@ public class ReversiModel extends Model {
         createConnection();
     }
 
+    /**
+     * prepares the everything necessary to start a new game
+     *
+     * @param mode indicates if the game is online or offline
+     */
     @Override
     public void gameStart(GameMode mode) {
 //        log("restart");
@@ -85,6 +96,11 @@ public class ReversiModel extends Model {
         log("Starting new game");
     }
 
+    /**
+     * checks if the game that has ended was lost or won
+     *
+     * @param won true if game was won
+     */
     @Override
     public void gameEnd(boolean won) {
         // TODO - do general game end stuff here, and call onGameWon() or onGameLost()
@@ -97,6 +113,9 @@ public class ReversiModel extends Model {
         // TODO - close game here
     }
 
+    /**
+     * what to do if the game ended with a win
+     */
     @Override
     public void onGameWon() {
         // TODO - specific game won stuff here
@@ -105,6 +124,9 @@ public class ReversiModel extends Model {
         view.goToMainMenu();
     }
 
+    /**
+     * what to do of a game ended with a lose
+     */
     @Override
     public void onGameLost() {
         // TODO - specific game lost stuff here
@@ -113,6 +135,9 @@ public class ReversiModel extends Model {
         view.goToMainMenu();
     }
 
+    /**
+     * handling forfeiting the current game
+     */
     @Override
     public void forfeitGame() {
         if (gameMode == GameMode.ONLINE)
