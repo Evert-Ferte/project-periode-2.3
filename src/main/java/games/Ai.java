@@ -5,8 +5,13 @@ import games.reversi.ReversiBoard;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Ai {
 
+public class Ai {
+    /**
+     * The random ai wil pick a random available position from the board using Math.random()
+     *
+     * @param board The board That the ai can use to check positions and move.
+     */
     public static Vector2 aiRandom(Board board){
         // TODO - Check if this if statement is needed. AI can be either black or white
 //        if(game.isWhiteTurn()){
@@ -24,7 +29,13 @@ public class Ai {
         return null;
     }
 
-    static Vector2 aiMiniMax(Board board, int depth, boolean player) throws CloneNotSupportedException {
+    /**
+     * For every possible move that can be made miniMax() is called with that move.
+     *
+     * @param board The board That the ai can use to check positions and move.
+     * @param depth The depth that the algorithm will go with recursion.
+     */
+    static Vector2 aiMiniMax(Board board, int depth) throws CloneNotSupportedException {
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;
 
@@ -32,7 +43,7 @@ public class Ai {
            Board cloneBoard = board.clone();
             cloneBoard.move((int)position.x, (int)position.y);
             cloneBoard.switchTurn();
-            int score = miniMax(cloneBoard, depth, player);
+            int score = miniMax(cloneBoard, depth, false);
             if (score > optimumScore) {
                 optimumScore = score;
                 bestMove = position;
@@ -45,7 +56,14 @@ public class Ai {
         }
         return aiRandom(board);
     }
-    public static Vector2 aiMiniMaxAlphaBetaPruning(Board board, int depth, boolean player) throws CloneNotSupportedException {
+
+    /**
+     * For every possible move that can be made miniMaxAlphaBetaPruning() is called with that move.
+     *
+     * @param board The board That the ai can use to check positions and move.
+     * @param depth The depth that the algorithm will go with recursion.
+     */
+    public static Vector2 aiMiniMaxAlphaBetaPruning(Board board, int depth) throws CloneNotSupportedException {
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;
 
@@ -53,7 +71,7 @@ public class Ai {
             Board cloneBoard = board.clone();
             cloneBoard.move((int)position.x, (int)position.y);
             cloneBoard.switchTurn();
-            int score = miniMaxAlphaBetaPruning(cloneBoard, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, player);
+            int score = miniMaxAlphaBetaPruning(cloneBoard, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, false);
             if (score > optimumScore) {
                 optimumScore = score;
                 bestMove = position;
@@ -66,17 +84,25 @@ public class Ai {
         }
         return aiRandom(board);
     }
-    public static Vector2 aiMiniMaxAlphaBetaPruningRiskRegions(ReversiBoard board, ArrayList<ArrayList<Integer>> riskRegions, int depth, boolean player) throws CloneNotSupportedException {
+
+    /**
+     * For every possible move that can be made miniMax() is called with that move.
+     *
+     * @param board The board That the ai can use to check positions and move.
+     * @param depth The depth that the algorithm will go with recursion.
+     * @param riskRegions An Two dimensional array with values of certain positions.
+     */
+    public static Vector2 aiMiniMaxAlphaBetaPruningRiskRegions(ReversiBoard board, ArrayList<ArrayList<Integer>> riskRegions, int depth) throws CloneNotSupportedException {
         //Initial values
         int optimumScore = Integer.MIN_VALUE;
         Vector2 bestMove = null;
 
         //Looping though positions and getting the score of those positions
         for (Vector2 position : board.getAvailablePositions()) {
-            ReversiBoard cloneBoard = (ReversiBoard) board.clone();
+            ReversiBoard cloneBoard = board.clone();
             cloneBoard.move((int)position.x, (int)position.y);
             cloneBoard.switchTurn();
-            int score = miniMaxAlphaBetaPruningRiskRegions(cloneBoard, riskRegions, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, player) + riskRegions.get((int)position.y).get((int)position.x);
+            int score = miniMaxAlphaBetaPruningRiskRegions(cloneBoard, riskRegions, depth,Integer.MIN_VALUE, Integer.MAX_VALUE, false) + riskRegions.get((int)position.y).get((int)position.x);
             if (score > optimumScore) {
                 optimumScore = score;
                 bestMove = position;
@@ -89,7 +115,13 @@ public class Ai {
         }
         return aiRandom(board);
     }
-
+    /**
+     * The static evaluation of the board is returned when the game is finished of the depth is 0.
+     * The evaluation is dependant on who's turn it is.
+     *
+     * @param board The board That the ai can use to check positions and move.
+     * @param depth The depth that the algorithm will go with recursion.
+     */
     private static Integer getStaticEvaluation(Board board, int depth) {
         if(depth == 0 || board.isGameFinished()) {
             int eval;
@@ -104,7 +136,18 @@ public class Ai {
         }
         return null;
     }
-    //mapSize, cornerValue, antiCornerValue, antiCornerEdgeValue, edgeValue, edgeCornerValue, antiEdgeValues
+
+    /**
+     * Generates the values of positions on the board.
+     *
+     * @param size The size of the board.
+     * @param cornerValue The value of the corners.
+     * @param antiCornerValue The values of the spaces next to the corners.
+     * @param antiCornerEdgeValue The values of the spaces on the edge of the corners.
+     * @param edgeValue The values of the edges
+     * @param edgeCornerValue The values of the edge ends.
+     * @param antiEdgeValue The values of the spaces before the edges.
+     */
     public static ArrayList<ArrayList<Integer>> generateRiskRegions(int size, int cornerValue, int antiCornerValue, int antiCornerEdgeValue, int edgeValue, int edgeCornerValue, int antiEdgeValue){
         int mapSize = size-1;
 
@@ -147,6 +190,14 @@ public class Ai {
         return riskRegions;
     }
 
+    /**
+     * For every possible move that can be made miniMax() calls itself.
+     * The optimum score for the player is calculated depending on if it is maximizing.
+     *
+     * @param board The board That the ai can use to check positions and move.
+     * @param depth The depth that the algorithm will go with recursion.
+     * @param isMaximizing The boolean for if the person who is playing is maximizing or minimizing the game.
+     */
     private static int miniMax(Board board, int depth, boolean isMaximizing) throws CloneNotSupportedException {
         Integer eval = getStaticEvaluation(board, depth);
         if (eval != null) return eval;
@@ -175,6 +226,16 @@ public class Ai {
         return optimumScore;
     }
 
+    /**
+     * For every possible move that can be made miniMaxAlphaBetaPruning() calls itself.
+     * Alpha and beta are used to compare branches inorder to save future computation depending on if the best move is already found.
+     *
+     * @param board The board That the ai can use to check positions and move.
+     * @param depth The depth that the algorithm will go with recursion.
+     * @param alpha The first stored value of a branch.
+     * @param beta  The second stored value of a branch.
+     * @param isMaximizing The boolean for if the person who is playing is maximizing or minimizing the game.
+     */
     private static int miniMaxAlphaBetaPruning(Board board, int depth, int alpha, int beta, boolean isMaximizing) throws CloneNotSupportedException {
         Integer eval = getStaticEvaluation(board, depth);
         if (eval != null) return eval;
@@ -211,6 +272,17 @@ public class Ai {
         return optimumScore;
     }
 
+    /**
+     * For every possible move that can be made miniMaxAlphaBetaPruning() calls itself.
+     * Alpha and beta are used to compare branches inorder to save future computation depending on if the best move is already found.
+     *
+     * @param board The board That the ai can use to check positions and move.
+     * @param depth The depth that the algorithm will go with recursion.
+     * @param alpha The first stored value of a branch.
+     * @param beta  The second stored value of a branch.
+     * @param isMaximizing The boolean for if the person who is playing is maximizing or minimizing the game.
+     * @param riskRegions An Two dimensional array with values of certain positions.
+     */
     private static int miniMaxAlphaBetaPruningRiskRegions(ReversiBoard board, ArrayList<ArrayList<Integer>> riskRegions, int depth, int alpha, int beta, boolean isMaximizing) throws CloneNotSupportedException {
         Integer eval = getStaticEvaluation(board, depth);
         if (eval != null) return eval;
