@@ -189,6 +189,11 @@ public class ReversiBoard extends Board {
     }
 
 
+    /**
+     * test if the current game is finished
+     *
+     * @return boolean indicating true if it is finished
+     */
     public boolean isGameFinished() {
         // Loop through the map and find tiles that can still be flipped
         for (int y = 0; y < mapSize; y++) {
@@ -205,6 +210,13 @@ public class ReversiBoard extends Board {
         return true;
     }
 
+    /**
+     * check if a specific move is valid and perform it
+     *
+     * @param x The x axis of the move
+     * @param y The y axis of the move
+     * @return True if the move was successful
+     */
     public boolean move(int x, int y){
         // Get and check for possible tiles that can be flipped at the clicked position
         ArrayList<Vector2> tilesToFlip = getTilesToFlip(x, y);
@@ -225,11 +237,20 @@ public class ReversiBoard extends Board {
         return true;
     }
 
+    /**
+     * clone the board
+     *
+     * @return a new clone of the current board
+     * @throws CloneNotSupportedException
+     */
     @Override
     public ReversiBoard clone() throws CloneNotSupportedException {
         return (ReversiBoard) super.clone();
     }
 
+    /**
+     * @return a string representation of the board
+     */
     @Override
     public String toString() {
         return "ReversiBoard{" +

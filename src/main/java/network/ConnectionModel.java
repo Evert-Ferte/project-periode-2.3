@@ -44,7 +44,6 @@ public class ConnectionModel {
 
     /**
      * Change the IP address of a specific connection instance.
-     * This method only exists for testing purposes.
      *
      * @param ip New IP address
      */
@@ -54,7 +53,6 @@ public class ConnectionModel {
 
     /**
      * Get the Port number for the connection instance.
-     * This method only exists for testing purposes.
      *
      * @return Port number of the server
      */
@@ -64,7 +62,6 @@ public class ConnectionModel {
 
     /**
      * Change the port number for a connection instance.
-     * This method only exists for testing purposes.
      *
      * @param port new Port number.
      */

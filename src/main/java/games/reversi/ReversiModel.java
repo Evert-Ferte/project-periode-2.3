@@ -12,6 +12,12 @@ import network.SenderModel;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * This is where all the logical operation happens and the related data is stored
+ *
+ * @author Evert de la Ferté
+ * @version 1.0
+ */
 
 public class ReversiModel extends Model {
     private  static final int mapSize = 8;
@@ -66,6 +72,11 @@ public class ReversiModel extends Model {
         createConnection();
     }
 
+    /**
+     * prepares the everything necessary to start a new game
+     *
+     * @param mode indicates if the game is online or offline
+     */
     @Override
     public void gameStart(GameMode mode) {
 //        log("restart");
@@ -85,6 +96,11 @@ public class ReversiModel extends Model {
         log("Starting new game");
     }
 
+    /**
+     * checks if the game that has ended was lost or won
+     *
+     * @param won true if game was won
+     */
     @Override
     public void gameEnd(boolean won) {
         // TODO - do general game end stuff here, and call onGameWon() or onGameLost()
@@ -97,6 +113,9 @@ public class ReversiModel extends Model {
         // TODO - close game here
     }
 
+    /**
+     * what to do if the game ended with a win
+     */
     @Override
     public void onGameWon() {
         // TODO - specific game won stuff here
@@ -105,6 +124,9 @@ public class ReversiModel extends Model {
         view.goToMainMenu();
     }
 
+    /**
+     * what to do of a game ended with a lose
+     */
     @Override
     public void onGameLost() {
         // TODO - specific game lost stuff here
@@ -113,6 +135,9 @@ public class ReversiModel extends Model {
         view.goToMainMenu();
     }
 
+    /**
+     * handling forfeiting the current game
+     */
     @Override
     public void forfeitGame() {
         if (gameMode == GameMode.ONLINE)
@@ -269,11 +294,19 @@ public class ReversiModel extends Model {
             sender.getPlayerlist();
         }
     }
-    
+
+    /**
+     * close the current connection
+     */
     public void closeConnection() {
         connection.terminate();
     }
-    
+
+    /**
+     * Challenge a specfifc player form the lobby.
+     *
+     * @param btn button containing the player name
+     */
     public void challengePlayer(Button btn) {
         if (!connection.isConnected()) return;
         
@@ -303,6 +336,7 @@ public class ReversiModel extends Model {
     
     /**
      * Accept a challenge from someon else.
+     *
      * @param nr Challenge number.
      */
     public void acceptChallenge(String nr) {
@@ -320,7 +354,12 @@ public class ReversiModel extends Model {
         acceptChallenge(nr);
 //        view.challengeReceived(challenger, nr);
     }
-    
+
+    /**
+     * get player names list from the server
+     *
+     * @return A string containing player names
+     */
     public String[] getPlayerList() {
         if (connection.isConnected()) sender.getPlayerlist();
         
@@ -352,9 +391,19 @@ public class ReversiModel extends Model {
 
 //region Getters and setters
 
+    /**
+     * @return current client name
+     */
     public String getClientName() { return clientName; }
+
+    /**
+     * @param name new player name
+     */
     public void setClientName(String name) { this.clientName = name; }
-    
+
+    /**
+     * @return current board bing played with
+     */
     public ReversiBoard getBoard(){return board;}
     
     public void setAi(String aiType) {
@@ -368,21 +417,43 @@ public class ReversiModel extends Model {
                 ai = "minimax";
         }
     }
+
+    /**
+     * @return The AI playing on the board
+     */
     public String getAi() { return ai; }
-    
+
+    /**
+     * @param ip new IP address of the server
+     */
     public void setIp(String ip) {
         this.ip = ip;
         createConnection();
     }
+
+    /**
+     * @return the current IP address of the server the client is connected to
+     */
     public String getIp() { return ip; }
     
     public void setPort(int port) {
         this.port = port;
         createConnection();
     }
+
+    /**
+     * @return the port number to connect to in the server
+     */
     public int getPort() { return port; }
-    
+
+    /**
+     * @param timeout in which the client has to make a move
+     */
     public void setTimeout(int timeout) { this.timeout = timeout; }
+
+    /**
+     * @return the current timeout set on the client
+     */
     public int getTimeout() { return timeout; }
     
 //endregion
