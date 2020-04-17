@@ -29,7 +29,12 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+/**
+ * Handles all the GUI functionality of the framework
+ *
+ * @author Evert de la Ferté
+ * @version 1.0
+ */
 // TODO - font for framework, reversi and ttt
 public class FrameworkView extends Application {
     private static final Vector2 WINDOW_SIZE = new Vector2(1000, 600);

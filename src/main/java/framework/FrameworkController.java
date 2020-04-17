@@ -8,6 +8,12 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+/**
+ * This class Controller provides all the necessary information for the frameworkView to function correctly
+ *
+ * @author Evert de la Ferté
+ * @version 1.0
+ */
 public class FrameworkController {
     /**
      * Mouse event for when the mouse enters a game tile.

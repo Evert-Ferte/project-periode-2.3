@@ -5,6 +5,12 @@ import games.Vector2;
 
 import java.util.ArrayList;
 
+/**
+ * This class makes the Reversi board and contains the backend functionality of it
+ *
+ * @author Evert de la Ferté
+ * @version 1.0
+ */
 public class ReversiBoard extends Board {
 
     ReversiBoard(int mapSize){
