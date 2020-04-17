@@ -9,6 +9,12 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * All the logic operations of the tic-tac-toe and the data related to it
+ *
+ * @author Maric Aronds
+ * @version 1.0
+ */
 public class TicTacToeModel extends Model {
     private static final int mapSize = 3;
 

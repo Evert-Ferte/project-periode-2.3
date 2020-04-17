@@ -5,6 +5,13 @@ import games.Vector2;
 
 import java.util.ArrayList;
 
+/**
+ * The tic-tac-toe board with its logic
+ *
+ * @author Maric Aronds
+ * @version 1.0
+ */
+
 public class TicTacToeBoard extends Board {
     private int mapSize = 3;
 

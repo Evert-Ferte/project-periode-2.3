@@ -6,6 +6,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
+/**
+ * Handlers all the operations between the view and the model of the tic-tac-toe game
+ *
+ * @author Maric Aronds
+ * @version 1.0
+ */
+
 public class TicTacToeController {
     public static EventHandler<ActionEvent> ButtonHandler(int x, int y, TicTacToeModel model) {
         return event -> {

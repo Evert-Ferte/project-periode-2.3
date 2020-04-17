@@ -23,6 +23,12 @@ import java.util.ArrayList;
 
 import java.util.Optional;
 
+/**
+ * contains all the GUI element of the toc-tac-toe game
+ *
+ * @author Maric Aronds
+ * @version 1.0
+ */
 public class TicTacToeView extends Game {
     private Vector2 playField = new Vector2(600, 600);
 
