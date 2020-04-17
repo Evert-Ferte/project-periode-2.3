@@ -18,6 +18,13 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.ArrayList;
 
+/**
+ * here are all the GUI elements of the Reversi game
+ *
+ * @author Evert de la Ferté
+ * @version 1.0
+ *
+ */
 // TODO - use static final variables for colors
 public class ReversiView extends Game{
     private static final Vector2 windowSize = new Vector2(680, 860);
@@ -158,7 +165,12 @@ public class ReversiView extends Game{
         // Set the above vertical box to the scene with a given width and height and return it
         return new Scene(container, windowSize.x, windowSize.y);
     }
-    
+
+    /**
+     * Creates a new scene contining the multi-plyer elements, like the lobby for example
+     *
+     * @return the new created scene
+     */
     private Scene createMultiplayerMenu() {
         // Create the main title for this screen
         Label title = new Label("Multiplayer");
@@ -213,7 +225,12 @@ public class ReversiView extends Game{
         // Set the above vertical box to the scene with a given width and height and return it
         return new Scene(container, windowSize.x, windowSize.y);
     }
-    
+
+    /**
+     * Create a new Setting menu scene
+     *
+     * @return The new created scene
+     */
     private Scene createSettingsMenu() {
         // Create the main title for this screen
         Label title = new Label("Settings");
@@ -334,7 +351,12 @@ public class ReversiView extends Game{
         // Set the above vertical box to the scene with a given width and height and return it
         return new Scene(container, windowSize.x, windowSize.y);
     }
-    
+
+    /**
+     * Creates the game chosing scene
+     *
+     * @return the new created scene
+     */
     private Scene createChooseModeMenu() {
         // Create the main title for this screen
         Label title = new Label("Choose game mode");
@@ -374,7 +396,12 @@ public class ReversiView extends Game{
         // Set the above vertical box to the scene with a given width and height and return it
         return new Scene(container, windowSize.x, windowSize.y);
     }
-    
+
+    /**
+     * Creates the game menu scene
+     *
+     * @return the new created scene
+     */
     private Scene createGameMenu() {
         // Get and set some initial variables
         ReversiBoard board = model.getBoard();
@@ -478,7 +505,10 @@ public class ReversiView extends Game{
     
         return new Scene(sp, windowSize.x, windowSize.y);
     }
-    
+
+    /**
+     * Action listeners to handle various actions of the GUI
+     */
     private void setActionListeners() {
 //        startButton.setOnAction(ReversiController.setSceneInStage(stage, gameMenu));
         startButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, choseModeMenu));
@@ -493,7 +523,12 @@ public class ReversiView extends Game{
         vsAiButton.addEventHandler(ActionEvent.ACTION, event -> model.gameStart(ReversiModel.GameMode.PLAYER_VS_AI));
         vsAiButton.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
     }
-    
+
+    /**
+     * Get the new players list from the server
+     *
+     * @param players new players list
+     */
     public void refreshPlayerList(String[] players) {
         if (entryHolders == null) return;
         
@@ -620,7 +655,13 @@ public class ReversiView extends Game{
     }
     
     public String getTileId(int x, int y) { return viewMap.get(y).get(x).getId(); }
-    
+
+    /**
+     * Handle a received challenge
+     *
+     * @param challenger challenger name
+     * @param nr challenger number
+     */
     public void challengeReceived(String challenger, String nr) {
         for (Node entry : entryHolders.getChildren()) {
             for (Node node : ((BorderPane) entry).getChildren()) {
@@ -644,13 +685,19 @@ public class ReversiView extends Game{
             }
         }
     }
-    
+
+    /**
+     * Start a new match
+     */
     public void startMatch() {
         Platform.runLater(() -> {
             stage.setScene(gameMenu);
         });
     }
-    
+
+    /**
+     * Go back to the main menu scene
+     */
     public void goToMainMenu() {
         Platform.runLater(() -> {
             stage.setScene(mainMenu);
