@@ -1,6 +1,7 @@
 package games.tictactoe;
 
 import games.Game;
+import games.Model;
 import games.Vector2;
 import games.reversi.ReversiController;
 import javafx.application.Platform;
@@ -287,7 +288,7 @@ public class TicTacToeView extends Game {
         mainMenuButton.setOnAction(TicTacToeController.setSceneInStage(stage,mainMenu)); // add setScene action to mainMenuButton
         continueGame.setOnAction(TicTacToeController.setSceneInStage(stage, gameMenu));
 
-        newGame.addEventHandler(ActionEvent.ACTION, event -> model.resetVariables());
+        newGame.addEventHandler(ActionEvent.ACTION, event -> model.gameStart(Model.GameMode.PLAYER_VS_PLAYER));
         newGame.addEventHandler(ActionEvent.ACTION, ReversiController.setSceneInStage(stage, gameMenu));
 
         settings.setOnAction(TicTacToeController.setSceneInStage(stage, settingsMenu));
@@ -387,7 +388,7 @@ public class TicTacToeView extends Game {
     }
 
 
-    private void hasWon(String player) {
+    public void hasWon(String player) {
         popup = new Popup();
         VBox popupBox = new VBox();
 
@@ -406,7 +407,7 @@ public class TicTacToeView extends Game {
         popupBox.setAlignment(Pos.CENTER);
 
         okButton = new Button("Play again!");
-        okButton.setOnAction(event -> {model.resetVariables(); popup.hide();hasPopup = false;});
+        okButton.setOnAction(event -> {model.gameStart(Model.GameMode.PLAYER_VS_PLAYER); popup.hide();hasPopup = false;});
         okButton.setMinWidth(200);
         okButton.setMinHeight(50);
 

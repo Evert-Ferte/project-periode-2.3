@@ -53,7 +53,9 @@ public class TicTacToeModel extends Model {
             board.setPlayerToWhite(false);
         else
             board.setPlayerTurn(false);
+        
         updateView();
+        System.out.println("view updated");
     }
 
     @Override
@@ -63,6 +65,8 @@ public class TicTacToeModel extends Model {
         if (won) onGameWon();
         else     onGameLost();
         // TODO - close game here
+        
+//        view.
     }
 
     @Override
@@ -86,7 +90,7 @@ public class TicTacToeModel extends Model {
 
     @Override
     public void resetVariables() {
-        board.reset();
+        board.reset(mapSize);
     }
 
     @Override
@@ -102,12 +106,20 @@ public class TicTacToeModel extends Model {
 
     @Override
     public void turnStart() {
-
+    
     }
 
     @Override
     public void turnEnd() {
         // Update the view on the end of each turn
+        boolean gameFinished = board.isGameFinished();
+        
+        if (gameFinished) {
+            view.hasWon(board.getWhiteTurn() ? "w" : "b");
+            updateView();
+            return;
+        }
+        
         board.switchTurn();
         updateView();
     }
@@ -135,7 +147,7 @@ public class TicTacToeModel extends Model {
                     }
                     if (ai.equals("minimaxAlphaBeta")){
                         try {
-                            position = Ai.aiMiniMaxAlphaBetaPruning(board, depth, aiPlayer);
+                            position = Ai.aiMiniMaxAlphaBetaPruning(board, depth);
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
                         }
@@ -163,6 +175,6 @@ public class TicTacToeModel extends Model {
 
     public void setAiPlayer(boolean player){aiPlayer = player;}
 
-    public TicTacToeBoard getBoard(){return board;}
+    public TicTacToeBoard getBoard() { return board; }
 
 }

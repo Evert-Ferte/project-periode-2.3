@@ -151,7 +151,8 @@ public class ReversiModel extends Model {
      */
     @Override
     protected void resetVariables() {
-        board.reset();
+        System.out.println("RESETTING VARIABLES");
+        board.reset(mapSize);
     }
 
 //region Turn handling functions
@@ -212,14 +213,14 @@ public class ReversiModel extends Model {
                     }
                     if (ai.equals("minimax")) {
                         try {
-                            position = Ai.aiMiniMaxAlphaBetaPruning(board, depth, aiPlayer);
+                            position = Ai.aiMiniMaxAlphaBetaPruning(board, depth);
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
                         }
                     }
                     if (ai.equals("minimaxRiskRegion")) {
                         try {
-                            position = Ai.aiMiniMaxAlphaBetaPruningRiskRegions(board, riskRegion, depth, aiPlayer);
+                            position = Ai.aiMiniMaxAlphaBetaPruningRiskRegions(board, riskRegion, depth);
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
                         }

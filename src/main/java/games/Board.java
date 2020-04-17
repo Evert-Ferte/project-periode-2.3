@@ -21,7 +21,8 @@ public abstract class Board implements Cloneable {
     protected ArrayList<ArrayList<String>> modelMap;
 
 
-    public void reset() {
+    public void reset(int mapSize) {
+        this.mapSize = mapSize;
         generateModelMap(mapSize);
         setScoreWhite(0);
         setScoreBlack(0);

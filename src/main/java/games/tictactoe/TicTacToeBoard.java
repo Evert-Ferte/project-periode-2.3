@@ -56,7 +56,7 @@ public class TicTacToeBoard extends Board {
 
     @Override
     public boolean move(int x, int y) {
-        if (!modelMap.get(y).get(x).equals(emptyId)){
+        if (modelMap.get(y).get(x).equals(emptyId)){
             modelMap.get(y).set(x,getPlayerId(whiteTurn));
             return true;
         }
@@ -70,5 +70,6 @@ public class TicTacToeBoard extends Board {
         TicTacToeBoard cloneBoard = (TicTacToeBoard) super.clone();
         return cloneBoard;
     }
-
+    
+    public int getMapSize() { return mapSize; }
 }
