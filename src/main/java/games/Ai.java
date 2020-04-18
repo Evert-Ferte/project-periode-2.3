@@ -184,9 +184,6 @@ public class Ai {
             }
             riskRegions.add(col);
         }
-        for (ArrayList<Integer> list : riskRegions) {
-            System.out.println(Arrays.toString(list.toArray()));
-        }
         return riskRegions;
     }
 

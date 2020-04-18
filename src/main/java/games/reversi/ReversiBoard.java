@@ -15,7 +15,6 @@ public class ReversiBoard extends Board {
 
     ReversiBoard(int mapSize){
         this.mapSize = mapSize;
-        System.out.println(mapSize + " reversi");
         generateModelMap(mapSize);
     }
 

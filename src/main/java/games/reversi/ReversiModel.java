@@ -192,7 +192,7 @@ public class ReversiModel extends Model {
 // region ai movement
 
     /**
-     * Desc here...
+     * Depending on the type of Ai selected it's corresponding function in the class Ai is called.
      */
     @Override
     public void AiMove() {
